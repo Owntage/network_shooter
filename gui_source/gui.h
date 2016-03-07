@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <memory>
 #include "singleton.h"
 
 #define FONT_NAME "res/UbuntuMono-R.ttf"
@@ -163,18 +164,68 @@ struct Font : Singleton<Font>
 	}
 };
 
-struct TextView : GuiElement
+struct AbstractTextView : GuiElement
 {
-	TextView(float x, float y, float scaleX, float scaleY) : GuiElement(x, y, scaleX, scaleY), color(sf::Color::Green), characterSize(16) {}
-	void draw(sf::RenderTarget& renderTarget);
+public:
+	virtual void draw(sf::RenderTarget& renderTarget) = 0;
 	void setText(std::string text);
+	std::string getText();
 	void setCharacterSize(int size);
 	void setColor(sf::Color color);
-	std::string getText();
-private:
+protected:
+	AbstractTextView(float x, float y, float scaleX, float scaleY) : GuiElement(x, y, scaleX, scaleY), color(sf::Color::Green), characterSize(16) {}
+	void formatText();
 	std::string text;
 	int characterSize;
 	sf::Color color;
+	
+};
+
+struct TextView : AbstractTextView
+{
+	TextView(float x, float y, float scaleX, float scaleY) : AbstractTextView(x, y, scaleX, scaleY) {}
+	void draw(sf::RenderTarget& renderTarget);
+};
+
+
+struct Slider : GuiElement
+{
+	Slider(float x, float y, float scaleX, float scaleY, bool isHorizontal, std::string backgroundNinePatch, std::string sliderNinePatch, float sliderScale);
+	void draw(sf::RenderTarget& renderTarget);
+	void onMouseMove(float x, float y);
+	void onMouseClick(float x, float y, bool isReleased);
+	void setMoveCallback(std::function<void(float)> moveCallback);
+private:
+	enum class SliderStates
+	{
+		PRESSED,
+		RELEASED
+	};
+	SliderStates state;
+	float sliderScale;
+	float normalizedSliderPosition;
+	bool isHorizontal;
+	std::function<void(float)> moveCallback;
+	std::shared_ptr<NinePatchSprite> backgroundSprite;
+	std::shared_ptr<NinePatchSprite> sliderSprite;
+	
+};
+
+struct ScrollingTextView : AbstractTextView
+{
+	ScrollingTextView(float x, float y, float scaleX, float scaleY,
+		std::string sliderBackgroundNinePatch, std::string sliderNinePatch,
+		std::string buttonNinePatch, std::string buttonHoveredNinePatch, std::string buttonPressedNinePatch);
+	void draw(sf::RenderTarget& renderTarget);
+	void onMouseMove(float x, float y);
+	void onMouseClick(float x, float y, bool isReleased);
+private:
+	Slider slider;
+	Button button;
+	std::shared_ptr<NinePatchSprite> buttonSprite;
+	std::shared_ptr<NinePatchSprite> buttonHoveredSprite;
+	std::shared_ptr<NinePatchSprite> buttonPressedSprite;
+	float sliderNormalizedPosition;
 };
 
 struct InputField : GuiElement //todo...

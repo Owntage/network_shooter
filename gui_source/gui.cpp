@@ -522,22 +522,37 @@ void Button::onMouseClick(float x, float y, bool isReleased)
 	}
 }
 
-void TextView::draw(sf::RenderTarget& renderTarget)
+void AbstractTextView::setText(std::string text)
 {
-	float singleCharacterSize;
-	float characterHeight;
+	this->text = text;
+}
 
+std::string AbstractTextView::getText()
+{
+	return text;
+}
+
+void AbstractTextView::setCharacterSize(int characterSize)
+{
+	this->characterSize = characterSize;
+}
+
+void AbstractTextView::setColor(sf::Color color)
+{
+	this->color = color;
+}
+
+void AbstractTextView::formatText()
+{
+	float characterWidth;
 	sf::Text oneCharacter;
 	oneCharacter.setCharacterSize(characterSize);
 	oneCharacter.setFont(Font::getInstance()->font);
 	oneCharacter.setString("R");
-	singleCharacterSize = oneCharacter.getLocalBounds().width;
-	characterHeight = oneCharacter.getLocalBounds().height;
-	int charactersPerLine = getScaleX() / singleCharacterSize;
+	characterWidth = oneCharacter.getLocalBounds().width;
+	int charactersPerLine = getScaleX() / characterWidth;
 
-	
 	int counter = 0;
-	
 	for(int i = 0; i < this->text.size(); i++)
 	{
 		if(this->text[i] == '\n')
@@ -551,16 +566,16 @@ void TextView::draw(sf::RenderTarget& renderTarget)
 		if(counter > charactersPerLine)
 		{
 			this->text.insert(this->text.begin() + i, '\n');
-			//i+=2;
 			counter = 0;
 		}
 	}
+}
 
-	
 
-	//this->text.erase(this->text.begin() + min(charactersPerLine * ((int) (getScaleY() / 2 / characterHeight)), (int) this->text.size()), this->text.end());
-	
 
+void TextView::draw(sf::RenderTarget& renderTarget)
+{
+	formatText();
 	sf::Text text;
 	text.setFont(Font::getInstance()->font);
 	text.setString(this->text);
@@ -568,30 +583,165 @@ void TextView::draw(sf::RenderTarget& renderTarget)
 	text.setColor(color);
 	text.setPosition(getX(), getY());
 	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
-	
-	
-	//RenderWindow::getInstance()->window.draw(text);
 	renderTarget.draw(text);
+}
+
+
+
+Slider::Slider(float x, float y, float scaleX, float scaleY, bool isHorizontal, std::string backgroundNinePatch,
+			   std::string sliderNinePatch, float sliderScale) : GuiElement(x, y, scaleX, scaleY), sliderScale(sliderScale),
+			   normalizedSliderPosition(0.3f), isHorizontal(isHorizontal)
+{
+	usesMouse = true;
+	moveCallback = [](float x){};
+	state = SliderStates::RELEASED;
+	sf::Image backgroundImage;
+	backgroundImage.loadFromFile(backgroundNinePatch);
+	backgroundSprite = std::make_shared<NinePatchSprite>(backgroundImage, true);
+
+	sf::Image sliderImage;
+	sliderImage.loadFromFile(sliderNinePatch);
+	sliderSprite = std::make_shared<NinePatchSprite>(sliderImage, true);
+}
+
+void Slider::setMoveCallback(std::function<void(float)> moveCallback)
+{
+	this->moveCallback = moveCallback;
+}
+
+void Slider::draw(sf::RenderTarget& renderTarget)
+{
+	backgroundSprite->set(getX(), getY());
+	backgroundSprite->setScale(getScaleX(), getScaleY());
+	backgroundSprite->draw(renderTarget);
+
+	if(isHorizontal)
+	{
+		sliderSprite->set(getX() + (normalizedSliderPosition - 0.5) * getScaleX(), getY());
+		sliderSprite->setScale(sliderScale, getScaleY());
+	}
+	else
+	{
+		sliderSprite->set(getX(), getY() + (normalizedSliderPosition - 0.5) * getScaleY());
+		sliderSprite->setScale(getScaleX(), sliderScale);	
+	}
+	sliderSprite->draw(renderTarget);
+}
+
+void Slider::onMouseMove(float x, float y)
+{
+	if(state == SliderStates::PRESSED)
+	{
+		if(isHorizontal)
+		{
+			normalizedSliderPosition = max(0.05, min(0.95, (x - getX()) / getScaleX() + 0.5));
+		}
+		else
+		{
+			normalizedSliderPosition = max(0.05, min(0.95, (y - getY()) / getScaleY() + 0.5));
+		}
+		moveCallback(normalizedSliderPosition);
+	}
+}
+
+void Slider::onMouseClick(float x, float y, bool isReleased)
+{
+	if(isReleased)
+	{
+		state = SliderStates::RELEASED;
+	}
+	else
+	{
+		if(isHorizontal)
+		{
+			if(x > getX() + (normalizedSliderPosition - 0.5) * getScaleX() - sliderScale * 0.5 && x < getX() + (normalizedSliderPosition - 0.5) * getScaleX() + sliderScale * 0.5)
+			{
+				state = SliderStates::PRESSED;
+			}
+		}
+		else
+		{
+			if(y > getY() + (normalizedSliderPosition - 0.5) * getScaleY() - sliderScale * 0.5 && y < getY() + (normalizedSliderPosition - 0.5) * getScaleY() + sliderScale * 0.5)
+			{
+				state = SliderStates::PRESSED;
+			}
+		}
+	}
+}
+
+ScrollingTextView::ScrollingTextView(float x, float y, float scaleX, float scaleY, std::string sliderBackgroundNinePatch, std::string sliderNinePatch,
+	std::string buttonNinePatch, std::string buttonHoveredNinePatch, std::string buttonPressedNinePatch) :
+	AbstractTextView(x, y, scaleX, scaleY), slider(0, 0, 0, 0, false, sliderBackgroundNinePatch, sliderNinePatch, 10), button(0, 0, 0, 0) 
+{
+	usesMouse = true;
 	
+	//buttonImages:
+	sf::Image buttonImage;
+	buttonImage.loadFromFile(buttonNinePatch);
+	buttonSprite = std::make_shared<NinePatchSprite>(buttonImage, true);
 	
+	sf::Image buttonHoveredImage;
+	buttonHoveredImage.loadFromFile(buttonHoveredNinePatch);
+	buttonHoveredSprite = std::make_shared<NinePatchSprite>(buttonHoveredImage, true);
+
+	sf::Image buttonPressedImage;
+	buttonPressedImage.loadFromFile(buttonPressedNinePatch);
+	buttonPressedSprite = std::make_shared<NinePatchSprite>(buttonPressedImage, true);
+	
+	sliderNormalizedPosition = 0.05;
+	slider.setMoveCallback([this](float pos)
+	{
+		this->sliderNormalizedPosition = (pos - 0.05) / 0.9;
+	});
 }
 
-void TextView::setText(std::string text)
+
+void ScrollingTextView::draw(sf::RenderTarget& renderTarget)
 {
-	this->text = text;
+	formatText();
+	sf::Text text;
+	text.setFont(Font::getInstance()->font);
+	text.setString(this->text);
+	text.setCharacterSize(characterSize);
+	text.setColor(color);
+	
+	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
+	
+	float deltaY = 0;
+	if(text.getGlobalBounds().height > getScaleY())
+	{
+		deltaY = (text.getGlobalBounds().height - getScaleY()) * sliderNormalizedPosition + characterSize * sliderNormalizedPosition;
+	}
+
+	text.setPosition(getX(), getY() - deltaY);
+
+	slider.setScale(10, getScaleY());
+	slider.set(getX() + getScaleX() / 2 - slider.getScaleX() / 2, getY());
+	
+	slider.draw(renderTarget);
+
+	renderTarget.draw(text);
 }
 
-void TextView::setCharacterSize(int characterSize)
+void ScrollingTextView::onMouseMove(float x, float y)
 {
-	this->characterSize = characterSize;
+	slider.onMouseMove(x, y);
 }
 
-void TextView::setColor(sf::Color color)
+void ScrollingTextView::onMouseClick(float x, float y, bool isReleased)
 {
-	this->color = color;
+	if(!isReleased)
+	{
+		if(x > getX() + getScaleX() / 2 - slider.getScaleX() / 2 && x < getX() + getScaleX() / 2 + slider.getScaleX() / 2)
+		{
+			slider.onMouseClick(x, y, isReleased);
+		}
+	}
+	else
+	{
+		slider.onMouseClick(x, y, isReleased);
+	}
 }
 
-std::string TextView::getText()
-{
-	return text;
-}
+
+

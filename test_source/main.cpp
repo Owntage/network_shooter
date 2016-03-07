@@ -22,14 +22,25 @@ int main()
 	GuiManager guiManager(800, 600);
 	guiManager.addElement(windowPanel);
 
-	TextView textView(0.0f, 0.0f, 1, 1);
+	ScrollingTextView textView(0.0f, 0.0f, 0.9, 0.9, "nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png");
 	textView.setText("Enter your text: ");
 	textView.makeChildOf(windowPanel);
 	textView.setColor(sf::Color(100, 50, 0));
-	textView.setCharacterSize(16);
+	textView.setCharacterSize(24);
 	textView.setScaleRelativeToParent(true);
 	//textView.setRelativeX(0.5f);
 	guiManager.addElement(textView);
+
+	/*
+	Slider slider(0, 0, 0.2, 0.8, false, "nine_patch_panel2.png", "nine_patch_panel2.png", 30);
+	slider.setMoveCallback([](float pos)
+	{
+		std::cout << "slider moved: " << pos << std::endl;
+	});
+	slider.makeChildOf(windowPanel);
+	slider.setScaleRelativeToParent(true);
+	guiManager.addElement(slider);
+	*/
 
 	
 	auto fpsTime = chrono::system_clock::now() + chrono::seconds(1);
