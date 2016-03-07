@@ -1,6 +1,8 @@
 #ifndef SINGLETON_H
 #define SINGLETON_H
 
+#include <fstream>
+
 template <typename T>
 struct Singleton
 {
@@ -24,5 +26,10 @@ private:
 
 template <typename T>
 T* Singleton<T>::instance = nullptr;
+
+
+
+
+
 
 #endif

@@ -2,6 +2,7 @@
 #include "render_window.h"
 #include <iostream>
 #include <algorithm>
+#include <utility>
 using namespace std;
 
 void GuiElement::makeChildOf(GuiElement& other)
@@ -121,7 +122,25 @@ void GuiManager::drawGuiElement(GuiElement* guiElement)
 	}
 	if(!isDrawn[guiElement])
 	{
-		guiElement->draw();
+		
+		renderTexture.clear(sf::Color::Transparent);
+		guiElement->draw(renderTexture);
+		renderTexture.display();
+		
+		sf::Sprite renderSprite(renderTexture.getTexture());
+		
+		sf::IntRect textureRect;
+		textureRect.width = guiElement->getScaleX();
+		textureRect.height = guiElement->getScaleY();
+		textureRect.left = guiElement->getX() - guiElement->getScaleX() / 2 + guiView.getSize().x / 2;
+		textureRect.top = guiElement->getY() - guiElement->getScaleY() / 2 + guiView.getSize().y / 2;
+		renderSprite.setTextureRect(textureRect);
+
+		renderSprite.setOrigin(guiElement->getScaleX() / 2, guiElement->getScaleY() / 2);
+		renderSprite.setPosition(guiElement->getX(), guiElement->getY());
+		
+		RenderWindow::getInstance()->window.draw(renderSprite);
+		
 		isDrawn[guiElement] = true;
 		renderOrder[guiElement] = renderCounter;
 		renderCounter++;
@@ -130,6 +149,7 @@ void GuiManager::drawGuiElement(GuiElement* guiElement)
 
 void GuiManager::draw()
 {
+	
 	renderCounter = 1;
 	RenderWindow::getInstance()->window.setView(guiView);
 	for(auto it = isDrawn.begin(); it != isDrawn.end(); it++)
@@ -137,8 +157,11 @@ void GuiManager::draw()
 		it->second = false;
 	}
 	
+	//sf::View defaultView = guiView;
 	for(auto it = elements.begin(); it != elements.end(); it++)
 	{
+		
+		
 		drawGuiElement(*it);
 	}
 	
@@ -176,7 +199,7 @@ void GuiManager::onMouseClick(float x, float y, bool isReleased)
 		vector<GuiElement*> clickedElements;
 		for(auto it = elements.begin(); it != elements.end(); it++)
 		{
-			if(isInRectangle(x, y, (*it)->getX(), (*it)->getY(), (*it)->getScaleX(), (*it)->getScaleY()))
+			if(isInRectangle(x, y, (*it)->getX(), (*it)->getY(), (*it)->getScaleX(), (*it)->getScaleY()) && (*it)->usesMouse)
 			{
 				clickedElements.push_back(*it);
 			}
@@ -320,7 +343,7 @@ void NinePatchSprite::setScale(float scaleX, float scaleY)
 	this->scaleY = scaleY;
 }
 
-void NinePatchSprite::draw()
+void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 {
 	if(isNinePatch)
 	{
@@ -357,8 +380,8 @@ void NinePatchSprite::draw()
 				shapes[i][j].setSize(sf::Vector2f(sizeX, sizeY));
 				shapes[i][j].setPosition(x + positionX, y + positionY);
 				
-				RenderWindow::getInstance()->window.draw(shapes[i][j]);
-				
+				//RenderWindow::getInstance()->window.draw(shapes[i][j]);
+				renderTarget.draw(shapes[i][j]);
 			}
 		}
 		
@@ -368,7 +391,8 @@ void NinePatchSprite::draw()
 	{
 		shapes[1][1].setSize(sf::Vector2f(scaleX, scaleY));
 		shapes[1][1].setPosition(x, y);
-		RenderWindow::getInstance()->window.draw(shapes[1][1]);
+		//RenderWindow::getInstance()->window.draw(shapes[1][1]);
+		renderTarget.draw(shapes[1][1]);
 	}
 }
 
@@ -377,12 +401,12 @@ NinePatchSprite& WindowPanel::getActiveSprite()
 	return *activeSprite;
 }
 
-void WindowPanel::draw()
+void WindowPanel::draw(sf::RenderTarget& renderTarget)
 {
 	NinePatchSprite& sprite = getActiveSprite();
 	sprite.set(getX(), getY());
 	sprite.setScale(getScaleX(), getScaleY());
-	sprite.draw();
+	sprite.draw(renderTarget);
 }
 
 void MovableWindowPanel::onMouseClick(float x, float y, bool isReleased)
@@ -435,12 +459,12 @@ void Button::setPressedSprite(NinePatchSprite& pressed)
 	this->pressed = &pressed;
 }
 
-void Button::setOnPressCallback(std::function<void(void)> onPressCallback)
+void Button::setOnPressCallback(std::function<void(void)>&& onPressCallback)
 {
 	this->onPressCallback = onPressCallback;
 }
 
-void Button::setOnReleaseCallback(std::function<void(void)> onReleaseCallback)
+void Button::setOnReleaseCallback(std::function<void(void)>&& onReleaseCallback)
 {
 	this->onReleaseCallback = onReleaseCallback;
 }
@@ -496,4 +520,78 @@ void Button::onMouseClick(float x, float y, bool isReleased)
 			}
 			break;
 	}
+}
+
+void TextView::draw(sf::RenderTarget& renderTarget)
+{
+	float singleCharacterSize;
+	float characterHeight;
+
+	sf::Text oneCharacter;
+	oneCharacter.setCharacterSize(characterSize);
+	oneCharacter.setFont(Font::getInstance()->font);
+	oneCharacter.setString("R");
+	singleCharacterSize = oneCharacter.getLocalBounds().width;
+	characterHeight = oneCharacter.getLocalBounds().height;
+	int charactersPerLine = getScaleX() / singleCharacterSize;
+
+	
+	int counter = 0;
+	
+	for(int i = 0; i < this->text.size(); i++)
+	{
+		if(this->text[i] == '\n')
+		{
+			counter = 0;
+		}
+		else
+		{
+			counter++;
+		}
+		if(counter > charactersPerLine)
+		{
+			this->text.insert(this->text.begin() + i, '\n');
+			//i+=2;
+			counter = 0;
+		}
+	}
+
+	
+
+	//this->text.erase(this->text.begin() + min(charactersPerLine * ((int) (getScaleY() / 2 / characterHeight)), (int) this->text.size()), this->text.end());
+	
+
+	sf::Text text;
+	text.setFont(Font::getInstance()->font);
+	text.setString(this->text);
+	text.setCharacterSize(characterSize);
+	text.setColor(color);
+	text.setPosition(getX(), getY());
+	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
+	
+	
+	//RenderWindow::getInstance()->window.draw(text);
+	renderTarget.draw(text);
+	
+	
+}
+
+void TextView::setText(std::string text)
+{
+	this->text = text;
+}
+
+void TextView::setCharacterSize(int characterSize)
+{
+	this->characterSize = characterSize;
+}
+
+void TextView::setColor(sf::Color color)
+{
+	this->color = color;
+}
+
+std::string TextView::getText()
+{
+	return text;
 }

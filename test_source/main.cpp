@@ -4,90 +4,89 @@
 #include "gui.h"
 #include <iostream>
 #include <memory>
+#include <chrono>
 using namespace std;
 
-struct WindowEvent
-{
-	WindowEvent(sf::Event& sfmlEvent) : sfmlEvent(sfmlEvent) {} 
-	sf::Event& sfmlEvent;
-};
 
-struct testScene2 : Scene
-{
-	testScene2(sf::Color color) : color(color) {}
-	void onFrame()
-	{
-		RenderWindow::getInstance()->window.clear(color);
-		RenderWindow::getInstance()->window.display();
-	}
-	
-	void onEvent(WindowEvent& event)
-	{
-		sf::Event& sfmlEvent = event.sfmlEvent;
-		if(sfmlEvent.type == sf::Event::KeyPressed && sfmlEvent.key.code == sf::Keyboard::Escape)
-		{
-			SceneManager::getInstance()->closeScene();
-		}
-	}
-	
-private:
-	sf::Color color;
-};
-
-struct testScene : Scene
-{
-	testScene()
-	{
-	}
-	void onFrame()
-	{
-		RenderWindow::getInstance()->window.clear(sf::Color(16, 0, 16));
-		RenderWindow::getInstance()->window.display();
-	}
-	void onEvent(WindowEvent& event)
-	{
-		sf::Event& sfmlEvent = event.sfmlEvent;
-		if(sfmlEvent.type == sf::Event::KeyPressed)
-		{
-			switch(sfmlEvent.key.code)
-			{
-				case sf::Keyboard::Escape:
-					SceneManager::getInstance()->closeScene();
-					break;
-				case sf::Keyboard::N:
-					SceneManager::getInstance()->startScene(make_shared<testScene2>(sf::Color(0, 16, 16)));
-					break;
-			}
-		}
-	}
-};
 
 int main()
 {
-	
-	SceneManager::getInstance()->startScene(make_shared<testScene>());
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
+	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(), sf::Vector2f(800, 600)));
 	
+	
+	sf::Image image;
+	image.loadFromFile("nine_patch_panel2.png");
+	NinePatchSprite sprite(image, true);
+	MovableWindowPanel windowPanel(0.0, 0.0, 500, 400, sprite);
+	GuiManager guiManager(800, 600);
+	guiManager.addElement(windowPanel);
+
+	TextView textView(0.0f, 0.0f, 1, 1);
+	textView.setText("Enter your text: ");
+	textView.makeChildOf(windowPanel);
+	textView.setColor(sf::Color(100, 50, 0));
+	textView.setCharacterSize(16);
+	textView.setScaleRelativeToParent(true);
+	//textView.setRelativeX(0.5f);
+	guiManager.addElement(textView);
+
+	
+	auto fpsTime = chrono::system_clock::now() + chrono::seconds(1);
+	int fpsCount = 0;
+
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
+		fpsCount++;
+		if(chrono::system_clock::now() > fpsTime)
+		{
+			std::cout << "fps: " << fpsCount << std::endl;
+			fpsTime = fpsTime + chrono::seconds(1);
+			fpsCount = 0;
+		}
+
+
 		sf::Event event;
 		while(RenderWindow::getInstance()->window.pollEvent(event))
 		{
-			if(event.type == sf::Event::Closed)
+			
+			switch(event.type)
 			{
-				RenderWindow::getInstance()->window.close();
+				case sf::Event::Closed:
+					RenderWindow::getInstance()->window.close();
+					break;
+				case sf::Event::MouseButtonPressed:
+					guiManager.onMouseClick(event.mouseButton.x - 400, event.mouseButton.y - 300, false);
+					break;
+				case sf::Event::MouseButtonReleased:
+					guiManager.onMouseClick(event.mouseButton.x - 400, event.mouseButton.y - 300, true);
+					break;
+				case sf::Event::MouseMoved:
+					guiManager.onMouseMove(event.mouseMove.x - 400, event.mouseMove.y - 300);
+					break;
+				//case sf::Event::TextEntered:
+				//	textView.setText(textView.getText() + (char) event.text.unicode);
+				//	break;
 			}
-			WindowEvent windowEvent(event);
-			SceneManager::getInstance()->onEvent(windowEvent);
+			if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace)
+			{
+				string newText = textView.getText();
+				newText.pop_back();
+				textView.setText(newText);
+				std::cout << "removed character " << std::endl;
+			}
+			else
+			{
+				if(event.type == sf::Event::TextEntered && event.text.unicode >= 32 && event.text.unicode <= 126)
+				{
+					
+					textView.setText(textView.getText() + (char) event.text.unicode);
+				}
+			}
 		}
-		
-		if(SceneManager::getInstance()->isEmpty())
-		{
-			RenderWindow::getInstance()->window.close();
-		}
-		
-		SceneManager::getInstance()->onFrame();
-		
+		RenderWindow::getInstance()->window.clear();
+		guiManager.draw();
+		RenderWindow::getInstance()->window.display();
 		
 	}
 	return 0;

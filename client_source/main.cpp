@@ -20,6 +20,9 @@ using namespace std;
 
 int main()
 {
+	std::string connectAddress;
+	cout << "enter address: ";
+	cin >> connectAddress;
 	cout << "client is running!" << endl;
 	
 	
@@ -28,7 +31,7 @@ int main()
 	
 	//game logic init
 	Controller controller;
-	NetworkLogic networkLogic(sf::IpAddress("127.0.0.1"), 13337, "testActor", controller);
+	NetworkLogic networkLogic(sf::IpAddress(connectAddress), 13337, "testActor", controller);
 	RenderSystem renderSystem;
 
 	

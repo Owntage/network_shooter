@@ -1,12 +1,11 @@
 //SERVER
 #include <iostream>
 #include <string>
-#include <SFML/Network.hpp>
-#include <SFML/Graphics.hpp>
 #include "server.h"
 #include <game_logic.h>
-#include <render_system.h>
-#include <render_window.h>
+#include <thread>
+#include <chrono>
+
 using namespace std;
 
 #define RECEIVE_PORT 13337
@@ -22,39 +21,17 @@ int main()
 	ActorFactory actorFactory("res/properties.xml");
 	GameLogic gameLogic(actorFactory);
 	GameServer gameServer(gameLogic, RECEIVE_PORT);
-	RenderSystem renderSystem;
-	int renderSystemID = gameLogic.registerSystem();
-		
 	
-	//window init
-	RenderWindow::getInstance()->window.setFramerateLimit(60);
+	auto time = chrono::system_clock::now();
 	
-	
-	//main loop
-	while(RenderWindow::getInstance()->window.isOpen())
+	while(true)
 	{
-		//window events
-		sf::Event event;
-		while(RenderWindow::getInstance()->window.pollEvent(event))
-		{
-			if(event.type == sf::Event::Closed)
-			{
-				RenderWindow::getInstance()->window.close();
-			}
-		}
-		
-		
-		RenderWindow::getInstance()->window.clear(sf::Color::Blue);
-		
-		//dealing with requests and events
+		this_thread::sleep_until(time);
+		time = time + chrono::milliseconds(16);
 		gameServer.receiveEvents();
 		gameServer.sendUpdates();
 		Event timerEvent("timer");
 		gameLogic.onEvent(timerEvent);
-		renderSystem.onUpdate(gameLogic.getUpdates(renderSystemID));
-		renderSystem.draw();
-
-		RenderWindow::getInstance()->window.display();
 	}
 	
 	return 0;
