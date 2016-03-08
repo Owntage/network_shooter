@@ -6,6 +6,8 @@
 #include <map>
 #include <functional>
 #include <memory>
+#include <chrono>
+#include <thread>
 #include "singleton.h"
 
 #define FONT_NAME "res/UbuntuMono-R.ttf"
@@ -20,6 +22,8 @@ struct GuiElement
 	virtual void draw(sf::RenderTarget& renderTarget) = 0;
 	virtual void onMouseMove(float x, float y) {}
 	virtual void onMouseClick(float x, float y, bool isReleased) {}
+	virtual void onTextEntered(unsigned int code) {}
+	virtual void onSpecialKey(unsigned int key) {}
 	void makeChildOf(GuiElement& other);
 	void setX(float x);
 	void setY(float y);
@@ -64,7 +68,11 @@ struct GuiManager
 	void draw();
 	void onMouseMove(float x, float y);
 	void onMouseClick(float x, float y, bool isReleased);
+	void onTextEntered(unsigned int code);
+	void onSpecialKey(unsigned int key);
+	void onEvent(sf::Event& event);
 private:
+	bool isSpecialKey(unsigned int keyCode);
 	void drawGuiElement(GuiElement* element);
 	std::map<GuiElement*, bool> isDrawn;
 	std::map<GuiElement*, int> renderOrder;
@@ -78,6 +86,7 @@ struct NinePatchSprite
 {
 	NinePatchSprite(sf::Image& image, bool isNinePatch);
 	NinePatchSprite() : isNinePatch(false) {}
+	NinePatchSprite(std::string imageName, bool isNinePatch);
 	void setTexture(sf::Image& image, bool isNinePatch);
 	void setX(float x);
 	void setY(float y);
@@ -228,12 +237,39 @@ private:
 	float sliderNormalizedPosition;
 };
 
-struct InputField : GuiElement //todo...
+struct InputField : GuiElement 
 {
-	InputField(float x, float y, float scaleX, float scaleY) : GuiElement(x, y, scaleX, scaleY) {}
-private:
+	InputField(float x, float y, float scaleX, float scaleY, std::string normalNinePatch, std::string hoveredNinePatch, std::string activeNinePatch) : 
+		GuiElement(x, y, scaleX, scaleY), normalSprite(normalNinePatch, true), hoveredSprite(hoveredNinePatch, true), activeSprite(activeNinePatch, true),
+		inputCallback([](std::string s){}), state(InputFieldStates::NORMAL), textColor(sf::Color::Black), characterSize(16), isVisibleSymbol(false),
+		time(std::chrono::system_clock::now()), cursorPos(0) { usesMouse = true; }
+	void setInputCallback(std::function<void(std::string)> inputCallback);
+	void draw(sf::RenderTarget& renderTarget);
 	void onMouseClick(float x, float y, bool isReleased);
-	
+	void onMouseMove(float x, float y);
+	void onTextEntered(unsigned int code);
+	void onSpecialKey(unsigned int key);
+	void setCharacterSize(int characterSize);
+	void setTextColor(sf::Color textColor);
+
+private:
+	std::string input;
+	NinePatchSprite normalSprite;
+	NinePatchSprite hoveredSprite;
+	NinePatchSprite activeSprite;
+	enum class InputFieldStates
+	{
+		NORMAL,
+		HOVERED,
+		ACTIVE
+	};
+	InputFieldStates state;
+	std::function<void(std::string)> inputCallback;
+	int characterSize;
+	sf::Color textColor;
+	std::chrono::time_point<std::chrono::system_clock> time;
+	bool isVisibleSymbol;
+	int cursorPos;
 };
 
 #endif

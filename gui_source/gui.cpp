@@ -215,9 +215,66 @@ void GuiManager::onMouseClick(float x, float y, bool isReleased)
 	}
 }
 
+bool GuiManager::isSpecialKey(unsigned int keyCode)
+{
+	return keyCode == sf::Keyboard::BackSpace || keyCode == sf::Keyboard::Return ||
+		keyCode == sf::Keyboard::Left || keyCode == sf::Keyboard::Right || keyCode == sf::Keyboard::Up ||
+		keyCode == sf::Keyboard::Down || keyCode == sf::Keyboard::Escape || keyCode == sf::Keyboard::Delete;
+}
+
+void GuiManager::onTextEntered(unsigned int key)
+{
+	for(auto it = elements.begin(); it != elements.end(); it++)
+	{
+		(*it)->onTextEntered(key);
+	}
+}
+
+void GuiManager::onSpecialKey(unsigned int key)
+{
+	for(auto it = elements.begin(); it != elements.end(); it++)
+	{
+		(*it)->onSpecialKey(key);
+	}
+}
+
+void GuiManager::onEvent(sf::Event& event)
+{
+	switch(event.type)
+	{
+		case sf::Event::MouseButtonPressed:
+			onMouseClick(event.mouseButton.x - 400, event.mouseButton.y - 300, false);
+			break;
+		case sf::Event::MouseButtonReleased:
+			onMouseClick(event.mouseButton.x - 400, event.mouseButton.y - 300, true);
+			break;
+		case sf::Event::MouseMoved:
+			onMouseMove(event.mouseMove.x - 400, event.mouseMove.y - 300);
+			break;
+	}
+	if(event.type == sf::Event::KeyPressed && isSpecialKey(event.key.code))
+	{
+		onSpecialKey(event.key.code);
+	}
+	else
+	{
+		if(event.type == sf::Event::TextEntered && event.text.unicode >= 32 && event.text.unicode <= 126)
+		{
+			onTextEntered(event.text.unicode);
+		}
+	}
+}
+
 
 NinePatchSprite::NinePatchSprite(sf::Image& image, bool isNinePatch)
 {
+	setTexture(image, isNinePatch);
+}
+
+NinePatchSprite::NinePatchSprite(std::string imageName, bool isNinePatch)
+{
+	sf::Image image;
+	image.loadFromFile(imageName);
 	setTexture(image, isNinePatch);
 }
 
@@ -225,7 +282,6 @@ void NinePatchSprite::setTexture(sf::Image& image, bool isNinePatch)
 {
 	texture.loadFromImage(image);
 	this->isNinePatch = isNinePatch;
-	//TODO CUTTING AN IMAGE
 	if(isNinePatch)
 	{
 		for(int i = 0; i < 3; i++)
@@ -671,7 +727,7 @@ void Slider::onMouseClick(float x, float y, bool isReleased)
 
 ScrollingTextView::ScrollingTextView(float x, float y, float scaleX, float scaleY, std::string sliderBackgroundNinePatch, std::string sliderNinePatch,
 	std::string buttonNinePatch, std::string buttonHoveredNinePatch, std::string buttonPressedNinePatch) :
-	AbstractTextView(x, y, scaleX, scaleY), slider(0, 0, 0, 0, false, sliderBackgroundNinePatch, sliderNinePatch, 10), button(0, 0, 0, 0) 
+	AbstractTextView(x, y, scaleX, scaleY), slider(0, 0, 0, 0, false, sliderBackgroundNinePatch, sliderNinePatch, 20), button(0, 0, 0, 0) 
 {
 	usesMouse = true;
 	
@@ -732,7 +788,7 @@ void ScrollingTextView::onMouseClick(float x, float y, bool isReleased)
 {
 	if(!isReleased)
 	{
-		if(x > getX() + getScaleX() / 2 - slider.getScaleX() / 2 && x < getX() + getScaleX() / 2 + slider.getScaleX() / 2)
+		if(x > getX() + getScaleX() / 2 - slider.getScaleX() && x < getX() + getScaleX() / 2)
 		{
 			slider.onMouseClick(x, y, isReleased);
 		}
@@ -743,5 +799,149 @@ void ScrollingTextView::onMouseClick(float x, float y, bool isReleased)
 	}
 }
 
+void InputField::setInputCallback(std::function<void(std::string)> inputCallback)
+{
+	this->inputCallback = inputCallback;
+}
 
+void InputField::setCharacterSize(int characterSize)
+{
+	this->characterSize = characterSize;
+}
+
+void InputField::setTextColor(sf::Color textColor)
+{
+	this->textColor = textColor;
+}
+
+void InputField::draw(sf::RenderTarget& renderTarget)
+{
+
+	if(std::chrono::system_clock::now() > time)
+	{
+		time = time + std::chrono::milliseconds(300);
+		isVisibleSymbol = !isVisibleSymbol;
+	}
+
+	NinePatchSprite* sprite;
+	switch(state)
+	{
+		case InputFieldStates::NORMAL:
+			sprite = &normalSprite;
+			break;
+		case InputFieldStates::HOVERED:
+			sprite = &hoveredSprite;
+			break;
+		case InputFieldStates::ACTIVE:
+			sprite = &activeSprite;
+			break;
+	}
+	sprite->set(getX(), getY());
+	sprite->setScale(getScaleX(), getScaleY());
+	sprite->draw(renderTarget);
+
+	sf::Text text;
+	std::string renderInput = input;
+	if(isVisibleSymbol && state == InputFieldStates::ACTIVE)
+	{
+		//renderInput += '|';
+		renderInput.insert(renderInput.end() - cursorPos, '|');
+	}
+	else
+	{
+		//renderInput += ' ';
+		renderInput.insert(renderInput.end() - cursorPos, ' ');
+	}
+	text.setFont(Font::getInstance()->font);
+	text.setCharacterSize(characterSize);
+	text.setColor(textColor);
+	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
+	text.setString(renderInput);
+
+	float deltaX = 0.0f;
+	if(text.getGlobalBounds().width > getScaleX())
+	{
+		deltaX = text.getGlobalBounds().width - getScaleX();
+	}
+	text.setPosition(getX() - deltaX, getY());
+	renderTarget.draw(text);
+}
+
+void InputField::onMouseClick(float x, float y, bool isReleased)
+{
+	if(!isReleased)
+	{
+		state = InputFieldStates::ACTIVE;
+	}
+}
+
+void InputField::onMouseMove(float x, float y)
+{
+	switch(state)
+	{
+		case InputFieldStates::NORMAL:
+			if(isInRectangle(x, y, getX(), getY(), getScaleX(), getScaleY()))
+			{
+				state = InputFieldStates::HOVERED;	
+			}
+			break;
+		case InputFieldStates::HOVERED:
+			if(!isInRectangle(x, y, getX(), getY(), getScaleX(), getScaleY()))
+			{
+				state = InputFieldStates::NORMAL;
+			}
+			break;
+	}
+}
+
+void InputField::onTextEntered(unsigned int code)
+{
+	if(state == InputFieldStates::ACTIVE)
+	{
+		input += (char) code;
+	}
+}
+
+void InputField::onSpecialKey(unsigned int key)
+{
+	if(state == InputFieldStates::ACTIVE)
+	{
+		switch(key)
+		{
+			case sf::Keyboard::Escape:
+				state = InputFieldStates::NORMAL;
+				break;
+			case sf::Keyboard::BackSpace:
+				if(cursorPos != input.size())
+				{
+					input.erase(input.end() - 1 - cursorPos);
+				}
+				break;
+			case sf::Keyboard::Return:
+				inputCallback(input);
+				input.clear();
+				state = InputFieldStates::NORMAL;
+				break;
+			case sf::Keyboard::Left:
+				if(cursorPos < input.size())
+				{
+					cursorPos++;
+				}
+				break;
+			case sf::Keyboard::Right:
+				if(cursorPos > 0)
+				{
+					cursorPos--;
+				}
+				break;
+			case sf::Keyboard::Delete:
+				if(cursorPos != 0)
+				{
+					input.erase(input.end() - cursorPos);
+					cursorPos--;
+				}
+				break;
+		}
+	}
+}
 
