@@ -646,7 +646,7 @@ void TextView::draw(sf::RenderTarget& renderTarget)
 
 Slider::Slider(float x, float y, float scaleX, float scaleY, bool isHorizontal, std::string backgroundNinePatch,
 			   std::string sliderNinePatch, float sliderScale) : GuiElement(x, y, scaleX, scaleY), sliderScale(sliderScale),
-			   normalizedSliderPosition(0.3f), isHorizontal(isHorizontal)
+			   normalizedSliderPosition(0.95f), isHorizontal(isHorizontal)
 {
 	usesMouse = true;
 	moveCallback = [](float x){};
@@ -725,26 +725,12 @@ void Slider::onMouseClick(float x, float y, bool isReleased)
 	}
 }
 
-ScrollingTextView::ScrollingTextView(float x, float y, float scaleX, float scaleY, std::string sliderBackgroundNinePatch, std::string sliderNinePatch,
-	std::string buttonNinePatch, std::string buttonHoveredNinePatch, std::string buttonPressedNinePatch) :
-	AbstractTextView(x, y, scaleX, scaleY), slider(0, 0, 0, 0, false, sliderBackgroundNinePatch, sliderNinePatch, 20), button(0, 0, 0, 0) 
+ScrollingTextView::ScrollingTextView(float x, float y, float scaleX, float scaleY, std::string sliderBackgroundNinePatch, std::string sliderNinePatch) :
+	AbstractTextView(x, y, scaleX, scaleY), slider(0, 0, 0, 0, false, sliderBackgroundNinePatch, sliderNinePatch, 20)
 {
 	usesMouse = true;
-	
-	//buttonImages:
-	sf::Image buttonImage;
-	buttonImage.loadFromFile(buttonNinePatch);
-	buttonSprite = std::make_shared<NinePatchSprite>(buttonImage, true);
-	
-	sf::Image buttonHoveredImage;
-	buttonHoveredImage.loadFromFile(buttonHoveredNinePatch);
-	buttonHoveredSprite = std::make_shared<NinePatchSprite>(buttonHoveredImage, true);
-
-	sf::Image buttonPressedImage;
-	buttonPressedImage.loadFromFile(buttonPressedNinePatch);
-	buttonPressedSprite = std::make_shared<NinePatchSprite>(buttonPressedImage, true);
-	
-	sliderNormalizedPosition = 0.05;
+		
+	sliderNormalizedPosition = 1.0;
 	slider.setMoveCallback([this](float pos)
 	{
 		this->sliderNormalizedPosition = (pos - 0.05) / 0.9;
@@ -943,5 +929,40 @@ void InputField::onSpecialKey(unsigned int key)
 				break;
 		}
 	}
+	else
+	{
+		switch(key)
+		{
+			case sf::Keyboard::Return:
+				state = InputFieldStates::ACTIVE;
+				break;
+		}
+	}
 }
 
+
+Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager)
+{
+	backgroundSprite = std::make_shared<NinePatchSprite>("res/gui/console/background.png", true);
+	background = std::make_shared<WindowPanel>(x, y - 9, scaleX, scaleY - 18, *backgroundSprite);
+	guiManager.addElement(*background);
+	std::shared_ptr<ScrollingTextView> tempScrollPtr(new ScrollingTextView(0, 0, scaleX, scaleY - 18, "res/gui/console/input_background.png", "res/gui/console/slider.png"));
+	scrollingTextView = tempScrollPtr;
+	scrollingTextView->makeChildOf(*background);
+	scrollingTextView->setCharacterSize(24);
+	guiManager.addElement(*scrollingTextView);
+	std::shared_ptr<InputField> tempInputPtr(new InputField(0,scaleY / 2, scaleX, 20, "res/gui/console/input_background.png", "res/gui/console/input_hovered_background.png", "res/gui/console/input_active_background.png"));
+	inputField = tempInputPtr;
+	inputField->makeChildOf(*background);
+	guiManager.addElement(*inputField);
+}
+
+void Console::println(std::string text)
+{
+	scrollingTextView->setText(scrollingTextView->getText() + text + '\n');
+}
+
+void Console::setInputCallback(std::function<void(string)> inputCallback)
+{
+	inputField->setInputCallback(inputCallback);
+}

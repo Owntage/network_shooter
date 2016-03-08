@@ -7,39 +7,24 @@
 #include <chrono>
 using namespace std;
 
-
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define CONSOLE_WIDTH 400
+#define CONSOLE_HEIGHT 300
 
 int main()
 {
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
-	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(), sf::Vector2f(800, 600)));
+	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(), sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT)));
 	
 	
-	sf::Image image;
-	image.loadFromFile("nine_patch_panel2.png");
-	NinePatchSprite sprite(image, true);
-	MovableWindowPanel windowPanel(0.0, 0.0, 500, 400, sprite);
-	GuiManager guiManager(800, 600);
-	guiManager.addElement(windowPanel);
-
-	ScrollingTextView textView(0.0f, 0.0f, 0.9, 0.5, "nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png","nine_patch_panel2.png");
-	textView.setText("Enter your text: ");
-	textView.makeChildOf(windowPanel);
-	textView.setColor(sf::Color(100, 50, 0));
-	textView.setCharacterSize(24);
-	textView.setScaleRelativeToParent(true);
-	guiManager.addElement(textView);
-
-	InputField inputField(0.0,0.0, 0.8, 0.1, "button_normal.png", "button_hovered.png", "button_pressed.png");
-	inputField.setRelative(0.0, 0.4);
-	inputField.setScaleRelativeToParent(true);
-	inputField.makeChildOf(windowPanel);
-	inputField.setInputCallback([&textView](std::string input)
+	
+	GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
+	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
+	console.setInputCallback([&console](std::string input)
 	{
-		textView.setText(textView.getText() + '\n' + input);
+		console.println(input);
 	});
-	guiManager.addElement(inputField);
-
 	
 	auto fpsTime = chrono::system_clock::now() + chrono::seconds(1);
 	int fpsCount = 0;
@@ -50,6 +35,7 @@ int main()
 		if(chrono::system_clock::now() > fpsTime)
 		{
 			std::cout << "fps: " << fpsCount << std::endl;
+			
 			fpsTime = fpsTime + chrono::seconds(1);
 			fpsCount = 0;
 		}

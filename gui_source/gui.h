@@ -10,7 +10,7 @@
 #include <thread>
 #include "singleton.h"
 
-#define FONT_NAME "res/UbuntuMono-R.ttf"
+#define FONT_NAME "res/gui/UbuntuMono-R.ttf"
 
 struct GuiElement
 {
@@ -182,7 +182,7 @@ public:
 	void setCharacterSize(int size);
 	void setColor(sf::Color color);
 protected:
-	AbstractTextView(float x, float y, float scaleX, float scaleY) : GuiElement(x, y, scaleX, scaleY), color(sf::Color::Green), characterSize(16) {}
+	AbstractTextView(float x, float y, float scaleX, float scaleY) : GuiElement(x, y, scaleX, scaleY), color(sf::Color::Cyan), characterSize(16) {}
 	void formatText();
 	std::string text;
 	int characterSize;
@@ -223,17 +223,12 @@ private:
 struct ScrollingTextView : AbstractTextView
 {
 	ScrollingTextView(float x, float y, float scaleX, float scaleY,
-		std::string sliderBackgroundNinePatch, std::string sliderNinePatch,
-		std::string buttonNinePatch, std::string buttonHoveredNinePatch, std::string buttonPressedNinePatch);
+		std::string sliderBackgroundNinePatch, std::string sliderNinePatch);
 	void draw(sf::RenderTarget& renderTarget);
 	void onMouseMove(float x, float y);
 	void onMouseClick(float x, float y, bool isReleased);
 private:
 	Slider slider;
-	Button button;
-	std::shared_ptr<NinePatchSprite> buttonSprite;
-	std::shared_ptr<NinePatchSprite> buttonHoveredSprite;
-	std::shared_ptr<NinePatchSprite> buttonPressedSprite;
 	float sliderNormalizedPosition;
 };
 
@@ -241,7 +236,7 @@ struct InputField : GuiElement
 {
 	InputField(float x, float y, float scaleX, float scaleY, std::string normalNinePatch, std::string hoveredNinePatch, std::string activeNinePatch) : 
 		GuiElement(x, y, scaleX, scaleY), normalSprite(normalNinePatch, true), hoveredSprite(hoveredNinePatch, true), activeSprite(activeNinePatch, true),
-		inputCallback([](std::string s){}), state(InputFieldStates::NORMAL), textColor(sf::Color::Black), characterSize(16), isVisibleSymbol(false),
+		inputCallback([](std::string s){}), state(InputFieldStates::NORMAL), textColor(sf::Color::White), characterSize(16), isVisibleSymbol(false),
 		time(std::chrono::system_clock::now()), cursorPos(0) { usesMouse = true; }
 	void setInputCallback(std::function<void(std::string)> inputCallback);
 	void draw(sf::RenderTarget& renderTarget);
@@ -270,6 +265,18 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> time;
 	bool isVisibleSymbol;
 	int cursorPos;
+};
+
+struct Console
+{
+	Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
+	void println(std::string text);
+	void setInputCallback(std::function<void(std::string)> inputCallback);
+private:
+	std::shared_ptr<NinePatchSprite> backgroundSprite;
+	std::shared_ptr<WindowPanel> background;
+	std::shared_ptr<ScrollingTextView> scrollingTextView;
+	std::shared_ptr<InputField> inputField;
 };
 
 #endif
