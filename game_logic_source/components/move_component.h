@@ -9,7 +9,6 @@ struct MoveComponent : IComponent
 {
 	void onEvent(const Event& event);
 	bool hasUpdate(int systemID);
-	void approve(int systemID, int number);
 	std::string getName();
 	std::shared_ptr<ComponentUpdate> getUpdate(int systemID);
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
@@ -21,7 +20,6 @@ private:
 	float speed;
 	float x, y;
 	std::map<int, MoveUpdate> systemUpdates;
-	std::map<int, bool> systemApprovals;
 };
 
 #endif

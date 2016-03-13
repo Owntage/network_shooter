@@ -2,6 +2,7 @@
 /build
 /build_visual_studio
 /build_linux
+/build_sublime
 /include
 /lib
 /notes

@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <map>
 #include <boost/property_tree/ptree.hpp>
 
 struct IComponent
@@ -13,12 +14,18 @@ struct IComponent
 	virtual ~IComponent() {}
 	virtual void onEvent(const Event& event) = 0;
 	virtual bool hasUpdate(int systemID) = 0;
-	virtual void approve(int systemID, int number) = 0;
+	void approve(int systemID, int number)
+	{
+		lastSystemApproved[systemID] = number;
+	}
 	virtual std::string getName() = 0;
 	virtual std::shared_ptr<ComponentUpdate>  getUpdate(int syatemID) = 0;
 	virtual std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree) = 0;
 	std::vector<std::shared_ptr<Event> > globalEvents;
 	std::vector<std::shared_ptr<Event> > localEvents;
+protected:
+	std::map<int, int> lastSystemApproved;
+	std::map<int, int> currentSystemNumber;
 };
 
 #endif

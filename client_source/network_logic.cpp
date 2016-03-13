@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <components/move_update.h>
+#include <components/chat_component.h>
 
 
 NetworkLogic::NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller) : address(address), port(port), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), lastApprove(-1)
@@ -48,11 +49,10 @@ void NetworkLogic::sendEvents()
 			if((*it)->name == "move")
 			{
 				MoveEvent& moveEvent = static_cast<MoveEvent&>(*(*it));
-				if(controller.getCurrentNumber() > lastApprove)
+				if(moveEvent.number > lastApprove)
 				{
-					std::cout << "sending event number " << controller.getCurrentNumber() << " . last approved: " << lastApprove << std::endl;
 					packet.clear();
-					packet << localPort << std::string("event") << uniqueID  << std::string("move") << moveEvent.up << moveEvent.down << moveEvent.left << moveEvent.right << controller.getCurrentNumber();
+					packet << localPort << std::string("event") << uniqueID << (Event&) moveEvent << moveEvent;
 					sendingSocket.send(packet, address, port);
 				}
 			}
@@ -117,21 +117,19 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 			case State::RECEIVING_UPDATES:
 				if(packetType == "update")
 				{
-					int actorID;
-					std::string component;
-					int number;
-					packet >> actorID >> component >> number;
-					if(component == "move")
+					ComponentUpdate componentUpdate;
+					packet >> componentUpdate;
+					if(componentUpdate.name == "move")
 					{
-						float x;
-						float y;
-						packet >> x >> y;
-						if(mappedUpdates.find(actorID) == mappedUpdates.end())
+						std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
+						(ComponentUpdate&) *moveUpdate = componentUpdate;
+						packet >> *moveUpdate;
+						if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
 						{
-							mappedUpdates[actorID] = std::make_shared<ActorUpdate>();
+							mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
 						}
-						mappedUpdates[actorID]->actorID = actorID;
-						mappedUpdates[actorID]->updates.push_back(std::make_shared<MoveUpdate>(x, y));
+						mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
 					}
 				}
 				else if(packetType == "approve")

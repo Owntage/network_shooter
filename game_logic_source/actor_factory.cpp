@@ -1,7 +1,7 @@
 #include "actor_factory.h"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
-
+#include "components/chat_component.h"
 #include "components/move_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
@@ -27,6 +27,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 	{
 		std::shared_ptr<IComponent> component;
 		if(v.first == "move") component = std::make_shared<MoveComponent>();
+		if(v.first == "chat") component = std::make_shared<ChatComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

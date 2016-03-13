@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <components/move_event.h>
+#include <components/chat_component.h>
 
 
 GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic)
@@ -63,6 +64,7 @@ void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  u
 	packet >> uniqueID;
 	if(clients.find(uniqueID) != clients.end())
 	{
+		/*
 		std::string eventType;
 		packet >> eventType;
 		if(eventType == "move")
@@ -75,7 +77,31 @@ void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  u
 			packet.clear();
 			packet << std::string("approve") << std::string("move") << number;
 			sendingSocket.send(packet, address, remotePort);
+		} 
+		else if(eventType == "chat")
+		{
+			std::string message;
+			int number;
+			packet >> message >> number;
+			gameLogic.onEvent(ChatEvent(message, clients[uniqueID].gameLogicID));
+			packet.clear();
+			packet << std::string("approve") << std::string("chat") << number;
+			sendingSocket.send(packet, address, remotePort);
 		}
+		*/
+		Event event;
+		packet >> event;
+		event.actorID = clients[uniqueID].gameLogicID;
+		if(event.name == "move")
+		{
+			MoveEvent moveEvent;
+			(Event&) moveEvent = event;
+			packet >> moveEvent;
+			gameLogic.onEvent(moveEvent);
+		}
+		packet.clear();
+		packet << "approve" << event.name << event.number;
+		sendingSocket.send(packet, address, remotePort);
 	}
 	else
 	{
@@ -101,7 +127,6 @@ void GameServer::sendUpdates()
 	{
 		destroyActor(*it);
 	}
-	//sending updates
 	for(auto client_it = clients.begin(); client_it != clients.end(); client_it++)
 	{
 		auto updates = gameLogic.getUpdates(client_it->second.systemID);
@@ -110,16 +135,13 @@ void GameServer::sendUpdates()
 			for(auto component_it = (*actor_it)->updates.begin(); component_it != (*actor_it)->updates.end(); component_it++)
 			{
 				sf::Packet packet;
-				packet << std::string("update") << (*actor_it)->actorID << (*component_it)->name << (*component_it)->number;
-				if((*component_it)->name == "move")
-				{
-					MoveUpdate& moveUpdate = static_cast<MoveUpdate&>(*(*component_it));
-					packet << moveUpdate.x << moveUpdate.y;
-				}
+				packet << "update" << *(*component_it);
+
+				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
+
 				sendingSocket.send(packet, client_it->second.address, client_it->second.port);
 			}
 		}
-		
 	}
 }
 

@@ -1,10 +1,13 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include "scenes.h"
 #include "render_window.h"
 #include "gui.h"
 #include <iostream>
 #include <memory>
+#include <string>
 #include <chrono>
+#include <sstream>
 using namespace std;
 
 #define WINDOW_WIDTH 800
@@ -12,13 +15,32 @@ using namespace std;
 #define CONSOLE_WIDTH 400
 #define CONSOLE_HEIGHT 300
 
+struct A
+{
+	int a, b, c;
+	A(int a, int b, int c) : a(a), b(b), c(c) {}
+};
+
+struct B : A
+{
+	int d, e;
+	B() : A(0, 0, 0), d(0), e(0) {}
+};
 int main()
 {
+	B b;
+	A a(1, 2, 3);
+	(A&) b = a;
+	std::cout << "result of assigning: " << std::endl;
+	std::cout << b.a << std::endl;
+	std::cout << b.b << std::endl;
+	std::cout << b.c << std::endl;
+	std::cout << b.d << std::endl;
+	std::cout << b.e << std::endl;
+	
+
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
 	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(), sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT)));
-	
-	
-	
 	GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
 	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
 	console.setInputCallback([&console](std::string input)
@@ -34,7 +56,7 @@ int main()
 		fpsCount++;
 		if(chrono::system_clock::now() > fpsTime)
 		{
-			std::cout << "fps: " << fpsCount << std::endl;
+			//std::cout << "fps: " << fpsCount << std::endl;
 			
 			fpsTime = fpsTime + chrono::seconds(1);
 			fpsCount = 0;

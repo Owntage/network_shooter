@@ -28,32 +28,28 @@ std::string MoveComponent::getName()
 bool MoveComponent::hasUpdate(int systemID)
 {
 	if(systemUpdates.find(systemID) == systemUpdates.end()) return true;
-	return !systemApprovals[systemID];
+	return lastSystemApproved[systemID] != currentSystemNumber[systemID];
 }
 
-void MoveComponent::approve(int systemID, int number)
-{
-	if(number == systemUpdates[systemID].number)
-	{
-		systemApprovals[systemID] = true;
-	}
-}
+
 
 std::shared_ptr<ComponentUpdate> MoveComponent::getUpdate(int systemID)
 {
 	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(x, y);
 	if(systemUpdates.find(systemID) != systemUpdates.end())
 	{
-		if(result->x == systemUpdates[systemID].x && result->y == systemUpdates[systemID].y)
+		if(result->x != systemUpdates[systemID].x || result->y != systemUpdates[systemID].y)
 		{
-			result->number = systemUpdates[systemID].number;
-		}
-		else
-		{
-			result->number = systemUpdates[systemID].number + 1;
+			currentSystemNumber[systemID]++;
 		}
 	}
+	else
+	{
+		currentSystemNumber[systemID] = 1;
+		
+	}
 	systemUpdates[systemID] = *result;
+	systemUpdates[systemID].number = currentSystemNumber[systemID];
 	return result;
 }
 

@@ -1,6 +1,7 @@
 #include "render_system.h"
 #include <render_window.h>
 #include <components/move_update.h>
+#include <iostream>
 
 DrawableActor::DrawableActor() : isMain(false), rect(sf::Vector2f(1.0f, 1.0f))
 {
@@ -35,6 +36,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 	{
 		if(actors.find((*it)->actorID) == actors.end())
 		{
+			std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
 			actors[(*it)->actorID] = std::make_shared<DrawableActor>();
 			if((*it)->actorID == mainActor)
 			{

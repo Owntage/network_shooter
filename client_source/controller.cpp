@@ -58,8 +58,13 @@ void Controller::setActorID(int actorID)
 std::vector<std::shared_ptr<Event> > Controller::getGameEvents(int systemID)
 {
 	std::vector<std::shared_ptr<Event> > result;
+	if(approveNumbers.find(systemID) == approveNumbers.end())
+	{
+		approveNumbers[systemID] = -1;
+	}
 	if(approveNumbers[systemID] < currentNumber)
 	{
+		moveEvent->number = currentNumber;
 		result.push_back(moveEvent);
 	}
 	return result;

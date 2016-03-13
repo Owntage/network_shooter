@@ -884,7 +884,8 @@ void InputField::onTextEntered(unsigned int code)
 {
 	if(state == InputFieldStates::ACTIVE)
 	{
-		input += (char) code;
+		//input += (char) code;
+		input.insert(input.end() - cursorPos, (char) code);
 	}
 }
 
@@ -949,7 +950,7 @@ Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiMa
 	std::shared_ptr<ScrollingTextView> tempScrollPtr(new ScrollingTextView(0, 0, scaleX, scaleY - 18, "res/gui/console/input_background.png", "res/gui/console/slider.png"));
 	scrollingTextView = tempScrollPtr;
 	scrollingTextView->makeChildOf(*background);
-	scrollingTextView->setCharacterSize(24);
+	scrollingTextView->setCharacterSize(16);
 	guiManager.addElement(*scrollingTextView);
 	std::shared_ptr<InputField> tempInputPtr(new InputField(0,scaleY / 2, scaleX, 20, "res/gui/console/input_background.png", "res/gui/console/input_hovered_background.png", "res/gui/console/input_active_background.png"));
 	inputField = tempInputPtr;

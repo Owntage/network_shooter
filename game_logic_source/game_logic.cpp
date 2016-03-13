@@ -1,4 +1,5 @@
 #include "game_logic.h"
+#include <iostream>
 
 void GameLogic::onEvent(const Event& event)
 {
@@ -46,6 +47,10 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID)
 		{
 			result.push_back(std::make_shared<ActorUpdate>(it->second->getUpdates(systemID)));
 			result.back()->actorID = it->first;
+			for(auto component_update = result.back()->updates.begin(); component_update != result.back()->updates.end(); component_update++)
+			{
+				(*component_update)->actorID = it->first;
+			}
 		}
 		
 	}
