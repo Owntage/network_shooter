@@ -5,7 +5,7 @@
 #include <components/chat_component.h>
 
 
-NetworkLogic::NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller) : address(address), port(port), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), lastApprove(-1)
+NetworkLogic::NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), port(port), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
 {
 	receivingSocket.bind(sf::UdpSocket::AnyPort);
 	localPort = receivingSocket.getLocalPort();
@@ -43,18 +43,22 @@ void NetworkLogic::sendEvents()
 		break;
 	case State::RECEIVING_UPDATES:
 		refreshTimeout();
-		auto events = controller.getGameEvents(0);
+		auto events = controller.getGameEvents();
 		for(auto it = events.begin(); it != events.end(); it++)
 		{
 			if((*it)->name == "move")
 			{
 				MoveEvent& moveEvent = static_cast<MoveEvent&>(*(*it));
-				if(moveEvent.number > lastApprove)
-				{
-					packet.clear();
-					packet << localPort << std::string("event") << uniqueID << (Event&) moveEvent << moveEvent;
-					sendingSocket.send(packet, address, port);
-				}
+				packet.clear();
+				packet << localPort << std::string("event") << uniqueID << (Event&) moveEvent << moveEvent;
+				sendingSocket.send(packet, address, port);
+			}
+			if((*it)->name == "chat")
+			{
+				ChatEvent& chatEvent = static_cast<ChatEvent&>(*(*it));
+				packet.clear();
+				packet << localPort << std::string("event") << uniqueID << (Event&) chatEvent << chatEvent;
+				sendingSocket.send(packet, address, port);
 			}
 		}
 		break;
@@ -111,6 +115,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						packet >> actorID;
 						controller.setActorID(actorID);
 						state = State::RECEIVING_UPDATES;
+						renderSystem.setMainActor(actorID);
 					}
 				}
 				break;
@@ -119,17 +124,25 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 				{
 					ComponentUpdate componentUpdate;
 					packet >> componentUpdate;
+					if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
+						{
+							mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
+						}
+					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
+
 					if(componentUpdate.name == "move")
 					{
 						std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
 						(ComponentUpdate&) *moveUpdate = componentUpdate;
 						packet >> *moveUpdate;
-						if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
-						{
-							mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
-						}
-						mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 						mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
+					}
+					if(componentUpdate.name == "chat")
+					{
+						std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
+						(ComponentUpdate&) *chatUpdate = componentUpdate;
+						packet >> *chatUpdate;
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
 					}
 				}
 				else if(packetType == "approve")
@@ -141,8 +154,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						std::cout << "received move approve" << std::endl;
 						int number;
 						packet >> number;
-						lastApprove = number;
-						controller.approve(CONTROLLER_SYSTEM_ID, number);
+						controller.approve("move", number);
 					}
 				}
 				break;

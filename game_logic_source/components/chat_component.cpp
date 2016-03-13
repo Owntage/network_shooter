@@ -1,17 +1,27 @@
 #include "chat_component.h"
+#include <iostream>
+
+std::vector<std::string> ChatComponent::chatHistory;
 
 void ChatComponent::onEvent(const Event& event)
 {
-	//todo
+	if(event.name == "chat")
+	{
+		const ChatEvent& chatEvent = static_cast<const ChatEvent&>(event);
+		chatHistory.push_back(chatEvent.message);
+		std::cout << "chat component received a message: " << chatEvent.message << std::endl;
+	}
 }
 
 bool ChatComponent::hasUpdate(int systemID)
 {
-	if(systemUpdates.find(systemID) == systemUpdates.end())
+	
+	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
 	{
+		lastSystemApproved[systemID] = 0;
 		return true;
 	}
-	return lastSystemApproved[systemID] != currentSystemNumber[systemID];
+	return lastSystemApproved[systemID] != chatHistory.size();
 }
 
 std::string ChatComponent::getName()
@@ -22,35 +32,20 @@ std::string ChatComponent::getName()
 std::shared_ptr<ComponentUpdate> ChatComponent::getUpdate(int systemID)
 {
 	std::shared_ptr<ChatUpdate> result = std::make_shared<ChatUpdate>();
-	/*
-	if(systemUpdates.find(systemID) == systemUpdates.end())
+	result->number = chatHistory.size();
+	currentSystemNumber[systemID] = chatHistory.size();
+	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
 	{
-		result->messageCount = 0;
+		lastSystemApproved[systemID] = 0;
 	}
-	else
+	result->rangeBegin = lastSystemApproved[systemID];
+	result->rangeEnd = chatHistory.size() - 1;
+	for(int i = result->rangeBegin; i <= result->rangeEnd; i++)
 	{
-		result->messageCount = chatHistory.size();
+		result->messages.push_back(chatHistory[i]);
 	}
-	int counter = 0;
-	while(result->messageCount < chatHistory.size())
-	{
-		result->messageCount++;
-		result->messages.push_back(chatHistory[chatHistory.size() - counter]);
-		counter++;
-	}
-	if(systemUpdates.find(systemID) != systemUpdates.end())
-	{
-		result->number = systemUpdates[systemID].number;
-	}
-	else
-	{
-		result->number = 0;
-	}
-	systemUpdates[systemID] = *result;
-	systemUpdateNumbers[systemID] = result->number;
-	*/
+	std::cout << "history size: " << chatHistory.size() << std::endl;
 	return result;
-	//todo peredelat'
 }
 
 std::shared_ptr<IComponent> ChatComponent::loadFromXml(const boost::property_tree::ptree& tree)

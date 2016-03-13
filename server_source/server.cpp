@@ -64,40 +64,24 @@ void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  u
 	packet >> uniqueID;
 	if(clients.find(uniqueID) != clients.end())
 	{
-		/*
-		std::string eventType;
-		packet >> eventType;
-		if(eventType == "move")
-		{
-			bool up, down, left, right;
-			int number;
-			packet >> up >> down >> left >> right >> number;
-			gameLogic.onEvent(MoveEvent(left, right, up, down, clients[uniqueID].gameLogicID));
-			std::cout << "sending approve number: " << number << std::endl;
-			packet.clear();
-			packet << std::string("approve") << std::string("move") << number;
-			sendingSocket.send(packet, address, remotePort);
-		} 
-		else if(eventType == "chat")
-		{
-			std::string message;
-			int number;
-			packet >> message >> number;
-			gameLogic.onEvent(ChatEvent(message, clients[uniqueID].gameLogicID));
-			packet.clear();
-			packet << std::string("approve") << std::string("chat") << number;
-			sendingSocket.send(packet, address, remotePort);
-		}
-		*/
+		
 		Event event;
 		packet >> event;
 		event.actorID = clients[uniqueID].gameLogicID;
+		std::cout << "received game event: " << event.name << std::endl;
 		if(event.name == "move")
 		{
 			MoveEvent moveEvent;
 			(Event&) moveEvent = event;
 			packet >> moveEvent;
 			gameLogic.onEvent(moveEvent);
+		}
+		if(event.name == "chat")
+		{
+			ChatEvent chatEvent;
+			(Event&) chatEvent = event;
+			packet >> chatEvent;
+			gameLogic.onEvent(chatEvent);
 		}
 		packet.clear();
 		packet << "approve" << event.name << event.number;
@@ -138,6 +122,7 @@ void GameServer::sendUpdates()
 				packet << "update" << *(*component_it);
 
 				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
+				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 
 				sendingSocket.send(packet, client_it->second.address, client_it->second.port);
 			}

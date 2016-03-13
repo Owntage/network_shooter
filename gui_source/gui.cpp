@@ -273,8 +273,11 @@ NinePatchSprite::NinePatchSprite(sf::Image& image, bool isNinePatch)
 
 NinePatchSprite::NinePatchSprite(std::string imageName, bool isNinePatch)
 {
+	std::cout << "creating an image" << std::endl;
 	sf::Image image;
+	std::cout << "loading it from file" << std::endl;
 	image.loadFromFile(imageName);
+	std::cout << "image is loaded from file" << std::endl;
 	setTexture(image, isNinePatch);
 }
 

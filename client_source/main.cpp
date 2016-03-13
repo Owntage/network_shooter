@@ -30,9 +30,12 @@ int main()
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
 	
 	//game logic init
-	Controller controller;
-	NetworkLogic networkLogic(sf::IpAddress(connectAddress), 13337, "testActor", controller);
-	RenderSystem renderSystem;
+	GuiManager guiManager(800, 600);
+	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
+	Controller controller(console);
+	RenderSystem renderSystem(console);
+	NetworkLogic networkLogic(sf::IpAddress(connectAddress), 13337, "testActor", controller, renderSystem);
+	
 
 	
 	
@@ -49,6 +52,7 @@ int main()
 				RenderWindow::getInstance()->window.close();
 			}
 			controller.onEvent(event);
+			guiManager.onEvent(event);
 		}
 
 		RenderWindow::getInstance()->window.clear();
@@ -58,7 +62,8 @@ int main()
 		renderSystem.draw();
 
 		//rendering gui...
-		
+		guiManager.draw();
+
 		RenderWindow::getInstance()->window.display();
 		
 		

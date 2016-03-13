@@ -18,9 +18,10 @@ struct ChatComponent : IComponent
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 
 private:
-	std::vector<std::string> chatHistory;
-	std::map<int, ChatUpdate> systemUpdates;
+	static std::vector<std::string> chatHistory;
+	//std::map<int, ChatUpdate> systemUpdates;
 };
+
 
 
 #endif

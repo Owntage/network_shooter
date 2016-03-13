@@ -4,19 +4,21 @@
 #include <actor_update.h>
 #include <SFML/Network.hpp>
 #include <string>
+#include <render_system.h>
 #include "controller.h"
 
 #define CONTROLLER_SYSTEM_ID 0
 
 struct NetworkLogic
 {
-	NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller);
+	NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller, RenderSystem& renderSystem);
 	void sendEvents();
 	std::vector<std::shared_ptr<ActorUpdate> > receiveUpdates();
 	int getActorID();
 private:
 	void refreshTimeout();
 	Controller& controller;
+	RenderSystem& renderSystem;
 	sf::IpAddress address;
 	sf::UdpSocket receivingSocket;
 	sf::UdpSocket sendingSocket;
@@ -24,7 +26,6 @@ private:
 	unsigned short port;
 	int uniqueID;
 	int actorID;
-	int lastApprove;
 	std::string actorType;
 	sf::Packet packet;
 	enum class State

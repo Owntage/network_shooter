@@ -1,5 +1,20 @@
 #include "controller.h"
 #include <iostream>
+#include <components/chat_event.h>
+
+Controller::Controller(Console& console) : moveEvent(std::make_shared<MoveEvent>(false, false, false, false, -1)), console(console)
+{
+	currentNumbers["move"] = 0;
+	currentNumbers["chat"] = 0;
+	approvedNumbers["move"] = 0;
+	approvedNumbers["chat"] = 0;
+	isMessageSent = false;
+	console.setInputCallback([this](std::string input)
+	{
+		isMessageSent = false;
+		message = input;
+	});
+}
 
 void Controller::onEvent(sf::Event event)
 {
@@ -26,24 +41,21 @@ void Controller::onEvent(sf::Event event)
 		}
 		if(!(lastEvent == *moveEvent))
 		{
-			currentNumber++;
+			currentNumbers["move"]++;
 		}
 
 	}
 	
 }
 
-void Controller::approve(int systemID, int number)
+void Controller::approve(std::string type, int number)
 {
-	std::cout << "number received: " << number << std::endl;
-	std::cout << "last number: " << approveNumbers[systemID] << std::endl;
-	approveNumbers[systemID] = number;
+	std::cout << "number received for " << type << ": " << number << std::endl;
+	std::cout << "last number: " << approvedNumbers[type] << std::endl;
+	approvedNumbers[type] = number;
 }
 
-int Controller::getCurrentNumber()
-{
-	return currentNumber;
-}
+
 
 void Controller::onEvent(WindowEvent& event)
 {
@@ -55,17 +67,21 @@ void Controller::setActorID(int actorID)
 	moveEvent->actorID = actorID;
 }
 
-std::vector<std::shared_ptr<Event> > Controller::getGameEvents(int systemID)
+std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 {
 	std::vector<std::shared_ptr<Event> > result;
-	if(approveNumbers.find(systemID) == approveNumbers.end())
+	
+	if(approvedNumbers["move"] < currentNumbers["move"])
 	{
-		approveNumbers[systemID] = -1;
-	}
-	if(approveNumbers[systemID] < currentNumber)
-	{
-		moveEvent->number = currentNumber;
+		moveEvent->number = currentNumbers["move"];
 		result.push_back(moveEvent);
+	}
+	if(!isMessageSent && message.size() > 0)
+	{
+		isMessageSent = true;
+		std::cout << "pushed message: " << message << std::endl;
+		result.push_back(std::make_shared<ChatEvent>(message, moveEvent->actorID));
 	}
 	return result;
 }
+

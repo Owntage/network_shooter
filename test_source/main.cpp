@@ -13,7 +13,7 @@ using namespace std;
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define CONSOLE_WIDTH 400
-#define CONSOLE_HEIGHT 300
+#define CONSOLE_HEIGHT 100
 
 struct A
 {
