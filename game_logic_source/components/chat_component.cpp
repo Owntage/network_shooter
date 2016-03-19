@@ -44,7 +44,8 @@ std::shared_ptr<ComponentUpdate> ChatComponent::getUpdate(int systemID)
 	{
 		result->messages.push_back(chatHistory[i]);
 	}
-	std::cout << "history size: " << chatHistory.size() << std::endl;
+	//std::cout << "history size: " << chatHistory.size() << std::endl;
+	result->number = chatHistory.size();
 	return result;
 }
 

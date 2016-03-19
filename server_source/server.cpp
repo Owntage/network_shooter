@@ -48,6 +48,21 @@ void GameServer::receiveEvents()
 			{
 				receiveGameEvent(packet, remoteAddress, remotePort);
 			}
+			else if(type == "approve")
+			{
+
+				int actorID;
+				int uniqueID;
+				std::string updateName;
+				int updateNumber;
+				packet >> uniqueID >> actorID >> updateName >> updateNumber;
+				//gameLogic.approve(actorID, updateName,
+				if(clients.find(uniqueID) != clients.end())
+				{
+					gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
+				}
+				
+			}
 
 		}
 		else
@@ -68,20 +83,28 @@ void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  u
 		Event event;
 		packet >> event;
 		event.actorID = clients[uniqueID].gameLogicID;
-		std::cout << "received game event: " << event.name << std::endl;
-		if(event.name == "move")
+		//std::cout << "received game event: " << event.name << std::endl;
+		if(clients[uniqueID].eventNumbers.find(event.name) == clients[uniqueID].eventNumbers.end())
 		{
-			MoveEvent moveEvent;
-			(Event&) moveEvent = event;
-			packet >> moveEvent;
-			gameLogic.onEvent(moveEvent);
+			clients[uniqueID].eventNumbers[event.name] = 0;
 		}
-		if(event.name == "chat")
+		if(event.number > clients[uniqueID].eventNumbers[event.name])
 		{
-			ChatEvent chatEvent;
-			(Event&) chatEvent = event;
-			packet >> chatEvent;
-			gameLogic.onEvent(chatEvent);
+			clients[uniqueID].eventNumbers[event.name] = event.number;
+			if(event.name == "move")
+			{
+				MoveEvent moveEvent;
+				(Event&) moveEvent = event;
+				packet >> moveEvent;
+				gameLogic.onEvent(moveEvent);
+			}
+			if(event.name == "chat")
+			{
+				ChatEvent chatEvent;
+				(Event&) chatEvent = event;
+				packet >> chatEvent;
+				gameLogic.onEvent(chatEvent);
+			}
 		}
 		packet.clear();
 		packet << "approve" << event.name << event.number;

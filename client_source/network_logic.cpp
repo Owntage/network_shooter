@@ -125,9 +125,9 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					ComponentUpdate componentUpdate;
 					packet >> componentUpdate;
 					if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
-						{
-							mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
-						}
+					{
+						mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
+					}
 					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
 					if(componentUpdate.name == "move")
@@ -144,6 +144,11 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						packet >> *chatUpdate;
 						mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
 					}
+
+					packet.clear();
+					//std::cout << "received update with nunber: " << componentUpdate.number << std::endl;
+					packet << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
+					sendingSocket.send(packet, address, port);
 				}
 				else if(packetType == "approve")
 				{
@@ -155,6 +160,13 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						int number;
 						packet >> number;
 						controller.approve("move", number);
+					}
+					else if(approveType == "chat")
+					{
+						std::cout << "received chat approve" << std::endl;
+						int number;
+						packet >>number;
+						controller.approve("chat", number);
 					}
 				}
 				break;

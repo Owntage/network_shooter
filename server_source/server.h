@@ -3,6 +3,7 @@
 
 #include <SFML/Network.hpp>
 #include <map>
+#include <string>
 #include <game_logic.h>
 
 
@@ -14,6 +15,7 @@ struct ClientData
 	int gameLogicID;
 	int systemID;
 	float time;
+	std::map<std::string, int> eventNumbers;
 };
 
 struct GameServer

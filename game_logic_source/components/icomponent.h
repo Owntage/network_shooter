@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <iostream>
 #include <boost/property_tree/ptree.hpp>
 
 struct IComponent

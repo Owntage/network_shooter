@@ -17,6 +17,13 @@ void MoveComponent::onEvent(const Event& event)
 		if(movingLeft) x -= speed / 60.0f;
 		if(movingUp) y -= speed / 60.0f;
 		if(movingDown) y += speed / 60.0f;
+		if(movingRight || movingLeft || movingUp || movingDown)
+		{
+			for(auto it = currentSystemNumber.begin(); it != currentSystemNumber.end(); it++)
+			{
+				it->second++;
+			}
+		}
 	}
 }
 
@@ -45,11 +52,12 @@ std::shared_ptr<ComponentUpdate> MoveComponent::getUpdate(int systemID)
 	}
 	else
 	{
-		currentSystemNumber[systemID] = 1;
+		currentSystemNumber[systemID] = 0;
 		
 	}
 	systemUpdates[systemID] = *result;
 	systemUpdates[systemID].number = currentSystemNumber[systemID];
+	result->number = currentSystemNumber[systemID];
 	return result;
 }
 

@@ -18,8 +18,8 @@ struct WindowEvent
 	sf::Event& sfmlEvent;
 };
 
-#define CONSOLE_WIDTH 200
-#define CONSOLE_HEIGHT 100
+#define CONSOLE_WIDTH 400
+#define CONSOLE_HEIGHT 200
 
 struct Controller
 {
