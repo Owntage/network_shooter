@@ -5,8 +5,12 @@ project(network_shooter_project)
 file(GLOB GUI_SOURCE_FILES ${PROJECT_SOURCE_DIR}/gui_source/*.cpp ${PROJECT_SOURCE_DIR}/gui_source/*.h)
 
 #game_logic sources
-file(GLOB GAME_LOGIC_FILES ${PROJECT_SOURCE_DIR}/game_logic_source/*.cpp ${PROJECT_SOURCE_DIR}/game_logic_source/*.h)
-file(GLOB GAME_LOGIC_COMPONENTS_FILES ${PROJECT_SOURCE_DIR}/game_logic_source/components/*.cpp ${PROJECT_SOURCE_DIR}/game_logic_source/components/*.h)
+file(GLOB GAME_LOGIC_FILES ${PROJECT_SOURCE_DIR}/game_logic_source/*.cpp 	${PROJECT_SOURCE_DIR}/game_logic_source/*.h)
+file(GLOB GAME_LOGIC_COMPONENTS_FILES ${PROJECT_SOURCE_DIR}/game_logic_source/components/*.cpp 	${PROJECT_SOURCE_DIR}/game_logic_source/components/*.h)
+
+#network_sources
+file(GLOB NETWORK_FILES ${PROJECT_SOURCE_DIR}/network_source/*.cpp
+	${PROJECT_SOURCE_DIR}/network_source/*.h)
 
 #render_system sources
 file(GLOB RENDER_SYSTEM_FILES ${PROJECT_SOURCE_DIR}/render_system/*.h ${PROJECT_SOURCE_DIR}/render_system/*.cpp)
@@ -30,14 +34,15 @@ file(GLOB_RECURSE TEST_SOURCE_FILES ${PROJECT_SOURCE_DIR}/test_source/*.cpp ${PR
 add_library(gui ${GUI_SOURCE_FILES})
 add_library(game_logic ${GAME_LOGIC_FILES} ${GAME_LOGIC_COMPONENTS_FILES})
 add_library(render_system ${RENDER_SYSTEM_FILES})
+add_library(network ${NETWORK_FILES})
 
 add_executable(shooter_client ${CLIENT_SOURCE_FILES})
 add_executable(shooter_server ${SERVER_SOURCE_FILES} ${SERVER_SOURCE_FILES_GAME_LOGIC} ${SERVER_SOURCE_FILES_GAME_LOGIC_COMPONENTS})
 add_executable(shooter_test ${TEST_SOURCE_FILES})
 
-add_dependencies(shooter_client gui game_logic render_system)
-add_dependencies(shooter_server gui game_logic render_system)
-add_dependencies(shooter_test gui game_logic render_system)
+add_dependencies(shooter_client gui game_logic render_system network)
+add_dependencies(shooter_server gui game_logic render_system network)
+add_dependencies(shooter_test gui game_logic render_system network)
 
 add_definitions(-std=c++11 -g)
 
@@ -57,9 +62,10 @@ if(SFML_FOUND AND Boost_FOUND)
 	include_directories(${PROJECT_SOURCE_DIR}/gui_source)
 	include_directories(${PROJECT_SOURCE_DIR}/game_logic_source)
 	include_directories(${PROJECT_SOURCE_DIR}/render_system)
-    	target_link_libraries(shooter_server ${SFML_LIBRARIES} gui game_logic render_system)
-	target_link_libraries(shooter_client ${SFML_LIBRARIES} gui game_logic render_system)
-	target_link_libraries(shooter_test ${SFML_LIBRARIES} gui game_logic render_system)
+	include_directories(${PROJECT_SOURCE_DIR}/network_source)
+    	target_link_libraries(shooter_server ${SFML_LIBRARIES} gui game_logic render_system network)
+	target_link_libraries(shooter_client ${SFML_LIBRARIES} gui game_logic render_system network)
+	target_link_libraries(shooter_test ${SFML_LIBRARIES} gui game_logic render_system network)
 endif()
 
 

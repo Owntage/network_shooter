@@ -8,6 +8,7 @@
 #include <string>
 #include <chrono>
 #include <sstream>
+#include <network.h>
 using namespace std;
 
 #define WINDOW_WIDTH 800
@@ -15,30 +16,12 @@ using namespace std;
 #define CONSOLE_WIDTH 400
 #define CONSOLE_HEIGHT 100
 
-struct A
-{
-	int a, b, c;
-	A(int a, int b, int c) : a(a), b(b), c(c) {}
-};
 
-struct B : A
-{
-	int d, e;
-	B() : A(0, 0, 0), d(0), e(0) {}
-};
+
 int main()
 {
-	B b;
-	A a(1, 2, 3);
-	(A&) b = a;
-	std::cout << "result of assigning: " << std::endl;
-	std::cout << b.a << std::endl;
-	std::cout << b.b << std::endl;
-	std::cout << b.c << std::endl;
-	std::cout << b.d << std::endl;
-	std::cout << b.e << std::endl;
 	
-
+	/*
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
 	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(), sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT)));
 	GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -78,8 +61,16 @@ int main()
 		}
 		RenderWindow::getInstance()->window.clear();
 		guiManager.draw();
-		RenderWindow::getInstance()->window.display();
-		
+		RenderWindow::getInstance()->window.display();	
 	}
+	*/
+	UdpSocket::initializeSockets();
+
+	IpAddress serverAddress("localhost", 13337);
+	UdpSocket socket;
+	socket.send(serverAddress, "hello", 5);
+	
+	UdpSocket::shutdownSockets();
+
 	return 0;
 }
