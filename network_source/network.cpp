@@ -69,6 +69,229 @@ bool IpAddress::isCorrect()
 	return correct;
 }
 
+Packet& Packet::operator<<(const std::string& a)
+{
+	int oldDataSize = data.size();
+	data.resize(data.size() + a.size() + 1);
+	data[oldDataSize] = '\0'; //it is like a c-string, but null-character is in the beginning
+	std::copy(a.begin(), a.end(), data.begin() + oldDataSize + 1);
+	data.push_back(static_cast<char>(PrimitiveTypes::STRING));
+	return *this;
+}
+
+Packet& Packet::operator<<(int8_t a)
+{
+	data.push_back(a);
+	data.push_back(static_cast<int>(PrimitiveTypes::INT8));
+	return *this;
+}
+
+Packet& Packet::operator<<(uint8_t a)
+{
+	data.push_back(a);
+	data.push_back(static_cast<int>(PrimitiveTypes::INT16));
+	return *this;
+}
+
+Packet& Packet::operator<<(int16_t a)
+{
+	data.resize(data.size() + 2);
+	*( (int16_t*) &data[data.size() - 2]) = htons(a);
+	data.push_back(static_cast<char>(PrimitiveTypes::INT16));
+	return *this;
+}
+
+Packet& Packet::operator<<(uint16_t a)
+{
+	*this << (int16_t) a;
+	data.back() = static_cast<char>(PrimitiveTypes::UINT16);
+	return *this;
+}
+
+Packet& Packet::operator<<(int32_t a)
+{
+	data.resize(data.size() + 4);
+	*( (int32_t*) &data[data.size() - 4]) = htonl(a);
+	data.push_back(static_cast<char>(PrimitiveTypes::INT32));
+	return *this;
+}
+
+Packet& Packet::operator<<(uint32_t a)
+{
+	*this << (int32_t) a;
+	data.back() = static_cast<char>(PrimitiveTypes::UINT32);
+	return *this;
+}
+
+Packet& Packet::operator<<(int64_t a)
+{
+	std::string a_str = stringConverter<int64_t, std::string>(a);
+	*this << a_str;
+	data.back() = static_cast<char>(PrimitiveTypes::INT64);
+	return *this;
+}
+
+Packet& Packet::operator<<(uint64_t a)
+{
+	std::string a_str = stringConverter<uint64_t, std::string>(a);
+	*this << a_str;
+	data.back() = static_cast<char>(PrimitiveTypes::UINT64);
+	return *this;
+}
+
+Packet& Packet::operator<<(float a)
+{
+	std::string a_str = stringConverter<float, std::string>(a);
+	*this << a_str;
+	data.back() = static_cast<char>(PrimitiveTypes::FLOAT);
+	return *this;
+}
+
+Packet& Packet::operator<<(double a)
+{
+	std::string a_str = stringConverter<double, std::string>(a);
+	*this << a_str;
+	data.back() = static_cast<char>(PrimitiveTypes::DOUBLE);
+	return *this;
+}
+
+void Packet::checkType(char type)
+{
+	if(data.back() != type)
+	{
+		std::cout << "warning! trying to read the wrong type (" << (int) type << ")" << std::endl;
+		std::cout << "actual type: " << (int) data.back() << std::endl;
+	}
+}
+
+Packet& Packet::operator>>(std::string& a)
+{
+	checkType((char) PrimitiveTypes::STRING);
+	data.pop_back();
+	int ptr = data.size() - 1;
+	while(ptr >= 0 && data[ptr] != '\0')
+	{
+		ptr--;
+	}
+	a.assign(data.begin() + ptr + 1, data.end());
+	data.resize(data.size() - a.size() - 1);
+	return *this;
+}
+
+Packet& Packet::operator>>(int8_t& a)
+{
+	checkType((char) PrimitiveTypes::INT8);
+	data.pop_back();
+	a = data.back();
+	data.pop_back();
+	return *this;
+}
+
+Packet& Packet::operator>>(uint8_t& a)
+{
+	checkType((char) PrimitiveTypes::UINT8);
+	*this >> (int8_t&) a;
+	return *this;
+}
+
+Packet& Packet::operator>>(int16_t& a)
+{
+	checkType((char) PrimitiveTypes::INT16);
+	data.pop_back();
+	a = ntohs(*((int16_t*) &data[data.size() - 2]));
+	data.resize(data.size() - 2);
+	return *this;
+}
+
+Packet& Packet::operator>>(uint16_t& a)
+{
+	checkType((char) PrimitiveTypes::UINT16);
+	data.back() = (char) PrimitiveTypes::INT16;
+	*this >> (int16_t&) a;
+	return *this;
+}
+
+Packet& Packet::operator>>(int32_t& a)
+{
+	checkType((char) PrimitiveTypes::INT32);
+	data.pop_back();
+	a = ntohl(*((int32_t*) &data[data.size() - 4]));
+	data.resize(data.size() - 4);
+	return *this;
+}
+
+Packet& Packet::operator>>(uint32_t& a)
+{
+	checkType((char) PrimitiveTypes::UINT32);
+	data.back() = (char) PrimitiveTypes::INT32;
+	*this >> (int32_t&) a;
+	return *this;
+}
+
+Packet& Packet::operator>>(int64_t& a)
+{
+	std::string a_str;
+	checkType((char) PrimitiveTypes::INT64);
+	data.back() = (char) PrimitiveTypes::STRING;
+	*this >> a_str;
+	a = stringConverter<std::string, int64_t>(a_str);
+	return *this;
+}
+
+Packet& Packet::operator>>(uint64_t& a)
+{
+	std::string a_str;
+	checkType((char) PrimitiveTypes::UINT64);
+	data.back() = (char) PrimitiveTypes::STRING;
+	*this >> a_str;
+	a = stringConverter<std::string, uint64_t>(a_str);
+	return *this;
+}
+
+Packet& Packet::operator>>(float& a)
+{
+	std::string a_str;
+	checkType((char) PrimitiveTypes::FLOAT);
+	data.back() = (char) PrimitiveTypes::STRING;
+	*this >> a_str;
+	a = stof(a_str);
+	return *this;
+}
+
+Packet& Packet::operator>>(double& a)
+{
+	std::string a_str;
+	checkType((char) PrimitiveTypes::DOUBLE);
+	data.back() = (char) PrimitiveTypes::STRING;
+	*this >> a_str;
+	a = stod(a_str);
+	return *this;
+}
+
+bool Packet::isPacked()
+{
+	return data.size() > MAX_PACKET_SIZE;
+}
+
+void Packet::setCursor()
+{
+	cursorPosition = data.size();
+}
+
+void Packet::revertToCursor()
+{
+	if(data.size() > cursorPosition)
+	{
+		data.resize(cursorPosition);
+	}
+}
+
+void Packet::reset()
+{
+	data.clear();
+	cursorPosition = 0;
+}
+
 bool UdpSocket::initializeSockets()
 {
 	if(!socketsInitialized)
@@ -185,6 +408,11 @@ bool UdpSocket::send(const IpAddress& address, const char* data, int dataSize)
 	return true;
 }
 
+bool UdpSocket::send(const IpAddress& address, const Packet& packet)
+{
+	return send(address, &packet.data[0], packet.data.size());
+}
+
 int UdpSocket::receive(char* data, int size, IpAddress& receiveAddress)
 {
 	#if PLATFORM == PLATFORM_WINDOWS
@@ -205,7 +433,20 @@ int UdpSocket::receive(char* data, int size, IpAddress& receiveAddress)
 	receiveAddress.port = from.sin_port;
 
 	return bytes;
+}
 
+bool UdpSocket::receive(Packet& packet, IpAddress& receiveAddress)
+{
+	char buffer[Packet::MAX_PACKET_SIZE];
+	int bytes = receive(buffer, Packet::MAX_PACKET_SIZE, receiveAddress);
+	if(bytes <= 0)
+	{
+		return false;
+	}
+	packet.reset();
+	packet.data.resize(bytes);
+	std::copy(buffer, buffer + bytes, packet.data.begin());
+	return true;
 }
 
 

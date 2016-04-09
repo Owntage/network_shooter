@@ -64,11 +64,22 @@ int main()
 		RenderWindow::getInstance()->window.display();	
 	}
 	*/
+
+	
+
 	UdpSocket::initializeSockets();
 
 	IpAddress serverAddress("localhost", 13337);
 	UdpSocket socket;
-	socket.send(serverAddress, "hello", 5);
+	Packet packet;
+	packet << "hello" << "over" << "here" << "kekeke";
+	for(int i = 0; i < 4; i++)
+	{
+		std::string temp;
+		packet >> temp;
+		std::cout << temp << std::endl;
+	}
+	socket.send(serverAddress, packet);
 	
 	UdpSocket::shutdownSockets();
 

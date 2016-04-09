@@ -47,10 +47,16 @@ int main()
 		std::cout << "waiting for message" << std::endl;
 		char buffer[128];
 		IpAddress remoteAddress;
-		int bytesReceived = socket.receive(buffer, 128, remoteAddress);
-		std::cout << "received " << bytesReceived << " bytes" << std::endl;
-		std::string message(buffer, bytesReceived);
-		std::cout << "message: " << message << std::endl;
+		Packet packet;
+		socket.receive(packet, remoteAddress);
+		std::cout << "received packet" << std::endl;
+		std::cout << "messages: " << std::endl;
+		for(int i = 0; i < 4; i++)
+		{
+			std::string message;
+			packet >> message;
+			std::cout << "message " << i << ": " << message << std::endl;
+		}
 	}
 
 	UdpSocket::shutdownSockets();

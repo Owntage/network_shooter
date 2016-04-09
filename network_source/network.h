@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 struct IpAddress
 {
@@ -39,6 +40,65 @@ private:
 	bool correct;
 };
 
+struct Packet
+{
+	static const int MAX_PACKET_SIZE = 2048;
+
+	Packet& operator<<(const std::string& a);
+
+	Packet& operator<<(int8_t a);
+	Packet& operator<<(int16_t a);
+	Packet& operator<<(int32_t a);
+	Packet& operator<<(int64_t a);
+
+	Packet& operator<<(uint8_t a);
+	Packet& operator<<(uint16_t a);
+	Packet& operator<<(uint32_t a);
+	Packet& operator<<(uint64_t a);
+
+	Packet& operator<<(float a);
+	Packet& operator<<(double a);
+
+	Packet& operator>>(std::string& a);
+
+	Packet& operator>>(int8_t& a);
+	Packet& operator>>(int16_t& a);
+	Packet& operator>>(int32_t& a);
+	Packet& operator>>(int64_t& a);
+
+	Packet& operator>>(uint8_t& a);
+	Packet& operator>>(uint16_t& a);
+	Packet& operator>>(uint32_t& a);
+	Packet& operator>>(uint64_t& a);
+
+	Packet& operator>>(float& a);
+	Packet& operator>>(double& a);
+
+	bool isPacked(); //returns if the size of a data is bigger than maximum size
+	void setCursor();
+	void revertToCursor();
+	void reset();
+private:
+	std::vector<char> data;
+	int cursorPosition; //holds size of a vector to revert	
+	void checkType(char type);
+	enum class PrimitiveTypes
+	{
+		STRING,
+		INT8,
+		INT16,
+		INT32,
+		INT64,
+		UINT8,
+		UINT16,
+		UINT32,
+		UINT64,
+		FLOAT,
+		DOUBLE
+	};
+	friend class UdpSocket;
+};
+
 struct UdpSocket
 {
 	UdpSocket();
@@ -47,7 +107,9 @@ struct UdpSocket
 	bool bind(uint16_t port);
 	bool setNonBlocking();
 	bool send(const IpAddress& address, const char* data, int dataSize);
+	bool send(const IpAddress& address, const Packet& packet);
 	int receive(char* buffer, int size, IpAddress& address);
+	bool receive(Packet& packet, IpAddress& address);
 	static bool initializeSockets();
 	static void shutdownSockets();
 private:
