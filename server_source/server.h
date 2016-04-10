@@ -1,16 +1,17 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <SFML/Network.hpp>
+//#include <SFML/Network.hpp>
 #include <map>
 #include <string>
+#include <network.h>
 #include <game_logic.h>
 
 
 
 struct ClientData
 {
-	sf::IpAddress address;
+	IpAddress address;
 	unsigned short port;
 	int gameLogicID;
 	int systemID;
@@ -24,18 +25,16 @@ struct GameServer
 	void receiveEvents();
 	void sendUpdates();
 private:
-	void sendUniqueID(sf::IpAddress& remoteAddress, unsigned short remotePort);
-	void createActor(sf::IpAddress& remoteAddress, unsigned short remotePort, int uniqueID, std::string actorID);
+	void sendUniqueID(IpAddress& remoteAddress);
+	void createActor(IpAddress& remoteAddress, int uniqueID, std::string actorID);
 	void destroyActor(int uniqueID);
 	void refreshTimeout(int uniqueID); 
 	void sendSuccessfulCreation(int uniqueID);
 	void approve(int uniqueID, int actorID, std::string component, int number);
-	void receiveGameEvent(sf::Packet& packet, sf::IpAddress& address, unsigned short port);
+	void receiveGameEvent(Packet& packet, IpAddress& address);
 	
 	//sf::UdpSocket sendingSocket;
-	sf::UdpSocket sendingSocket;
-	sf::UdpSocket receivingSocket;
-	int systemID;
+	UdpSocket socket;
 	int uniqueCounter;
 	GameLogic& gameLogic;
 	std::map<int, ClientData> clients;

@@ -5,17 +5,19 @@
 #include <components/chat_component.h>
 
 
-NetworkLogic::NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), port(port), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
+NetworkLogic::NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
 {
-	receivingSocket.bind(sf::UdpSocket::AnyPort);
-	localPort = receivingSocket.getLocalPort();
+	//receivingSocket.bind(sf::UdpSocket::AnyPort);
+	socket.bind(0);
+	localPort = socket.getLocalPort();
+	socket.setNonBlocking();
 }
 
 void NetworkLogic::refreshTimeout()
 {
-	packet.clear();
-	packet << localPort << std::string("refresh_timeout") << uniqueID;
-	sendingSocket.send(packet, address, port);
+	packet.reset();
+	packet << localPort << "refresh_timeout" << uniqueID;
+	socket.send(address, packet);
 }
 
 void NetworkLogic::sendEvents()
@@ -24,21 +26,21 @@ void NetworkLogic::sendEvents()
 	switch(state)
 	{
 	case State::GETTING_UNIQUE_ID:
-		packet.clear();
-		packet << localPort << std::string("id");
-		sendingSocket.send(packet, address, port);
+		packet.reset();
+		packet << localPort << "id";
+		socket.send(address, packet);
 		break;
 	case State::CREATING_ACTOR:
 		std::cout << "requesting for creation of the actor" << std::endl;
-		packet.clear();
-		packet << localPort << std::string("create") << uniqueID << actorType;
-		if(sendingSocket.send(packet, address, port) != sf::Socket::Done)
+		packet.reset();
+		packet << localPort << "create" << uniqueID << actorType;
+		if(socket.send(address, packet))
 		{
-			std::cout << "failed to send request for creating" << std::endl;
+			std::cout << "cretion request sent successfuly" << std::endl;
 		}
 		else
 		{
-			std::cout << "cretion request sent successfuly" << std::endl;
+			std::cout << "failed to send request for creating" << std::endl;
 		}
 		break;
 	case State::RECEIVING_UPDATES:
@@ -49,16 +51,16 @@ void NetworkLogic::sendEvents()
 			if((*it)->name == "move")
 			{
 				MoveEvent& moveEvent = static_cast<MoveEvent&>(*(*it));
-				packet.clear();
-				packet << localPort << std::string("event") << uniqueID << (Event&) moveEvent << moveEvent;
-				sendingSocket.send(packet, address, port);
+				packet.reset();
+				packet << localPort << "event" << uniqueID << (Event&) moveEvent << moveEvent;
+				socket.send(address, packet);
 			}
 			if((*it)->name == "chat")
 			{
 				ChatEvent& chatEvent = static_cast<ChatEvent&>(*(*it));
-				packet.clear();
-				packet << localPort << std::string("event") << uniqueID << (Event&) chatEvent << chatEvent;
-				sendingSocket.send(packet, address, port);
+				packet.reset();
+				packet << localPort << "event" << uniqueID << (Event&) chatEvent << chatEvent;
+				socket.send(address, packet);
 			}
 		}
 		break;
@@ -70,113 +72,114 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 	std::vector<std::shared_ptr<ActorUpdate> > result;
 	std::map<int, std::shared_ptr<ActorUpdate> > mappedUpdates;
 	
-	sf::SocketSelector selector;
-	selector.add(receivingSocket);
-	packet.clear();
 	
-	while(true)
+	
+	
+	while(socket.receive(packet, address))
 	{
-
-		if(selector.wait(sf::milliseconds(1)))
+		
+		unsigned short temp;
+		std::string packetType;
+		std::string creationResult;
+		packet >> packetType;
+		switch(state)
 		{
-			unsigned short temp;
-			receivingSocket.receive(packet, address, temp);
-			std::string packetType;
-			std::string creationResult;
-			packet >> packetType;
-			switch(state)
+		case State::GETTING_UNIQUE_ID:
+			if(packetType == "id")
 			{
-			case State::GETTING_UNIQUE_ID:
-				if(packetType == "id")
+				std::cout << "successful connection to the server" << std::endl;
+				packet >> uniqueID;
+				state = State::CREATING_ACTOR;
+				packet.reset();
+				packet << localPort << std::string("create") << uniqueID << actorType;
+				if(!socket.send(address, packet))
 				{
-					std::cout << "successful connection to the server" << std::endl;
-					packet >> uniqueID;
-					state = State::CREATING_ACTOR;
-					packet.clear();
-					packet << localPort << std::string("create") << uniqueID << actorType;
-					if(sendingSocket.send(packet, address, port) != sf::Socket::Done)
-					{
-						std::cout << "failed to send request for creating" << std::endl;
-					}
-			else
-			{
-				std::cout << "cretion request sent successfuly" << std::endl;
-			}
+					std::cout << "failed to send request for creating" << std::endl;
 				}
-				break;
-			case State::CREATING_ACTOR:
-				if(packetType == "create")
+				else
+				{
+					std::cout << "cretion request sent successfuly" << std::endl;
+				}
+			}
+			break;
+		case State::CREATING_ACTOR:
+			if(packetType == "create")
+			{
+				
+				
+				
+
+				packet >> creationResult;
+				if(creationResult == "success")
 				{
 					std::cout << "actor has been created" << std::endl;
-			
-					packet >> creationResult;
-					if(creationResult == "success")
-					{
-						packet >> actorID;
-						controller.setActorID(actorID);
-						state = State::RECEIVING_UPDATES;
-						renderSystem.setMainActor(actorID);
-					}
+					packet >> actorID;
+					controller.setActorID(actorID);
+					state = State::RECEIVING_UPDATES;
+					renderSystem.setMainActor(actorID);
+					
 				}
-				break;
-			case State::RECEIVING_UPDATES:
-				if(packetType == "update")
-				{
-					ComponentUpdate componentUpdate;
-					packet >> componentUpdate;
-					if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
-					{
-						mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
-					}
-					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
-
-					if(componentUpdate.name == "move")
-					{
-						std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
-						(ComponentUpdate&) *moveUpdate = componentUpdate;
-						packet >> *moveUpdate;
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
-					}
-					if(componentUpdate.name == "chat")
-					{
-						std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
-						(ComponentUpdate&) *chatUpdate = componentUpdate;
-						packet >> *chatUpdate;
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
-					}
-
-					packet.clear();
-					//std::cout << "received update with nunber: " << componentUpdate.number << std::endl;
-					packet << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
-					sendingSocket.send(packet, address, port);
-				}
-				else if(packetType == "approve")
-				{
-					std::string approveType;
-					packet >> approveType;
-					if(approveType == "move")
-					{
-						std::cout << "received move approve" << std::endl;
-						int number;
-						packet >> number;
-						controller.approve("move", number);
-					}
-					else if(approveType == "chat")
-					{
-						std::cout << "received chat approve" << std::endl;
-						int number;
-						packet >>number;
-						controller.approve("chat", number);
-					}
-				}
-				break;
+				
 			}
-	
-		}
-		else
-		{
+			break;
+		case State::RECEIVING_UPDATES:
+			if(packetType == "update")
+			{
+				ComponentUpdate componentUpdate;
+				packet >> componentUpdate;
+				
+				if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
+				{
+					mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
+				}
+				mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
+
+				
+
+				if(componentUpdate.name == "move")
+				{
+					std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
+					(ComponentUpdate&) *moveUpdate = componentUpdate;
+					
+					packet >> *moveUpdate;
+					
+					mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
+				}
+				if(componentUpdate.name == "chat")
+				{
+					std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
+					(ComponentUpdate&) *chatUpdate = componentUpdate;
+					packet >> *chatUpdate;
+					mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
+				}
+
+				packet.reset();
+				
+				packet << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
+				socket.send(address, packet);
+			}
+			else if(packetType == "approve")
+			{
+				std::string approveType;
+				packet >> approveType;
+				if(approveType == "move")
+				{
+					
+					int number;
+					packet >> number;
+					controller.approve("move", number);
+				}
+				else if(approveType == "chat")
+				{
+					int number;
+					packet >>number;
+					controller.approve("chat", number);
+				}
+			}
 			break;
 		}
+	
+		
 	}
 	
 	

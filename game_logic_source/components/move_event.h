@@ -16,13 +16,13 @@ struct MoveEvent : Event
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, MoveEvent& e)
 	{
-		s << e.left << e.right << e.up << e.down;
+		s << (uint8_t) e.left << (uint8_t) e.right << (uint8_t) e.up << (uint8_t) e.down;
 		return s;
 	}
 	template<typename STREAM_T>
 	friend STREAM_T& operator>>(STREAM_T& s, MoveEvent& e)
 	{
-		s >> e.left >> e.right >> e.up >> e.down;
+		s >> (uint8_t&) e.left >> (uint8_t&) e.right >> (uint8_t&) e.up >> (uint8_t&) e.down;
 		return s;
 	}
 };

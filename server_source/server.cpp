@@ -8,72 +8,63 @@
 
 GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic)
 {
-	receivingSocket.bind(port);
-	systemID = gameLogic.registerSystem();
+	socket.bind(port);
+	socket.setNonBlocking();
 }
 
 void GameServer::receiveEvents()
 {
-	
-	sf::SocketSelector selector;
-	selector.add(receivingSocket);
-	while(true)
+	Packet packet;
+	IpAddress remoteAddress;
+	while(socket.receive(packet, remoteAddress))
 	{
-		if(selector.wait(sf::milliseconds(1)))
+		unsigned short remotePort;
+		std::string type;
+		packet >> remotePort >> type;
+		if(type == "id")
 		{
-			sf::Packet packet;
-			sf::IpAddress remoteAddress;
-			unsigned short remotePort;
-			std::string type;
-			receivingSocket.receive(packet, remoteAddress, remotePort);
-			packet >> remotePort >> type;
-			if(type == "id")
-			{
-				sendUniqueID(remoteAddress, remotePort);
-			}
-			else if(type == "create")
-			{
-				std::string actorID;
-				int uniqueID;
-				packet >> uniqueID >> actorID;
-				createActor(remoteAddress, remotePort, uniqueID, actorID);
-			}
-			else if(type == "refresh_timeout")
-			{
-				int uniqueID;
-				packet >> uniqueID;
-				refreshTimeout(uniqueID);
-			}
-			else if(type == "event")
-			{
-				receiveGameEvent(packet, remoteAddress, remotePort);
-			}
-			else if(type == "approve")
-			{
+			std::cout << "id sent" << std::endl;
+			sendUniqueID(remoteAddress);
+		}
+		else if(type == "create")
+		{
+			std::string actorID;
+			int uniqueID;
+			packet >> uniqueID >> actorID;
+			createActor(remoteAddress, uniqueID, actorID);
+		}
+		else if(type == "refresh_timeout")
+		{
+			int uniqueID;
+			packet >> uniqueID;
+			refreshTimeout(uniqueID);
+		}
+		else if(type == "event")
+		{
+			receiveGameEvent(packet, remoteAddress);
+		}
+		else if(type == "approve")
+		{
 
-				int actorID;
-				int uniqueID;
-				std::string updateName;
-				int updateNumber;
-				packet >> uniqueID >> actorID >> updateName >> updateNumber;
-				//gameLogic.approve(actorID, updateName,
-				if(clients.find(uniqueID) != clients.end())
-				{
-					gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
-				}
+			int actorID;
+			int uniqueID;
+			std::string updateName;
+			int updateNumber;
+			packet >> uniqueID >> actorID >> updateName >> updateNumber;
+			//gameLogic.approve(actorID, updateName,
+			if(clients.find(uniqueID) != clients.end())
+			{
+				gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
+			}
 				
-			}
+		}
 
-		}
-		else
-		{
-			break;
-		}
+		
 	}
 	
 }
 
-void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  unsigned short remotePort)
+void GameServer::receiveGameEvent(Packet& packet, IpAddress& address)
 {
 	int uniqueID;
 	packet >> uniqueID;
@@ -106,9 +97,9 @@ void GameServer::receiveGameEvent(sf::Packet& packet, sf::IpAddress& address,  u
 				gameLogic.onEvent(chatEvent);
 			}
 		}
-		packet.clear();
+		packet.reset();
 		packet << "approve" << event.name << event.number;
-		sendingSocket.send(packet, address, remotePort);
+		socket.send(address, packet);
 	}
 	else
 	{
@@ -141,13 +132,13 @@ void GameServer::sendUpdates()
 		{
 			for(auto component_it = (*actor_it)->updates.begin(); component_it != (*actor_it)->updates.end(); component_it++)
 			{
-				sf::Packet packet;
+				Packet packet;
 				packet << "update" << *(*component_it);
 
 				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 
-				sendingSocket.send(packet, client_it->second.address, client_it->second.port);
+				socket.send(client_it->second.address, packet);
 			}
 		}
 	}
@@ -164,23 +155,23 @@ void GameServer::refreshTimeout(int uniqueID)
 	clients[uniqueID].time = 0.0f;
 }
 
-void GameServer::sendUniqueID(sf::IpAddress& remoteAddress, unsigned short remotePort)
+void GameServer::sendUniqueID(IpAddress& remoteAddress)
 {
-	sf::Packet packet;
-	packet << std::string("id") << uniqueCounter;
+	Packet packet;
+	packet << "id" << uniqueCounter;
 	uniqueCounter++;
-	sendingSocket.send(packet, remoteAddress, remotePort);
+	socket.send(remoteAddress, packet);
 }
 
 void GameServer::sendSuccessfulCreation(int uniqueID)
 {
 	std::cout << "sending successful creation" << std::endl;
-	sf::Packet packet;
-	packet << std::string("create") << std::string("success") << clients[uniqueID].gameLogicID;
-	sendingSocket.send(packet, clients[uniqueID].address, clients[uniqueID].port);
+	Packet packet;
+	packet << "create" << "success" << clients[uniqueID].gameLogicID;
+	socket.send(clients[uniqueID].address, packet);
 }
 
-void GameServer::createActor(sf::IpAddress& remoteAddress, unsigned short remotePort, int uniqueID, std::string actorID)
+void GameServer::createActor(IpAddress& remoteAddress, int uniqueID, std::string actorID)
 {
 	if(clients.find(uniqueID) != clients.end())
 	{
@@ -191,7 +182,6 @@ void GameServer::createActor(sf::IpAddress& remoteAddress, unsigned short remote
 		std::cout << "creating actor" << std::endl;
 		ClientData data;
 		data.address = remoteAddress;
-		data.port = remotePort;
 		data.gameLogicID = gameLogic.createActor(actorID);
 		data.systemID = gameLogic.registerSystem();
 		data.time = 0.0f;

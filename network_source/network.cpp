@@ -17,11 +17,12 @@ int numberOfDigits(const std::string& addr, int offset)
 	return result;
 }
 
-std::stringstream converter_stream;
+
 
 template<typename FROM_T, typename TO_T>
 static TO_T stringConverter(FROM_T t)
 {
+	std::stringstream converter_stream;
 	TO_T result;
 	converter_stream << t;
 	converter_stream >> result;
@@ -71,93 +72,114 @@ bool IpAddress::isCorrect()
 
 Packet& Packet::operator<<(const std::string& a)
 {
+	data.push_back(stringByte);
 	int oldDataSize = data.size();
-	data.resize(data.size() + a.size() + 1);
-	data[oldDataSize] = '\0'; //it is like a c-string, but null-character is in the beginning
-	std::copy(a.begin(), a.end(), data.begin() + oldDataSize + 1);
-	data.push_back(static_cast<char>(PrimitiveTypes::STRING));
+	data.resize(data.size() + a.size());
+	std::copy(a.begin(), a.end(), data.begin() + oldDataSize);
+	data.push_back(0);
 	return *this;
 }
 
 Packet& Packet::operator<<(int8_t a)
 {
-	data.push_back(a);
 	data.push_back(static_cast<int>(PrimitiveTypes::INT8));
+	data.push_back(a);
 	return *this;
 }
 
 Packet& Packet::operator<<(uint8_t a)
 {
+	data.push_back(static_cast<int>(PrimitiveTypes::UINT8));
 	data.push_back(a);
-	data.push_back(static_cast<int>(PrimitiveTypes::INT16));
 	return *this;
 }
 
+
+/*
+Packet& Packet::operator<<(bool a)
+{
+	//data.push_back(static_cast<char>(PrimitiveTypes::BOOL));
+	//data.push_back(a);
+	*this << (uint8_t) a;
+	return *this;
+}
+*/
+
+
+
 Packet& Packet::operator<<(int16_t a)
 {
+	data.push_back(static_cast<char>(PrimitiveTypes::INT16));
 	data.resize(data.size() + 2);
 	*( (int16_t*) &data[data.size() - 2]) = htons(a);
-	data.push_back(static_cast<char>(PrimitiveTypes::INT16));
+	
 	return *this;
 }
 
 Packet& Packet::operator<<(uint16_t a)
 {
 	*this << (int16_t) a;
-	data.back() = static_cast<char>(PrimitiveTypes::UINT16);
+	data[data.size() -3] = static_cast<char>(PrimitiveTypes::UINT16);
 	return *this;
 }
 
 Packet& Packet::operator<<(int32_t a)
 {
+	//std::cout << "adding signed int" << std::endl;
+	data.push_back(static_cast<char>(PrimitiveTypes::INT32));
 	data.resize(data.size() + 4);
 	*( (int32_t*) &data[data.size() - 4]) = htonl(a);
-	data.push_back(static_cast<char>(PrimitiveTypes::INT32));
 	return *this;
 }
 
 Packet& Packet::operator<<(uint32_t a)
 {
+	//std::cout << "adding unsigned int" << std::endl;
 	*this << (int32_t) a;
-	data.back() = static_cast<char>(PrimitiveTypes::UINT32);
+	data[data.size() - 5] = static_cast<char>(PrimitiveTypes::UINT32);
 	return *this;
 }
 
 Packet& Packet::operator<<(int64_t a)
 {
 	std::string a_str = stringConverter<int64_t, std::string>(a);
+	stringByte = (char) PrimitiveTypes::INT64;
 	*this << a_str;
-	data.back() = static_cast<char>(PrimitiveTypes::INT64);
+	stringByte = (char) PrimitiveTypes::STRING;
 	return *this;
 }
 
 Packet& Packet::operator<<(uint64_t a)
 {
 	std::string a_str = stringConverter<uint64_t, std::string>(a);
+	stringByte = (char) PrimitiveTypes::UINT64;
 	*this << a_str;
-	data.back() = static_cast<char>(PrimitiveTypes::UINT64);
+	stringByte = (char) PrimitiveTypes::STRING;
 	return *this;
 }
 
 Packet& Packet::operator<<(float a)
 {
 	std::string a_str = stringConverter<float, std::string>(a);
+	//std::cout << "float string: ." << a_str <<". " << std::endl;
+	stringByte = (char) PrimitiveTypes::FLOAT;
 	*this << a_str;
-	data.back() = static_cast<char>(PrimitiveTypes::FLOAT);
+	stringByte = (char) PrimitiveTypes::STRING;
 	return *this;
 }
 
 Packet& Packet::operator<<(double a)
 {
 	std::string a_str = stringConverter<double, std::string>(a);
+	stringByte = (char) PrimitiveTypes::DOUBLE;
 	*this << a_str;
-	data.back() = static_cast<char>(PrimitiveTypes::DOUBLE);
+	stringByte = (char) PrimitiveTypes::STRING;
 	return *this;
 }
 
 void Packet::checkType(char type)
 {
-	if(data.back() != type)
+	if(data[offset] != type)
 	{
 		std::cout << "warning! trying to read the wrong type (" << (int) type << ")" << std::endl;
 		std::cout << "actual type: " << (int) data.back() << std::endl;
@@ -167,64 +189,86 @@ void Packet::checkType(char type)
 Packet& Packet::operator>>(std::string& a)
 {
 	checkType((char) PrimitiveTypes::STRING);
-	data.pop_back();
-	int ptr = data.size() - 1;
-	while(ptr >= 0 && data[ptr] != '\0')
+	offset++;
+	int ptr = offset;
+	while(data[ptr] != 0)
 	{
-		ptr--;
+		ptr++;
 	}
-	a.assign(data.begin() + ptr + 1, data.end());
-	data.resize(data.size() - a.size() - 1);
+	
+	a.assign(data.begin() + offset, data.begin() + ptr);
+
+	offset = ptr + 1;
+	
+
 	return *this;
 }
 
 Packet& Packet::operator>>(int8_t& a)
 {
 	checkType((char) PrimitiveTypes::INT8);
-	data.pop_back();
-	a = data.back();
-	data.pop_back();
+	offset++;
+	a = data[offset];
+	offset++;
 	return *this;
 }
+
 
 Packet& Packet::operator>>(uint8_t& a)
 {
 	checkType((char) PrimitiveTypes::UINT8);
-	*this >> (int8_t&) a;
+	offset++;
+	a = data[offset];
+	offset++;
 	return *this;
 }
+
+
+/*
+Packet& Packet::operator>>(bool& a)
+{
+	*this >> (uint8_t&) a;
+	return *this;
+}
+*/
+
+
 
 Packet& Packet::operator>>(int16_t& a)
 {
 	checkType((char) PrimitiveTypes::INT16);
-	data.pop_back();
-	a = ntohs(*((int16_t*) &data[data.size() - 2]));
-	data.resize(data.size() - 2);
+	offset++;
+	a = ntohs(*((int16_t*) &data[offset]));
+	offset += 2;
 	return *this;
 }
 
 Packet& Packet::operator>>(uint16_t& a)
 {
 	checkType((char) PrimitiveTypes::UINT16);
-	data.back() = (char) PrimitiveTypes::INT16;
-	*this >> (int16_t&) a;
+	offset++;
+	a = ntohs(*((int16_t*) &data[offset]));
+	offset += 2;
 	return *this;
 }
 
 Packet& Packet::operator>>(int32_t& a)
 {
+	//std::cout << "reading signed int" << std::endl;
 	checkType((char) PrimitiveTypes::INT32);
-	data.pop_back();
-	a = ntohl(*((int32_t*) &data[data.size() - 4]));
-	data.resize(data.size() - 4);
+	offset++;
+	a = ntohl(*((int32_t*) &data[offset]));
+	offset += 4;
 	return *this;
 }
 
 Packet& Packet::operator>>(uint32_t& a)
 {
+	//std::cout << "reading unsigned int" << std::endl;
 	checkType((char) PrimitiveTypes::UINT32);
-	data.back() = (char) PrimitiveTypes::INT32;
-	*this >> (int32_t&) a;
+	offset++;
+	a = ntohl(*((int32_t*) &data[offset]));
+	offset +=4;
 	return *this;
 }
 
@@ -232,7 +276,7 @@ Packet& Packet::operator>>(int64_t& a)
 {
 	std::string a_str;
 	checkType((char) PrimitiveTypes::INT64);
-	data.back() = (char) PrimitiveTypes::STRING;
+	data[offset] = (char) PrimitiveTypes::STRING;
 	*this >> a_str;
 	a = stringConverter<std::string, int64_t>(a_str);
 	return *this;
@@ -242,19 +286,22 @@ Packet& Packet::operator>>(uint64_t& a)
 {
 	std::string a_str;
 	checkType((char) PrimitiveTypes::UINT64);
-	data.back() = (char) PrimitiveTypes::STRING;
+	data[offset] = (char) PrimitiveTypes::STRING;
 	*this >> a_str;
-	a = stringConverter<std::string, uint64_t>(a_str);
+	a = stringConverter<std::string, int64_t>(a_str);
 	return *this;
 }
 
 Packet& Packet::operator>>(float& a)
 {
+	
 	std::string a_str;
 	checkType((char) PrimitiveTypes::FLOAT);
-	data.back() = (char) PrimitiveTypes::STRING;
+	data[offset] = (char) PrimitiveTypes::STRING;
 	*this >> a_str;
+	
 	a = stof(a_str);
+	
 	return *this;
 }
 
@@ -262,7 +309,7 @@ Packet& Packet::operator>>(double& a)
 {
 	std::string a_str;
 	checkType((char) PrimitiveTypes::DOUBLE);
-	data.back() = (char) PrimitiveTypes::STRING;
+	data[offset] = (char) PrimitiveTypes::STRING;
 	*this >> a_str;
 	a = stod(a_str);
 	return *this;
@@ -289,6 +336,7 @@ void Packet::revertToCursor()
 void Packet::reset()
 {
 	data.clear();
+	offset = 0;
 	cursorPosition = 0;
 }
 
@@ -367,6 +415,18 @@ bool UdpSocket::bind(uint16_t port)
 	{
 		return true;
 	}
+}
+
+int UdpSocket::getLocalPort()
+{
+	#if PLATFORM == PLATFORM_WINDOWS
+	typedef int socklen_t;
+	#endif
+
+	sockaddr_in data;
+	socklen_t fromLength = sizeof(data);
+	getsockname(fd, (sockaddr*) &data, &fromLength);
+	return data.sin_port;
 }
 
 bool UdpSocket::setNonBlocking()

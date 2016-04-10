@@ -2,7 +2,8 @@
 #define NETWORK_LOGIC_H
 
 #include <actor_update.h>
-#include <SFML/Network.hpp>
+//#include <SFML/Network.hpp>
+#include<network.h>
 #include <string>
 #include <render_system.h>
 #include "controller.h"
@@ -11,7 +12,7 @@
 
 struct NetworkLogic
 {
-	NetworkLogic(sf::IpAddress address, unsigned short port, std::string actorType, Controller& controller, RenderSystem& renderSystem);
+	NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem);
 	void sendEvents();
 	std::vector<std::shared_ptr<ActorUpdate> > receiveUpdates();
 	int getActorID();
@@ -19,15 +20,13 @@ private:
 	void refreshTimeout();
 	Controller& controller;
 	RenderSystem& renderSystem;
-	sf::IpAddress address;
-	sf::UdpSocket receivingSocket;
-	sf::UdpSocket sendingSocket;
+	IpAddress address;
+	UdpSocket socket;
 	unsigned short localPort;
-	unsigned short port;
 	int uniqueID;
 	int actorID;
 	std::string actorType;
-	sf::Packet packet;
+	Packet packet;
 	enum class State
 	{
 		GETTING_UNIQUE_ID,

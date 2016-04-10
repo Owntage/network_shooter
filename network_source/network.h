@@ -42,11 +42,15 @@ private:
 
 struct Packet
 {
+
+	Packet() : offset(0) , stringByte((char) PrimitiveTypes::STRING) {}
+
 	static const int MAX_PACKET_SIZE = 2048;
 
 	Packet& operator<<(const std::string& a);
 
 	Packet& operator<<(int8_t a);
+	//Packet& operator<<(bool a);
 	Packet& operator<<(int16_t a);
 	Packet& operator<<(int32_t a);
 	Packet& operator<<(int64_t a);
@@ -62,6 +66,7 @@ struct Packet
 	Packet& operator>>(std::string& a);
 
 	Packet& operator>>(int8_t& a);
+	//Packet& operator>>(bool& a);
 	Packet& operator>>(int16_t& a);
 	Packet& operator>>(int32_t& a);
 	Packet& operator>>(int64_t& a);
@@ -81,6 +86,8 @@ struct Packet
 private:
 	std::vector<char> data;
 	int cursorPosition; //holds size of a vector to revert	
+	int offset;
+	char stringByte;
 	void checkType(char type);
 	enum class PrimitiveTypes
 	{
@@ -94,7 +101,8 @@ private:
 		UINT32,
 		UINT64,
 		FLOAT,
-		DOUBLE
+		DOUBLE,
+		BOOL
 	};
 	friend class UdpSocket;
 };
@@ -105,6 +113,7 @@ struct UdpSocket
 	~UdpSocket();
 	bool isCreated();
 	bool bind(uint16_t port);
+	int getLocalPort();
 	bool setNonBlocking();
 	bool send(const IpAddress& address, const char* data, int dataSize);
 	bool send(const IpAddress& address, const Packet& packet);

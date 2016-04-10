@@ -20,6 +20,7 @@ using namespace std;
 
 int main()
 {
+	UdpSocket::initializeSockets();
 	std::string connectAddress;
 	cout << "enter address: ";
 	cin >> connectAddress;
@@ -34,7 +35,7 @@ int main()
 	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
 	Controller controller(console);
 	RenderSystem renderSystem(console);
-	NetworkLogic networkLogic(sf::IpAddress(connectAddress), 13337, "testActor", controller, renderSystem);
+	NetworkLogic networkLogic(IpAddress(connectAddress, 13337), "testActor", controller, renderSystem);
 	
 
 	
@@ -68,5 +69,6 @@ int main()
 		
 		
 	}
+	UdpSocket::shutdownSockets();
 	return 0;
 }
