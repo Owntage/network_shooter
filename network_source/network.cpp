@@ -72,25 +72,31 @@ bool IpAddress::isCorrect()
 
 Packet& Packet::operator<<(const std::string& a)
 {
+	data.pop_back();
 	data.push_back(stringByte);
 	int oldDataSize = data.size();
 	data.resize(data.size() + a.size());
 	std::copy(a.begin(), a.end(), data.begin() + oldDataSize);
 	data.push_back(0);
+	data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
 Packet& Packet::operator<<(int8_t a)
 {
+	data.pop_back();
 	data.push_back(static_cast<int>(PrimitiveTypes::INT8));
 	data.push_back(a);
+	data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
 Packet& Packet::operator<<(uint8_t a)
 {
+	data.pop_back();
 	data.push_back(static_cast<int>(PrimitiveTypes::UINT8));
 	data.push_back(a);
+	data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -109,26 +115,32 @@ Packet& Packet::operator<<(bool a)
 
 Packet& Packet::operator<<(int16_t a)
 {
+	data.pop_back();
 	data.push_back(static_cast<char>(PrimitiveTypes::INT16));
 	data.resize(data.size() + 2);
 	*( (int16_t*) &data[data.size() - 2]) = htons(a);
-	
+	data.push_back((char) PrimitiveTypes::END);
 	return *this;
+	
 }
 
 Packet& Packet::operator<<(uint16_t a)
 {
+	//data.pop_back();
 	*this << (int16_t) a;
-	data[data.size() -3] = static_cast<char>(PrimitiveTypes::UINT16);
+	data[data.size() - 4] = static_cast<char>(PrimitiveTypes::UINT16);
+	//data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
 Packet& Packet::operator<<(int32_t a)
 {
 	//std::cout << "adding signed int" << std::endl;
+	data.pop_back();
 	data.push_back(static_cast<char>(PrimitiveTypes::INT32));
 	data.resize(data.size() + 4);
 	*( (int32_t*) &data[data.size() - 4]) = htonl(a);
+	data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -136,7 +148,7 @@ Packet& Packet::operator<<(uint32_t a)
 {
 	//std::cout << "adding unsigned int" << std::endl;
 	*this << (int32_t) a;
-	data[data.size() - 5] = static_cast<char>(PrimitiveTypes::UINT32);
+	data[data.size() - 6] = static_cast<char>(PrimitiveTypes::UINT32);
 	return *this;
 }
 
@@ -146,6 +158,7 @@ Packet& Packet::operator<<(int64_t a)
 	stringByte = (char) PrimitiveTypes::INT64;
 	*this << a_str;
 	stringByte = (char) PrimitiveTypes::STRING;
+	//data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -155,6 +168,7 @@ Packet& Packet::operator<<(uint64_t a)
 	stringByte = (char) PrimitiveTypes::UINT64;
 	*this << a_str;
 	stringByte = (char) PrimitiveTypes::STRING;
+	//data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -165,6 +179,7 @@ Packet& Packet::operator<<(float a)
 	stringByte = (char) PrimitiveTypes::FLOAT;
 	*this << a_str;
 	stringByte = (char) PrimitiveTypes::STRING;
+	//data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -174,6 +189,7 @@ Packet& Packet::operator<<(double a)
 	stringByte = (char) PrimitiveTypes::DOUBLE;
 	*this << a_str;
 	stringByte = (char) PrimitiveTypes::STRING;
+	//data.push_back((char) PrimitiveTypes::END);
 	return *this;
 }
 
@@ -317,7 +333,13 @@ Packet& Packet::operator>>(double& a)
 
 bool Packet::isPacked()
 {
-	return data.size() > MAX_PACKET_SIZE;
+	return data.size() > MAX_PACKET_SIZE - 1;
+}
+
+bool Packet::isEnd()
+{
+
+	return data[offset] == (char) PrimitiveTypes::END;
 }
 
 void Packet::setCursor()
@@ -330,12 +352,14 @@ void Packet::revertToCursor()
 	if(data.size() > cursorPosition)
 	{
 		data.resize(cursorPosition);
+		data.push_back((char) PrimitiveTypes::END);
 	}
 }
 
 void Packet::reset()
 {
 	data.clear();
+	data.push_back((char) PrimitiveTypes::END);
 	offset = 0;
 	cursorPosition = 0;
 }
@@ -504,6 +528,7 @@ bool UdpSocket::receive(Packet& packet, IpAddress& receiveAddress)
 		return false;
 	}
 	packet.reset();
+	packet.data.clear();
 	packet.data.resize(bytes);
 	std::copy(buffer, buffer + bytes, packet.data.begin());
 	return true;

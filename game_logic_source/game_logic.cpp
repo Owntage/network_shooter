@@ -1,4 +1,5 @@
 #include "game_logic.h"
+#include "delete_update.h"
 #include <iostream>
 
 void GameLogic::onEvent(const Event& event)
@@ -32,6 +33,11 @@ void GameLogic::onEvent(const Event& event)
 
 void GameLogic::approve(int actorID, std::string component, int systemID, int number)
 {
+	if(component == "delete")
+	{
+		deletedActorApproves[systemID] = std::max(deletedActorApproves[systemID], number);
+		return;
+	}
 	if(actors.find(actorID) != actors.end())
 	{
 		actors[actorID]->approve(component, systemID, number);
@@ -54,12 +60,28 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID)
 		}
 		
 	}
+
+	if(deletedActorApproves[systemID] != deletedActors.size() - 1)
+	{
+		auto deleteUpdate = std::make_shared<DeleteUpdate>(deletedActors.size() - 1);
+		for(int i = deletedActorApproves[systemID] + 1; i < deletedActors.size(); i++)
+		{
+			//std::cout << "deleted actor: " << deletedActors[i] << std::endl;
+			deleteUpdate->deletedActors.push_back(deletedActors[i]);
+		}
+		deleteUpdate->actorID = -1;
+		auto deleteActorUpdate = std::make_shared<ActorUpdate>();
+		deleteActorUpdate->actorID = -1;
+		deleteActorUpdate->updates.push_back(deleteUpdate);
+		result.push_back(deleteActorUpdate);
+	}
 	return result;
 }
 
 int GameLogic::registerSystem()
 {
 	systemCount++;
+	deletedActorApproves[systemCount] = deletedActors.size() - 1;
 	return systemCount;
 }
 
@@ -72,6 +94,7 @@ int GameLogic::createActor(std::string actorID)
 
 void GameLogic::destroyActor(int actorID)
 {
+	deletedActors.push_back(actorID);
 	actors.erase(actors.find(actorID));
 }
 

@@ -7,6 +7,7 @@
 #include <map>
 #include <SFML/Graphics.hpp>
 #include <gui.h>
+#include <set>
 
 struct DrawableActor
 {
@@ -30,6 +31,7 @@ struct RenderSystem
 	void setMainActor(int mainActor);
 private:
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
+	std::set<int> deletedActors;
 	int mainActor;
 	
 	sf::View gameView;

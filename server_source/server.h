@@ -3,6 +3,7 @@
 
 //#include <SFML/Network.hpp>
 #include <map>
+#include <set>
 #include <string>
 #include <network.h>
 #include <game_logic.h>
@@ -19,6 +20,8 @@ struct ClientData
 	std::map<std::string, int> eventNumbers;
 };
 
+
+
 struct GameServer
 {
 	GameServer(GameLogic& gameLogic, unsigned short port);
@@ -32,12 +35,31 @@ private:
 	void sendSuccessfulCreation(int uniqueID);
 	void approve(int uniqueID, int actorID, std::string component, int number);
 	void receiveGameEvent(Packet& packet, IpAddress& address);
-	
 	//sf::UdpSocket sendingSocket;
 	UdpSocket socket;
 	int uniqueCounter;
 	GameLogic& gameLogic;
 	std::map<int, ClientData> clients;
+
+	struct ActorCoords
+	{
+		bool actorExists;
+		bool hasCoords;
+		float x;
+		float y;
+	};
+
+	struct ServerView
+	{
+		void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
+		ActorCoords getCoords(int actorID);
+	private:
+		std::map<int, std::shared_ptr<ActorCoords> > actors;
+		std::set<int> deletedActors;
+	};
+
+	int serverViewSystemID;
+	ServerView serverView;
 };
 
 #endif

@@ -43,7 +43,10 @@ private:
 struct Packet
 {
 
-	Packet() : offset(0) , stringByte((char) PrimitiveTypes::STRING) {}
+	Packet() : offset(0) , stringByte((char) PrimitiveTypes::STRING)
+	{
+		data.push_back((char) PrimitiveTypes::END);
+	}
 
 	static const int MAX_PACKET_SIZE = 2048;
 
@@ -80,6 +83,7 @@ struct Packet
 	Packet& operator>>(double& a);
 
 	bool isPacked(); //returns if the size of a data is bigger than maximum size
+	bool isEnd();
 	void setCursor();
 	void revertToCursor();
 	void reset();
@@ -102,7 +106,8 @@ private:
 		UINT64,
 		FLOAT,
 		DOUBLE,
-		BOOL
+		BOOL,
+		END
 	};
 	friend class UdpSocket;
 };

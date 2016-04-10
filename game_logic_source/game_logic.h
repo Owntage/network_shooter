@@ -23,6 +23,8 @@ private:
 	int systemCount;
 	int actorCount;
 	std::map<int, std::shared_ptr<Actor> > actors;
+	std::map<int, int> deletedActorApproves;
+	std::vector<int> deletedActors;
 };
 
 #endif

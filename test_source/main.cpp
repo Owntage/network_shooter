@@ -26,7 +26,7 @@ int main()
 	UdpSocket socket;
 	IpAddress address("localhost", 13337);
 	Packet packet;
-	packet << 1.0f << 2.0f << 3.0f;
+	packet << 1.0f << 2.0f << 3.0f << 4.0f << 5.0f;
 	socket.send(address, packet);
 
 	UdpSocket::shutdownSockets();

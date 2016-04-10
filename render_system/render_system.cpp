@@ -3,6 +3,7 @@
 #include <components/move_update.h>
 #include <components/chat_update.h>
 #include <iostream>
+#include <delete_update.h>
 
 DrawableActor::DrawableActor(Console& console) : isMain(false), rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1)
 {
@@ -49,8 +50,36 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 {
 	for(auto it = updates.begin(); it != updates.end(); it++)
 	{
+		if((*it)->actorID == -1)
+		{
+			
+			for(auto update_it = (*it)->updates.begin(); update_it != (*it)->updates.end(); update_it++)
+			{
+				if((*update_it)->name == "delete")
+				{
+					
+					DeleteUpdate& deleteUpdate = (DeleteUpdate&) *(*update_it);
+					for(int i = 0; i < deleteUpdate.deletedActors.size(); i++)
+					{
+						int deletedActor = deleteUpdate.deletedActors[i];
+						std::cout << "deleted actor: " << deletedActor << std::endl;
+						if(actors.find(deletedActor) != actors.end())
+						{
+							deletedActors.insert(deletedActor);
+							actors.erase(deletedActor);
+						}
+					}
+				}
+			}
+			continue;
+		}
+
 		if(actors.find((*it)->actorID) == actors.end())
 		{
+			if(deletedActors.find((*it)->actorID) != deletedActors.end())
+			{
+				continue;
+			}
 			std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
 			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console);
 			if((*it)->actorID == mainActor)

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <components/move_update.h>
 #include <components/chat_component.h>
+#include <delete_update.h>
 
 
 NetworkLogic::NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
@@ -123,40 +124,56 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 			}
 			break;
 		case State::RECEIVING_UPDATES:
+			
 			if(packetType == "update")
 			{
-				ComponentUpdate componentUpdate;
-				packet >> componentUpdate;
 				
-				if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
+				while(!packet.isEnd())
 				{
-					mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
-				}
-				mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
-				
-
-				if(componentUpdate.name == "move")
-				{
-					std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
-					(ComponentUpdate&) *moveUpdate = componentUpdate;
 					
-					packet >> *moveUpdate;
-					
-					mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
-				}
-				if(componentUpdate.name == "chat")
-				{
-					std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
-					(ComponentUpdate&) *chatUpdate = componentUpdate;
-					packet >> *chatUpdate;
-					mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
-				}
-
-				packet.reset();
+					ComponentUpdate componentUpdate;
+					packet >> componentUpdate;
 				
-				packet << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
-				socket.send(address, packet);
+					if(mappedUpdates.find(componentUpdate.actorID) == mappedUpdates.end())
+					{
+						mappedUpdates[componentUpdate.actorID] = std::make_shared<ActorUpdate>();
+					}
+					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
+
+					
+
+					if(componentUpdate.name == "move")
+					{
+						std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
+						(ComponentUpdate&) *moveUpdate = componentUpdate;
+					
+						packet >> *moveUpdate;
+					
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
+					}
+					if(componentUpdate.name == "chat")
+					{
+						std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
+						(ComponentUpdate&) *chatUpdate = componentUpdate;
+						packet >> *chatUpdate;
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
+					}
+					if(componentUpdate.name == "delete")
+					{
+						std::shared_ptr<DeleteUpdate> deleteUpdate = std::make_shared<DeleteUpdate>();
+						(ComponentUpdate&) *deleteUpdate = componentUpdate;
+						packet >> *deleteUpdate;
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(deleteUpdate);
+					}
+
+					
+
+					Packet approvePacket;
+				
+					approvePacket << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
+					socket.send(address, approvePacket);
+				}
 			}
 			else if(packetType == "approve")
 			{

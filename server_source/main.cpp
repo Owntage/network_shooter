@@ -53,24 +53,20 @@ int main()
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 		//std::cout << "waiting for message" << std::endl;
-		char buffer[128];
 		IpAddress remoteAddress;
 		Packet packet;
 		if(socket.receive(packet, remoteAddress))
 		{
 			std::cout << "received packet" << std::endl;
 			std::cout << "messages: " << std::endl;
-			for(int i = 0; i < 3; i++)
+			while(!packet.isEnd())
 			{
-				float message;
-				packet >> message;
-				std::cout << "message " << i << ": " << message << std::endl;
+				float temp;
+				packet >> temp;
+				std::cout << "message: " << temp << std::endl;
 			}
 		}
-		else
-		{
-			//std::cout << "receive returned false" << std::endl;
-		}
+		
 	}
 
 	UdpSocket::shutdownSockets();

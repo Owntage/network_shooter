@@ -4,12 +4,14 @@
 #include <iostream>
 #include <components/move_event.h>
 #include <components/chat_component.h>
+#include <delete_update.h>
 
 
 GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic)
 {
 	socket.bind(port);
 	socket.setNonBlocking();
+	serverViewSystemID = gameLogic.registerSystem();
 }
 
 void GameServer::receiveEvents()
@@ -125,22 +127,52 @@ void GameServer::sendUpdates()
 	{
 		destroyActor(*it);
 	}
+
+	//getting updates for serverView
+	serverView.onUpdate(gameLogic.getUpdates(serverViewSystemID));
+
+	//sending updates
 	for(auto client_it = clients.begin(); client_it != clients.end(); client_it++)
 	{
+		
 		auto updates = gameLogic.getUpdates(client_it->second.systemID);
+		Packet packet;
+		packet << "update";
+		
+		int clientActorID = client_it->second.gameLogicID;
+		std::sort(updates.begin(), updates.end(), [this, clientActorID](std::shared_ptr<ActorUpdate> actorUpdate1, std::shared_ptr<ActorUpdate> actorUpdate2)
+		{
+			ActorCoords coords1 = serverView.getCoords(actorUpdate1->actorID);
+			ActorCoords coords2 = serverView.getCoords(actorUpdate2->actorID);
+			if(!coords1.hasCoords) return true;
+			if(!coords2.hasCoords) return false;
+			ActorCoords clientCoords = serverView.getCoords(clientActorID);
+			if(!clientCoords.hasCoords) return true; //weird, but possible. Client could be a game mode manager, or admin or smth like that.
+			return pow(coords1.x - clientCoords.x, 2) + pow(coords1.y - clientCoords.y, 2) < pow(coords2.x - clientCoords.x, 2)
+				+ pow(coords2.y - clientCoords.y, 2);
+		});
 		for(auto actor_it = updates.begin(); actor_it != updates.end(); actor_it++)
 		{
 			for(auto component_it = (*actor_it)->updates.begin(); component_it != (*actor_it)->updates.end(); component_it++)
 			{
-				Packet packet;
-				packet << "update" << *(*component_it);
+				
+				packet.setCursor();
+
+				packet << *(*component_it);
 
 				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
+				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
 
-				socket.send(client_it->second.address, packet);
+				if(packet.isPacked())
+				{
+					packet.revertToCursor();
+				}
 			}
 		}
+		
+		socket.send(client_it->second.address, packet);
+		
 	}
 }
 
@@ -193,4 +225,64 @@ void GameServer::createActor(IpAddress& remoteAddress, int uniqueID, std::string
 void GameServer::approve(int uniqueID, int actorID, std::string component, int number)
 {
 	gameLogic.approve(actorID, component, clients[uniqueID].systemID, number);
+}
+
+void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > update)
+{
+	for(auto it = update.begin(); it != update.end(); it++)
+	{
+		if((*it)->actorID == -1)
+		{
+			for(auto component_it = (*it)->updates.begin(); component_it != (*it)->updates.end(); component_it++)
+			{
+				if((*component_it)->name == "delete")
+				{
+					DeleteUpdate& deleteUpdate = (DeleteUpdate&) *(*component_it);
+					for(int i = 0; i < deleteUpdate.deletedActors.size(); i++)
+					{
+						if(actors.find(deleteUpdate.deletedActors[i]) != actors.end())
+						{
+							deletedActors.insert(deleteUpdate.deletedActors[i]);
+							actors.erase(deleteUpdate.deletedActors[i]);
+						}
+					}
+				}
+			}
+			continue;
+		}
+		if(actors.find((*it)->actorID) == actors.end())
+		{
+			if(deletedActors.find((*it)->actorID) == deletedActors.end())
+			{
+				continue;
+			}
+			actors[(*it)->actorID] = std::make_shared<ActorCoords>();
+			actors[(*it)->actorID]->actorExists = true;
+			actors[(*it)->actorID]->hasCoords = false;
+			
+		}	
+		for(auto component_it = (*it)->updates.begin(); component_it != (*it)->updates.end(); component_it++)
+		{
+			
+			if((*component_it)->name == "move")
+			{
+				MoveUpdate& moveUpdate = (MoveUpdate&) *(*component_it);
+				actors[(*it)->actorID]->hasCoords = true;
+				actors[(*it)->actorID]->x = moveUpdate.x;
+				actors[(*it)->actorID]->y = moveUpdate.y;
+				
+			}
+		}
+	}
+}
+
+GameServer::ActorCoords GameServer::ServerView::getCoords(int actorID)
+{
+	if(actors.find(actorID) == actors.end())
+	{
+		ActorCoords result;
+		result.actorExists = false;
+		return result;
+	}
+	return *actors.find(actorID)->second;
 }
