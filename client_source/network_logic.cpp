@@ -3,6 +3,7 @@
 #include <iostream>
 #include <components/move_update.h>
 #include <components/chat_component.h>
+#include <components/animation_update.h>
 #include <delete_update.h>
 
 
@@ -165,6 +166,13 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						(ComponentUpdate&) *deleteUpdate = componentUpdate;
 						packet >> *deleteUpdate;
 						mappedUpdates[componentUpdate.actorID]->updates.push_back(deleteUpdate);
+					}
+					if(componentUpdate.name == "animation")
+					{
+						std::shared_ptr<AnimationUpdate> animationUpdate = std::make_shared<AnimationUpdate>();
+						(ComponentUpdate&) *animationUpdate = componentUpdate;
+						packet >> *animationUpdate;
+						mappedUpdates[componentUpdate.actorID]->updates.push_back(animationUpdate);
 					}
 
 					

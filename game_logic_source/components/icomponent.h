@@ -12,6 +12,7 @@
 
 struct IComponent
 {
+	IComponent() : currentDataNumber(1) {}
 	virtual ~IComponent() {}
 	virtual void onEvent(const Event& event) = 0;
 	virtual bool hasUpdate(int systemID) = 0;
@@ -26,7 +27,8 @@ struct IComponent
 	std::vector<std::shared_ptr<Event> > localEvents;
 protected:
 	std::map<int, int> lastSystemApproved;
-	std::map<int, int> currentSystemNumber;
+	//std::map<int, int> currentSystemNumber;
+	int currentDataNumber;
 };
 
 #endif

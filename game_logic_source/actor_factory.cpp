@@ -3,6 +3,7 @@
 #include <boost/foreach.hpp>
 #include "components/chat_component.h"
 #include "components/move_component.h"
+#include "components/animation_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -28,6 +29,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		std::shared_ptr<IComponent> component;
 		if(v.first == "move") component = std::make_shared<MoveComponent>();
 		if(v.first == "chat") component = std::make_shared<ChatComponent>();
+		if(v.first == "animation") component = std::make_shared<AnimationComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

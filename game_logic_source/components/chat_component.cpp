@@ -33,7 +33,7 @@ std::shared_ptr<ComponentUpdate> ChatComponent::getUpdate(int systemID)
 {
 	std::shared_ptr<ChatUpdate> result = std::make_shared<ChatUpdate>();
 	result->number = chatHistory.size();
-	currentSystemNumber[systemID] = chatHistory.size();
+	//currentSystemNumber[systemID] = chatHistory.size();
 	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
 	{
 		lastSystemApproved[systemID] = 0;

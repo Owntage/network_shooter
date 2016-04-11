@@ -19,10 +19,7 @@ void MoveComponent::onEvent(const Event& event)
 		if(movingDown) y += speed / 60.0f;
 		if(movingRight || movingLeft || movingUp || movingDown)
 		{
-			for(auto it = currentSystemNumber.begin(); it != currentSystemNumber.end(); it++)
-			{
-				it->second++;
-			}
+			currentDataNumber++;
 		}
 	}
 }
@@ -34,8 +31,8 @@ std::string MoveComponent::getName()
 
 bool MoveComponent::hasUpdate(int systemID)
 {
-	if(systemUpdates.find(systemID) == systemUpdates.end()) return true;
-	return lastSystemApproved[systemID] != currentSystemNumber[systemID];
+	if(lastSystemApproved.find(systemID) == lastSystemApproved.end()) return true;
+	return lastSystemApproved[systemID] != currentDataNumber;
 }
 
 
@@ -43,21 +40,7 @@ bool MoveComponent::hasUpdate(int systemID)
 std::shared_ptr<ComponentUpdate> MoveComponent::getUpdate(int systemID)
 {
 	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(x, y);
-	if(systemUpdates.find(systemID) != systemUpdates.end())
-	{
-		if(result->x != systemUpdates[systemID].x || result->y != systemUpdates[systemID].y)
-		{
-			currentSystemNumber[systemID]++;
-		}
-	}
-	else
-	{
-		currentSystemNumber[systemID] = 0;
-		
-	}
-	systemUpdates[systemID] = *result;
-	systemUpdates[systemID].number = currentSystemNumber[systemID];
-	result->number = currentSystemNumber[systemID];
+	result->number = currentDataNumber;
 	return result;
 }
 

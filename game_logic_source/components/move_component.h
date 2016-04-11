@@ -19,7 +19,7 @@ private:
 	bool movingDown;
 	float speed;
 	float x, y;
-	std::map<int, MoveUpdate> systemUpdates;
+	//std::map<int, MoveUpdate> systemUpdates;
 };
 
 #endif

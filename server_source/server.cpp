@@ -4,6 +4,7 @@
 #include <iostream>
 #include <components/move_event.h>
 #include <components/chat_component.h>
+#include <components/animation_update.h>
 #include <delete_update.h>
 
 
@@ -163,6 +164,7 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
+				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
 
 				if(packet.isPacked())
 				{
