@@ -8,18 +8,26 @@
 #include <SFML/Graphics.hpp>
 #include <gui.h>
 #include <set>
+#include <components/animation_component.h>
 
 struct DrawableActor
 {
-	DrawableActor(Console& console);
+	DrawableActor(Console& console, std::map<std::string, sf::Texture>& textures);
 	void onUpdate(ActorUpdate& actorUpdate);
 	void draw();
 	void setMain(bool isMain);
 private:
 	bool isMain;
+	float textureChangeTime;
+	float delay;
+	int currentAnimation;
+	
+	std::string currentAnimationState;
 	int lastMessagePrinted;
 	sf::RectangleShape rect;
+	std::map<std::string, AnimationState> animationStates;
 	Console& console;
+	std::map<std::string, sf::Texture>& textures;
 };
 
 struct RenderSystem
@@ -31,6 +39,7 @@ struct RenderSystem
 	void setMainActor(int mainActor);
 private:
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
+	std::map<std::string, sf::Texture> textures;
 	std::set<int> deletedActors;
 	int mainActor;
 	
