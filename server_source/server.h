@@ -40,6 +40,7 @@ private:
 	int uniqueCounter;
 	GameLogic& gameLogic;
 	std::map<int, ClientData> clients;
+	std::map<std::string, std::shared_ptr<File> > images;
 
 	struct ActorCoords
 	{

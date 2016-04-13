@@ -1,6 +1,7 @@
 #include "network_logic.h"
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <components/move_update.h>
 #include <components/chat_component.h>
 #include <components/animation_update.h>
@@ -64,6 +65,40 @@ void NetworkLogic::sendEvents()
 				packet << localPort << "event" << uniqueID << (Event&) chatEvent << chatEvent;
 				socket.send(address, packet);
 			}
+		}
+
+		//send request for images;
+		while(renderSystem.imagesToLoad.size() > 0)
+		{
+			downloadingFiles[renderSystem.imagesToLoad.back()];
+			std::cout << "downloading image: " << renderSystem.imagesToLoad.back() << std::endl;
+			renderSystem.imagesToLoad.pop_back();
+		}
+
+		for(auto it = downloadingFiles.begin(); it != downloadingFiles.end(); )
+		{
+			if(it->second.isDownloaded())
+			{
+				downloadingFiles.erase(it++);
+			}
+			else
+			{
+				it++;
+			}
+		}
+
+		for(auto it = downloadingFiles.begin(); it != downloadingFiles.end(); it++)
+		{
+			packet.reset();
+			if(it->second.sizeIsKnown)
+			{
+				packet << localPort << "image_data" << it->first << it->second.mask;
+			}
+			else
+			{
+				packet << localPort << "image_size" << it->first;
+			}
+			socket.send(address, packet);
 		}
 		break;
 	}
@@ -200,6 +235,33 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					packet >>number;
 					controller.approve("chat", number);
 				}
+			}
+			else if(packetType == "image_size")
+			{
+				std::string imageName;
+				int size;
+				packet >> imageName >> size;
+				std::cout << "size of an image " << imageName << " :" << size << std::endl;
+				if(downloadingFiles.find(imageName) != downloadingFiles.end())
+				{
+					downloadingFiles[imageName].setSize(size);
+				}
+			}
+			else if(packetType == "image_data")
+			{
+				
+					std::string imageName;
+					packet >> imageName;
+					if(downloadingFiles.find(imageName) != downloadingFiles.end())
+					{
+						packet >> downloadingFiles[imageName];
+						if(downloadingFiles[imageName].isDownloaded())
+						{
+							downloadingFiles[imageName].saveToFile(imageName);
+							renderSystem.onImageLoaded(imageName);
+						}
+					}
+				
 			}
 			break;
 		}

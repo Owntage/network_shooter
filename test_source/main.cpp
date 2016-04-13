@@ -20,7 +20,7 @@ using namespace std;
 
 int main()
 {
-	
+	/*
 	UdpSocket::initializeSockets();
 
 	UdpSocket socket;
@@ -30,6 +30,24 @@ int main()
 	socket.send(address, packet);
 
 	UdpSocket::shutdownSockets();
+	*/
+
+	File file("res/graphic/jumping.png");
+	
+	File file2;
+	file2.setSize(file.size);
+
+	Packet packet;
+	
+	while(!file2.isDownloaded())
+	{
+		packet.reset();
+		file.printToPacket(packet, file2.mask);
+		packet >> file2;
+	}
+
+	
+	file2.saveToFile("res/graphic/concr1_copy.png");
 
 	return 0;
 }

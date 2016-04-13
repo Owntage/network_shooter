@@ -4,10 +4,11 @@
 #include <components/chat_update.h>
 #include <components/animation_update.h>
 #include <iostream>
+#include <fstream>
 #include <delete_update.h>
 
-DrawableActor::DrawableActor(Console& console, std::map<std::string, sf::Texture>& textures) : isMain(false),
-	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), textures(textures)
+DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isMain(false),
+	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
 {
 	rect.setOrigin(0.5f, 0.5f);
 	textureChangeTime = 0.0f;
@@ -51,20 +52,19 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			{
 				if(animationStates.find(animationUpdate.states[i].stateName) == animationStates.end())
 				{
-					
 					animationStates[animationUpdate.states[i].stateName] = animationUpdate.states[i];
-					std::cout << "state name: " << animationUpdate.states[i].stateName << std::endl;
-					std::cout << "state delay: " << animationUpdate.states[i].delay << std::endl;
-					for(int j = 0; j < animationUpdate.states[i].images.size(); j++)
-					{
-						std::cout << "image " << j + 1 << ": " << animationUpdate.states[i].images[j] << std::endl;
-					}
 				}
 			}
 			currentAnimationState = animationUpdate.animationState;
 			delay = animationStates[currentAnimationState].delay;
 		}
 	}
+}
+
+bool isFileExists(std::string filename)
+{
+	std::ifstream file(filename.c_str());
+	return file.good();
 }
 
 void DrawableActor::draw()
@@ -75,14 +75,31 @@ void DrawableActor::draw()
 		textureChangeTime = 0.0f;
 		currentAnimation = (currentAnimation + 1) % animationStates[currentAnimationState].images.size();
 		std::string nextImage = animationStates[currentAnimationState].images[currentAnimation];
-		if(textures.find(nextImage) == textures.end())
+		if(renderSystem.textures.find(nextImage) == renderSystem.textures.end())
 		{
-			sf::Texture newTexture;
-			newTexture.loadFromFile(nextImage);
-			textures[nextImage] = newTexture;
+			if(isFileExists(nextImage))
+			{
+				sf::Texture newTexture;
+				newTexture.loadFromFile(nextImage);
+				renderSystem.textures[nextImage] = newTexture;
+			}
+			else
+			{
+				if(renderSystem.textures.find(DEFAULT_TEXTURE) == renderSystem.textures.end())
+				{
+					sf::Texture defaultTexture;
+					defaultTexture.loadFromFile(DEFAULT_TEXTURE);
+					renderSystem.textures[DEFAULT_TEXTURE] = defaultTexture;
+				}
+				renderSystem.textures[nextImage] = renderSystem.textures[DEFAULT_TEXTURE];
+				if(renderSystem.imageLoadRequests.find(nextImage) == renderSystem.imageLoadRequests.end())
+				{
+					renderSystem.imagesToLoad.push_back(nextImage);
+				}
+			}
 		}
 		
-		rect.setTexture(&textures[nextImage]);
+		rect.setTexture(&renderSystem.textures[nextImage]);
 	}
 	RenderWindow::getInstance()->window.draw(rect);
 }
@@ -122,7 +139,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 				continue;
 			}
 			std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
-			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, textures);
+			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this);
 			if((*it)->actorID == mainActor)
 			{
 				actors[(*it)->actorID]->setMain(true);
@@ -146,4 +163,15 @@ void RenderSystem::draw()
 void RenderSystem::setMainActor(int mainActor)
 {
 	this->mainActor = mainActor;
+}
+
+void RenderSystem::onImageLoaded(std::string image)
+{
+	//check later
+	if(textures.find(image) != textures.end())
+	{
+		sf::Texture texture;
+		texture.loadFromFile(image);
+		textures[image] = texture;
+	}
 }

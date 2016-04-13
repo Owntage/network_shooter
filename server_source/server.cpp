@@ -58,10 +58,30 @@ void GameServer::receiveEvents()
 			if(clients.find(uniqueID) != clients.end())
 			{
 				gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
-			}
-				
+			}		
 		}
-
+		else if(type == "image_size")
+		{
+			std::string imageName;
+			packet >> imageName;
+			if(images.find(imageName) == images.end())
+			{
+				images[imageName] = std::make_shared<File>(imageName);
+			}
+			packet.reset();
+			packet << "image_size" << imageName << images[imageName]->size;
+			socket.send(remoteAddress, packet);
+		}
+		else if(type == "image_data")
+		{
+			std::string imageName;
+			FileMask mask;
+			packet >> imageName >> mask;
+			packet.reset();
+			packet << "image_data" << imageName;
+			images[imageName]->printToPacket(packet, mask);
+			socket.send(remoteAddress, packet);
+		}
 		
 	}
 	

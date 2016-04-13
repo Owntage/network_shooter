@@ -351,7 +351,7 @@ void Packet::revertToCursor()
 {
 	if(data.size() > cursorPosition)
 	{
-		data.resize(cursorPosition);
+		data.resize(cursorPosition - 1);
 		data.push_back((char) PrimitiveTypes::END);
 	}
 }
@@ -362,6 +362,11 @@ void Packet::reset()
 	data.push_back((char) PrimitiveTypes::END);
 	offset = 0;
 	cursorPosition = 0;
+}
+
+int Packet::getSize()
+{
+	return data.size();
 }
 
 bool UdpSocket::initializeSockets()

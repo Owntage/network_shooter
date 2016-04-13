@@ -28,6 +28,9 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <iterator>
 
 struct IpAddress
 {
@@ -87,6 +90,7 @@ struct Packet
 	void setCursor();
 	void revertToCursor();
 	void reset();
+	int getSize();
 private:
 	std::vector<char> data;
 	int cursorPosition; //holds size of a vector to revert	
@@ -112,6 +116,8 @@ private:
 	friend class UdpSocket;
 };
 
+
+
 struct UdpSocket
 {
 	UdpSocket();
@@ -132,6 +138,175 @@ private:
 	static bool socketsInitialized;
 };
 
+
+#define FILE_PART_SIZE 256
+
+struct FilePart
+{
+	FilePart() : isReceived(false) {}
+	char bytes[FILE_PART_SIZE];
+	bool isReceived;
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator<<(STREAM_T& s, FilePart& fp)
+	{
+		for(int i = 0; i < FILE_PART_SIZE; i++)
+		{
+			s << (uint8_t) fp.bytes[i];
+		}
+		return s;
+	}
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, FilePart& fp)
+	{
+		for(int i = 0; i < FILE_PART_SIZE; i++)
+		{
+			uint8_t temp;
+			s >> temp;
+			fp.bytes[i] = temp;
+		}
+		return s;
+	}
+};
+
+struct FileMask
+{
+	std::vector<bool> mask;
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator<<(STREAM_T& s, FileMask& fm)
+	{
+		s << (int) fm.mask.size();
+		for(int i = 0; i < fm.mask.size(); i++)
+		{
+			s << (uint8_t) fm.mask[i];
+		}
+		return s;
+	}
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, FileMask& fm)
+	{
+		int size;
+		s >> size;
+		for(int i = 0; i < size; i++)
+		{
+			
+			uint8_t temp;
+			s >> temp;
+			fm.mask.push_back(temp);
+		}
+		return s;
+	}
+};
+
+struct File
+{
+	File(int size): sizeIsKnown(true)
+	{
+			setSize(size);
+	}
+	File(): sizeIsKnown(false) {}
+
+	File(std::string filename)
+	{
+		std::ifstream file(filename.c_str(), std::ios::in | std::ios::binary);
+		
+		std::vector<char> buffer((
+				std::istreambuf_iterator<char>(file)), 
+				(std::istreambuf_iterator<char>()));
+
+		setSize(buffer.size());
+
+		for(int i = 0; i < buffer.size(); i++)
+		{
+			parts[i / FILE_PART_SIZE].bytes[i % FILE_PART_SIZE] = buffer[i];
+		}
+	}
+
+	void setSize(int size)
+	{
+		this->size = size;
+		parts.resize(size  / FILE_PART_SIZE + 1);
+		mask.mask.resize(size / FILE_PART_SIZE + 1);
+		sizeIsKnown = true;
+	}
+	
+	void saveToFile(std::string filename)
+	{
+		std::ofstream file(filename.c_str(), std::ios::binary | std::ios::out);
+		for(int i = 0; i < parts.size(); i++)
+		{
+			file.write(parts[i].bytes, FILE_PART_SIZE);
+		}
+	}
+
+	bool isDownloaded() const
+	{
+		if(!sizeIsKnown) return false;
+		
+		for(int i = 0; i < parts.size(); i++)
+		{
+			if(!parts[i].isReceived) return false;
+		}
+		return true;
+	}
+
+	
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, File& f)
+	{
+		int number;
+		s >> number;
+		while(number != -1)
+		{
+			std::cout << "reading block." << std::endl;
+			std::cout << "number: " << number << std::endl;
+			s >> f.parts[number];
+			f.parts[number].isReceived = true;
+			f.mask.mask[number] = true;
+			s >> number;
+		}
+		return s;
+	}
+
+	bool printToPacket(Packet& p, FileMask& fm)
+	{
+		bool isFull = false;
+		int counter = 0;
+		for(int i = 0; i < parts.size(); i++)
+		{
+			
+			if(!fm.mask[i])
+			{
+				
+				p.setCursor();
+				p << i << parts[i];
+				counter++;
+				if(p.isPacked())
+				{
+					p.revertToCursor();
+					
+					p << (int) -1;
+					isFull = true;
+					break;
+				}
+			}
+		}
+		if(!isFull)
+		{
+			std::cout << "-1 added to the end of packet" << std::endl;
+			p << -1;
+		}
+		return isFull;
+	}
+	bool sizeIsKnown;
+	int size;
+	std::vector<FilePart> parts;
+	FileMask mask;
+};
 
 
 #endif

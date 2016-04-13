@@ -10,9 +10,13 @@
 #include <set>
 #include <components/animation_component.h>
 
+#define DEFAULT_TEXTURE "res/graphic/default.png"
+
+struct RenderSystem;
+
 struct DrawableActor
 {
-	DrawableActor(Console& console, std::map<std::string, sf::Texture>& textures);
+	DrawableActor(Console& console, RenderSystem& renderSystem);
 	void onUpdate(ActorUpdate& actorUpdate);
 	void draw();
 	void setMain(bool isMain);
@@ -27,7 +31,7 @@ private:
 	sf::RectangleShape rect;
 	std::map<std::string, AnimationState> animationStates;
 	Console& console;
-	std::map<std::string, sf::Texture>& textures;
+	RenderSystem& renderSystem;
 };
 
 struct RenderSystem
@@ -37,14 +41,17 @@ struct RenderSystem
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw();
 	void setMainActor(int mainActor);
+	void onImageLoaded(std::string image);
+	std::vector<std::string> imagesToLoad;
 private:
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
 	std::map<std::string, sf::Texture> textures;
 	std::set<int> deletedActors;
+	std::set<std::string> imageLoadRequests;
 	int mainActor;
-	
 	sf::View gameView;
 	Console& console;
+	friend class DrawableActor;
 };
 
 #endif
