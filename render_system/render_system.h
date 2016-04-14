@@ -22,6 +22,7 @@ struct DrawableActor
 	void setMain(bool isMain);
 private:
 	bool isMain;
+	bool isDrawing;
 	float textureChangeTime;
 	float delay;
 	int currentAnimation;

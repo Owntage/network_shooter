@@ -3,6 +3,7 @@
 #include <components/move_update.h>
 #include <components/chat_update.h>
 #include <components/animation_update.h>
+#include <components/tile_update.h>
 #include <iostream>
 #include <fstream>
 #include <delete_update.h>
@@ -11,8 +12,9 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isM
 	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
 {
 	rect.setOrigin(0.5f, 0.5f);
-	textureChangeTime = 0.0f;
+	textureChangeTime = 9999.0f;
 	delay = 0.0f;
+	isDrawing = false;
 	currentAnimation = 0;
 }
 
@@ -29,6 +31,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		{
 			MoveUpdate& moveUpdate = static_cast<MoveUpdate&> (*(*it));
 			rect.setPosition(moveUpdate.x, moveUpdate.y);
+			
 		}
 		if((*it)->name == "chat" && isMain)
 		{
@@ -57,6 +60,15 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			}
 			currentAnimationState = animationUpdate.animationState;
 			delay = animationStates[currentAnimationState].delay;
+			isDrawing = true;
+		}
+		if((*it)->name == "tile")
+		{
+			std::cout << "tile update got" << std::endl;
+			TileUpdate& tileUpdate = static_cast<TileUpdate&>(*(*it));
+			std::cout << "image: " << tileUpdate.image << std::endl;
+			std::cout << "x: " << tileUpdate.x << std::endl;
+			std::cout << "y: " << tileUpdate.y << std::endl;
 		}
 	}
 }
@@ -101,7 +113,11 @@ void DrawableActor::draw()
 		
 		rect.setTexture(&renderSystem.textures[nextImage]);
 	}
-	RenderWindow::getInstance()->window.draw(rect);
+	if(isDrawing)
+	{
+		RenderWindow::getInstance()->window.draw(rect);
+	}
+	
 }
 
 void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)

@@ -5,6 +5,7 @@
 #include <components/move_update.h>
 #include <components/chat_component.h>
 #include <components/animation_update.h>
+#include <components/tile_update.h>
 #include <delete_update.h>
 
 
@@ -39,7 +40,7 @@ void NetworkLogic::sendEvents()
 		packet << localPort << "create" << uniqueID << actorType;
 		if(socket.send(address, packet))
 		{
-			std::cout << "cretion request sent successfuly" << std::endl;
+			std::cout << "creation request sent successfully" << std::endl;
 		}
 		else
 		{
@@ -104,6 +105,20 @@ void NetworkLogic::sendEvents()
 	}
 }
 
+template<typename UPDATE_T>
+void addUpdate(std::shared_ptr<ActorUpdate> actorUpdate, ComponentUpdate& componentUpdate, Packet& packet, bool shouldBeWritten)
+{
+
+	std::shared_ptr<UPDATE_T> newUpdate = std::make_shared<UPDATE_T>();
+	(ComponentUpdate&) *newUpdate = componentUpdate;
+	packet >> *newUpdate;
+	if(shouldBeWritten)
+	{
+		actorUpdate->updates.push_back(newUpdate);
+	}
+	
+}
+
 std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 {
 	std::vector<std::shared_ptr<ActorUpdate> > result;
@@ -135,7 +150,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 				}
 				else
 				{
-					std::cout << "cretion request sent successfuly" << std::endl;
+					std::cout << "creation request sent successfully" << std::endl;
 				}
 			}
 			break;
@@ -177,38 +192,29 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					}
 					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
-					
+					bool shouldBeWritten;
+
+					if(updateNumbers.find(componentUpdate.name) == updateNumbers.end())
+					{
+						shouldBeWritten = true;
+						updateNumbers[componentUpdate.name] = componentUpdate.number;
+					}
+					else
+					{
+						shouldBeWritten = updateNumbers[componentUpdate.name] < componentUpdate.number;
+					}
 
 					if(componentUpdate.name == "move")
-					{
-						std::shared_ptr<MoveUpdate> moveUpdate = std::make_shared<MoveUpdate>();
-						(ComponentUpdate&) *moveUpdate = componentUpdate;
-					
-						packet >> *moveUpdate;
-					
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(moveUpdate);				
-					}
+						addUpdate<MoveUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "chat")
-					{
-						std::shared_ptr<ChatUpdate> chatUpdate = std::make_shared<ChatUpdate>();
-						(ComponentUpdate&) *chatUpdate = componentUpdate;
-						packet >> *chatUpdate;
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(chatUpdate);
-					}
+						addUpdate<ChatUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "delete")
-					{
-						std::shared_ptr<DeleteUpdate> deleteUpdate = std::make_shared<DeleteUpdate>();
-						(ComponentUpdate&) *deleteUpdate = componentUpdate;
-						packet >> *deleteUpdate;
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(deleteUpdate);
-					}
+						addUpdate<DeleteUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "animation")
-					{
-						std::shared_ptr<AnimationUpdate> animationUpdate = std::make_shared<AnimationUpdate>();
-						(ComponentUpdate&) *animationUpdate = componentUpdate;
-						packet >> *animationUpdate;
-						mappedUpdates[componentUpdate.actorID]->updates.push_back(animationUpdate);
-					}
+						addUpdate<AnimationUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					if(componentUpdate.name == "tile")
+						addUpdate<TileUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					
 
 					
 

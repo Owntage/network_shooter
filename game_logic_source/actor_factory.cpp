@@ -4,6 +4,7 @@
 #include "components/chat_component.h"
 #include "components/move_component.h"
 #include "components/animation_component.h"
+#include "components/tile_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -30,6 +31,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "move") component = std::make_shared<MoveComponent>();
 		if(v.first == "chat") component = std::make_shared<ChatComponent>();
 		if(v.first == "animation") component = std::make_shared<AnimationComponent>();
+		if(v.first == "tile") component = std::make_shared<TileComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

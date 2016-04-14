@@ -5,6 +5,9 @@
 #include <components/move_event.h>
 #include <components/chat_component.h>
 #include <components/animation_update.h>
+#include <components/tile_update.h>
+#include <components/coord_event.h>
+#include <components/string_event.h>
 #include <delete_update.h>
 
 
@@ -13,6 +16,9 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 	socket.bind(port);
 	socket.setNonBlocking();
 	serverViewSystemID = gameLogic.registerSystem();
+	int testTile = gameLogic.createActor("tileActor");
+	gameLogic.onEvent(CoordEvent("set_coords", testTile, 5.0f, 1.0f));
+	gameLogic.onEvent(StringEvent("set_image", testTile, "res/graphic/concr1.png"));
 }
 
 void GameServer::receiveEvents()
@@ -185,6 +191,7 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
+				if((*component_it)->name == "tile") packet << (TileUpdate&) *(*component_it);
 
 				if(packet.isPacked())
 				{

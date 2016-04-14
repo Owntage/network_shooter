@@ -28,6 +28,7 @@ private:
 	std::string actorType;
 	Packet packet;
 	std::map<std::string, File> downloadingFiles;
+	std::map<std::string, int> updateNumbers;
 	enum class State
 	{
 		GETTING_UNIQUE_ID,
