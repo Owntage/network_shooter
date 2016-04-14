@@ -8,6 +8,7 @@
 #include "actor_update.h"
 #include "event.h"
 
+#define UPDATE_RADIUS 10
 
 struct GameLogic
 {
@@ -15,6 +16,7 @@ struct GameLogic
 	void onEvent(const Event& event);
 	void approve(int actorID, std::string component, int systemID, int number);
 	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID);
+	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID, float x, float y);
 	int registerSystem();
 	int createActor(std::string id);
 	void destroyActor(int number);

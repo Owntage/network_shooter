@@ -169,11 +169,14 @@ void GameServer::sendUpdates()
 	for(auto client_it = clients.begin(); client_it != clients.end(); client_it++)
 	{
 		
-		auto updates = gameLogic.getUpdates(client_it->second.systemID);
+		
 		Packet packet;
 		packet << "update";
 		
 		int clientActorID = client_it->second.gameLogicID;
+		ActorCoords mainActorCoords = serverView.getCoords(clientActorID);
+		auto updates = gameLogic.getUpdates(client_it->second.systemID, mainActorCoords.x, mainActorCoords.y);
+		/*
 		std::sort(updates.begin(), updates.end(), [this, clientActorID](std::shared_ptr<ActorUpdate> actorUpdate1, std::shared_ptr<ActorUpdate> actorUpdate2)
 		{
 			ActorCoords coords1 = serverView.getCoords(actorUpdate1->actorID);
@@ -185,8 +188,18 @@ void GameServer::sendUpdates()
 			return pow(coords1.x - clientCoords.x, 2) + pow(coords1.y - clientCoords.y, 2) < pow(coords2.x - clientCoords.x, 2)
 				+ pow(coords2.y - clientCoords.y, 2);
 		});
+		*/
+
+		
+
 		for(auto actor_it = updates.begin(); actor_it != updates.end(); actor_it++)
 		{
+
+			//if((*actor_it)->actor->hasCoords && sqrt(pow(mainActorCoords.x - (*actor_it)->actor->x, 2) + pow(mainActorCoords.y - (*actor_it)->actor->y, 2)) >= 10)
+			//{
+			//	continue;
+			//}
+
 			for(auto component_it = (*actor_it)->updates.begin(); component_it != (*actor_it)->updates.end(); component_it++)
 			{
 				
@@ -308,6 +321,9 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 				actors[(*it)->actorID]->hasCoords = true;
 				actors[(*it)->actorID]->x = moveUpdate.x;
 				actors[(*it)->actorID]->y = moveUpdate.y;
+				(*it)->actor->x = moveUpdate.x;
+				(*it)->actor->y = moveUpdate.y;
+				(*it)->actor->hasCoords = true;
 				
 			}
 			if((*component_it)->name == "tile")
@@ -316,6 +332,9 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 				actors[(*it)->actorID]->hasCoords = true;
 				actors[(*it)->actorID]->x = tileUpdate.x;
 				actors[(*it)->actorID]->y = tileUpdate.y;
+				(*it)->actor->x = tileUpdate.x;
+				(*it)->actor->y = tileUpdate.y;
+				(*it)->actor->hasCoords = true;
 			}
 		}
 	}

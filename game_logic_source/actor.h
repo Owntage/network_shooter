@@ -10,6 +10,7 @@
 
 struct Actor
 {
+	Actor() : hasCoords(false) {}
 	bool hasUpdates(int systemID);
 	bool hasEvents();
 	ActorUpdate getUpdates(int systemID);
@@ -17,7 +18,11 @@ struct Actor
 	void onEvent(const Event& event);
 	void approve(std::string component, int systemID, int number);
 	friend class ActorFactory;
-	Actor() {}
+	
+	bool hasCoords;
+	float x;
+	float y;
+
 private:
 	std::vector<std::shared_ptr<IComponent> > components;
 };
