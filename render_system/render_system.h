@@ -30,15 +30,19 @@ private:
 	std::string currentAnimationState;
 	int lastMessagePrinted;
 	sf::RectangleShape rect;
+	sf::Vertex vertices[4];
 	std::map<std::string, AnimationState> animationStates;
 	Console& console;
 	RenderSystem& renderSystem;
 };
 
+#define TILE_SIZE 32
+#define TILESET_WIDTH 16
+#define TILESET_HEIGHT 16
+
 struct RenderSystem
 {
-	RenderSystem(Console& console) : gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(800.0f / 32.0f, 600.0f / 32.0f)), 
-		mainActor(-1), console(console) {}
+	RenderSystem(Console& console);
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw();
 	void setMainActor(int mainActor);
@@ -47,10 +51,13 @@ struct RenderSystem
 private:
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
 	std::map<std::string, sf::Texture> textures;
+	std::map<std::string, int> imagesInTileset;
 	std::set<int> deletedActors;
 	std::set<std::string> imageLoadRequests;
 	int mainActor;
 	sf::View gameView;
+	sf::VertexArray tileVertices;
+	sf::Texture tileset;
 	Console& console;
 	friend class DrawableActor;
 };

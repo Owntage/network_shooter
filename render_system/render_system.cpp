@@ -64,11 +64,46 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		}
 		if((*it)->name == "tile")
 		{
-			std::cout << "tile update got" << std::endl;
+			//std::cout << "tile update got" << std::endl;
 			TileUpdate& tileUpdate = static_cast<TileUpdate&>(*(*it));
-			std::cout << "image: " << tileUpdate.image << std::endl;
-			std::cout << "x: " << tileUpdate.x << std::endl;
-			std::cout << "y: " << tileUpdate.y << std::endl;
+			//std::cout << "image: " << tileUpdate.image << std::endl;
+			//std::cout << "x: " << tileUpdate.x << std::endl;
+			//std::cout << "y: " << tileUpdate.y << std::endl;
+			if(renderSystem.imagesInTileset.find(tileUpdate.image) == renderSystem.imagesInTileset.end())
+			{
+				//it may not exist
+				sf::Image image;
+				image.loadFromFile(tileUpdate.image);
+				int pos = renderSystem.imagesInTileset.size();
+				renderSystem.imagesInTileset[tileUpdate.image] = pos;
+				int tileset_x = pos % TILESET_WIDTH;
+				int tileset_y = pos / TILESET_WIDTH;
+				renderSystem.tileset.update(image, tileset_x * TILE_SIZE, tileset_y * TILE_SIZE);
+			}
+			
+			float tileset_x = renderSystem.imagesInTileset[tileUpdate.image] % TILESET_WIDTH;
+			float tileset_y = renderSystem.imagesInTileset[tileUpdate.image] / TILESET_WIDTH;
+
+			tileset_x *= TILE_SIZE;
+			tileset_y *= TILE_SIZE;
+
+			//float f_width = TILESET_WIDTH;
+			//float f_height = TILESET_HEIGHT;
+
+			vertices[0].position = sf::Vector2f(tileUpdate.x - 0.5f, tileUpdate.y - 0.5f);
+			vertices[1].position = sf::Vector2f(tileUpdate.x + 0.5f, tileUpdate.y - 0.5f);
+			vertices[2].position = sf::Vector2f(tileUpdate.x + 0.5f, tileUpdate.y + 0.5f);
+			vertices[3].position = sf::Vector2f(tileUpdate.x - 0.5f, tileUpdate.y + 0.5f);
+
+			vertices[0].texCoords = sf::Vector2f(tileset_x, tileset_y);
+			vertices[1].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y);
+			vertices[2].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y + TILE_SIZE);
+			vertices[3].texCoords = sf::Vector2f(tileset_x, tileset_y + TILE_SIZE);
+
+			for(int i = 0; i < 4; i++)
+			{
+				renderSystem.tileVertices.append(vertices[i]);
+			}
 		}
 	}
 }
@@ -115,9 +150,21 @@ void DrawableActor::draw()
 	}
 	if(isDrawing)
 	{
+		if(isMain)
+		{
+			renderSystem.gameView.setCenter(rect.getPosition());
+			RenderWindow::getInstance()->window.setView(renderSystem.gameView);
+		}
 		RenderWindow::getInstance()->window.draw(rect);
 	}
 	
+}
+
+RenderSystem::RenderSystem(Console& console) : gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(800.0f / 32.0f, 600.0f / 32.0f)), 
+	mainActor(-1), console(console)
+{
+	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
+	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
 }
 
 void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
@@ -154,7 +201,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 			{
 				continue;
 			}
-			std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
+			//std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
 			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this);
 			if((*it)->actorID == mainActor)
 			{
@@ -169,7 +216,13 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 
 void RenderSystem::draw()
 {
+	
+
 	RenderWindow::getInstance()->window.setView(gameView);
+
+	//sf::RenderStates renderStates(&tileset);
+	RenderWindow::getInstance()->window.draw(tileVertices, &tileset);
+
 	for(auto it = actors.begin(); it != actors.end(); it++)
 	{
 		it->second->draw();

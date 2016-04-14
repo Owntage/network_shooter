@@ -11,14 +11,21 @@
 #include <delete_update.h>
 
 
-GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic)
+GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic), serverView(gameLogic, gameLogic.registerSystem())
 {
 	socket.bind(port);
 	socket.setNonBlocking();
-	serverViewSystemID = gameLogic.registerSystem();
-	int testTile = gameLogic.createActor("tileActor");
-	gameLogic.onEvent(CoordEvent("set_coords", testTile, 5.0f, 1.0f));
-	gameLogic.onEvent(StringEvent("set_image", testTile, "res/graphic/concr1.png"));
+	//serverViewSystemID = gameLogic.registerSystem();
+	for(int i = 0; i < 100; i++)
+	{
+		for(int j = 0; j < 100; j++)
+		{
+			int testTile = gameLogic.createActor("tileActor");
+			gameLogic.onEvent(CoordEvent("set_coords", testTile, 5.0f + i - 50, 1.0f + j - 50));
+			gameLogic.onEvent(StringEvent("set_image", testTile, "res/graphic/concr1.png"));
+		}
+	}
+	
 }
 
 void GameServer::receiveEvents()
@@ -156,7 +163,7 @@ void GameServer::sendUpdates()
 	}
 
 	//getting updates for serverView
-	serverView.onUpdate(gameLogic.getUpdates(serverViewSystemID));
+	serverView.onUpdate(gameLogic.getUpdates(serverView.systemID));
 
 	//sending updates
 	for(auto client_it = clients.begin(); client_it != clients.end(); client_it++)
@@ -260,10 +267,12 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 {
 	for(auto it = update.begin(); it != update.end(); it++)
 	{
+		
 		if((*it)->actorID == -1)
 		{
 			for(auto component_it = (*it)->updates.begin(); component_it != (*it)->updates.end(); component_it++)
 			{
+				gameLogic.approve(-1, (*component_it)->name, systemID, (*component_it)->number);
 				if((*component_it)->name == "delete")
 				{
 					DeleteUpdate& deleteUpdate = (DeleteUpdate&) *(*component_it);
@@ -281,7 +290,7 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 		}
 		if(actors.find((*it)->actorID) == actors.end())
 		{
-			if(deletedActors.find((*it)->actorID) == deletedActors.end())
+			if(deletedActors.find((*it)->actorID) != deletedActors.end())
 			{
 				continue;
 			}
@@ -292,7 +301,7 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 		}	
 		for(auto component_it = (*it)->updates.begin(); component_it != (*it)->updates.end(); component_it++)
 		{
-			
+			gameLogic.approve((*component_it)->actorID, (*component_it)->name, systemID, (*component_it)->number);	
 			if((*component_it)->name == "move")
 			{
 				MoveUpdate& moveUpdate = (MoveUpdate&) *(*component_it);
@@ -300,6 +309,13 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 				actors[(*it)->actorID]->x = moveUpdate.x;
 				actors[(*it)->actorID]->y = moveUpdate.y;
 				
+			}
+			if((*component_it)->name == "tile")
+			{
+				TileUpdate& tileUpdate = (TileUpdate&) *(*component_it);
+				actors[(*it)->actorID]->hasCoords = true;
+				actors[(*it)->actorID]->x = tileUpdate.x;
+				actors[(*it)->actorID]->y = tileUpdate.y;
 			}
 		}
 	}

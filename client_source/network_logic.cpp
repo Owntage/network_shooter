@@ -192,8 +192,9 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					}
 					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
-					bool shouldBeWritten;
+					bool shouldBeWritten = true;
 
+					/*
 					if(updateNumbers.find(componentUpdate.name) == updateNumbers.end())
 					{
 						shouldBeWritten = true;
@@ -203,6 +204,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					{
 						shouldBeWritten = updateNumbers[componentUpdate.name] < componentUpdate.number;
 					}
+					*/
 
 					if(componentUpdate.name == "move")
 						addUpdate<MoveUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);

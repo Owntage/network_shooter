@@ -52,11 +52,18 @@ private:
 
 	struct ServerView
 	{
+		ServerView(GameLogic& gameLogic, int systemID) : gameLogic(gameLogic), systemID(systemID)
+		{
+			std::cout << "serverView systemID: " << systemID << std::endl;
+		}
 		void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 		ActorCoords getCoords(int actorID);
+		int systemID;
 	private:
 		std::map<int, std::shared_ptr<ActorCoords> > actors;
 		std::set<int> deletedActors;
+		
+		GameLogic& gameLogic;
 	};
 
 	int serverViewSystemID;
