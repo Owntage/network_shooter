@@ -7,6 +7,7 @@
 #include <chrono>
 #include <network.h>
 #include <string>
+#include <components/world.h>
 
 using namespace std;
 
@@ -35,6 +36,7 @@ int main()
 		time = time + chrono::milliseconds(16);
 		gameServer.receiveEvents();
 		gameServer.sendUpdates();
+		World::getInstance()->update(60.0f);
 		Event timerEvent("timer");
 		gameLogic.onEvent(timerEvent);
 	}

@@ -16,12 +16,12 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 	socket.bind(port);
 	socket.setNonBlocking();
 	//serverViewSystemID = gameLogic.registerSystem();
-	for(int i = 0; i < 100; i++)
+	for(int i = 0; i < 200; i++)
 	{
-		for(int j = 0; j < 100; j++)
+		for(int j = 0; j < 200; j++)
 		{
 			int testTile = gameLogic.createActor("tileActor");
-			gameLogic.onEvent(CoordEvent("set_coords", testTile, 5.0f + i - 50, 1.0f + j - 50));
+			gameLogic.onEvent(CoordEvent("set_coords", testTile, 5.0f + i - 100, 1.0f + j - 100));
 			gameLogic.onEvent(StringEvent("set_image", testTile, "res/graphic/concr1.png"));
 		}
 	}

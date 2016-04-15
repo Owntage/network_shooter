@@ -8,6 +8,13 @@
 #include <fstream>
 #include <delete_update.h>
 
+
+bool isFileExists(std::string filename)
+{
+	std::ifstream file(filename.c_str());
+	return file.good();
+}
+
 DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isMain(false),
 	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
 {
@@ -73,7 +80,20 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			{
 				//it may not exist
 				sf::Image image;
-				image.loadFromFile(tileUpdate.image);
+				if(!isFileExists(tileUpdate.image))
+				{
+					image.loadFromFile(DEFAULT_TEXTURE);
+					if(renderSystem.imageLoadRequests.find(tileUpdate.image) == renderSystem.imageLoadRequests.end())
+					{
+						renderSystem.imageLoadRequests.insert(tileUpdate.image);
+						renderSystem.imagesToLoad.push_back(tileUpdate.image);
+					}
+				}
+				else
+				{
+					image.loadFromFile(tileUpdate.image);
+				}
+				
 				int pos = renderSystem.imagesInTileset.size();
 				renderSystem.imagesInTileset[tileUpdate.image] = pos;
 				int tileset_x = pos % TILESET_WIDTH;
@@ -108,11 +128,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 	}
 }
 
-bool isFileExists(std::string filename)
-{
-	std::ifstream file(filename.c_str());
-	return file.good();
-}
+
 
 void DrawableActor::draw()
 {
@@ -152,7 +168,9 @@ void DrawableActor::draw()
 	{
 		if(isMain)
 		{
-			renderSystem.gameView.setCenter(rect.getPosition());
+			float view_x = renderSystem.gameView.getCenter().x;
+			float view_y = renderSystem.gameView.getCenter().y;
+			renderSystem.gameView.setCenter(rect.getPosition().x * 0.05 + view_x * 0.95, rect.getPosition().y * 0.05 + view_y * 0.95);
 			RenderWindow::getInstance()->window.setView(renderSystem.gameView);
 		}
 		RenderWindow::getInstance()->window.draw(rect);
@@ -242,5 +260,14 @@ void RenderSystem::onImageLoaded(std::string image)
 		sf::Texture texture;
 		texture.loadFromFile(image);
 		textures[image] = texture;
+	}
+	if(imagesInTileset.find(image) != imagesInTileset.end())
+	{
+		sf::Image sfImage;
+		sfImage.loadFromFile(image);
+		int pos = imagesInTileset[image];
+		int tileset_x = pos % TILESET_WIDTH;
+		int tileset_y = pos / TILESET_WIDTH;
+		tileset.update(sfImage, tileset_x * TILE_SIZE, tileset_y * TILE_SIZE);
 	}
 }
