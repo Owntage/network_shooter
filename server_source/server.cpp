@@ -9,6 +9,7 @@
 #include <components/coord_event.h>
 #include <components/string_event.h>
 #include <delete_update.h>
+#include "level_loader.h"
 
 
 GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter(0), gameLogic(gameLogic), serverView(gameLogic, gameLogic.registerSystem())
@@ -16,6 +17,7 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 	socket.bind(port);
 	socket.setNonBlocking();
 	//serverViewSystemID = gameLogic.registerSystem();
+	/*
 	for(int i = 0; i < 200; i++)
 	{
 		for(int j = 0; j < 200; j++)
@@ -25,7 +27,9 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 			gameLogic.onEvent(StringEvent("set_image", testTile, "res/graphic/concr1.png"));
 		}
 	}
-	
+	*/
+	LevelLoader levelLoader(gameLogic);
+	levelLoader.loadLevel("res", "level1.tmx");
 }
 
 void GameServer::receiveEvents()

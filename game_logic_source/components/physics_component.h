@@ -17,6 +17,9 @@ private:
 	ContactData contactData;
 	bool up, down, left, right;
 	float speed;
+	float density;
+	float friction;
+	float restitution;
 	b2Body* body;
 
 };

@@ -1,6 +1,7 @@
 #include "physics_component.h"
 #include "move_event.h"
 #include "move_update.h"
+#include "coord_event.h"
 
 PhysicsComponent::PhysicsComponent() :
 	up(false),
@@ -48,6 +49,28 @@ void PhysicsComponent::onEvent(const Event& event)
 			body->ApplyForceToCenter(60.0 * direction, true);
 		}
 		//here should be handled hit
+	}
+	if(event.name == "set_coords")
+	{
+		const CoordEvent& coordEvent = (const CoordEvent&) event;
+		body->SetTransform(b2Vec2(coordEvent.x, coordEvent.y), body->GetAngle());
+	}
+	if(event.name == "set_scale")
+	{
+		const CoordEvent& coordEvent = (const CoordEvent&) event;
+		b2Body* newBody;
+		if(body->GetType() != b2_dynamicBody)
+		{
+			newBody = World::getInstance()->createStaticBody(body->GetPosition().x, body->GetPosition().y, coordEvent.x, coordEvent.y);
+			World::getInstance()->destroyBody(body);
+			body = newBody;
+			World::getInstance()->setFriction(body, friction);
+			World::getInstance()->setDensity(body, density);
+			World::getInstance()->setRestitution(body, restitution);
+			World::getInstance()->setContactData(body, contactData);
+		}
+		//deal with dynamic bodies...
+		
 	}
 }
 
@@ -102,6 +125,9 @@ std::shared_ptr<IComponent> PhysicsComponent::loadFromXml(const boost::property_
 	double density = tree.get("density", 1.0);
 	double restitution = tree.get("restitution", 0.2);
 	double friction = tree.get("friction", 0.5);
+	result->density = density;
+	result->restitution = restitution;
+	result->friction = friction;
 	World::setDensity(result->body, density);
 	World::setRestitution(result->body, restitution);
 	World::setFriction(result->body, friction);
