@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#define SPRITE_SIZE 32
+
 struct LevelLoader
 {
 	LevelLoader(GameLogic& gameLogic);
