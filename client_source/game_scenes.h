@@ -34,7 +34,7 @@ private:
 
 struct ConnectScene : Scene
 {
-	ConnectScene(float screenWidth, float screenHeight);
+	ConnectScene(float screenWidth, float screenHeight, bool restarted);
 	void onFrame();
 	void onEvent(WindowEvent& event);
 private:

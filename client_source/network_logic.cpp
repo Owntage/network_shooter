@@ -7,6 +7,7 @@
 #include <components/animation_update.h>
 #include <components/tile_update.h>
 #include <delete_update.h>
+#include "game_scenes.h"
 
 
 NetworkLogic::NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
@@ -134,6 +135,12 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 		std::string packetType;
 		std::string creationResult;
 		packet >> packetType;
+		if(packetType == "incorrect_packet")
+		{
+			std::cout << "server is restarted. popping the scene from scene stack" << std::endl;
+			SceneManager::getInstance()->closeScene();
+			SceneManager::getInstance()->startScene(std::make_shared<ConnectScene>(800, 600, true));
+		}
 		switch(state)
 		{
 		case State::GETTING_UNIQUE_ID:
@@ -157,10 +164,6 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 		case State::CREATING_ACTOR:
 			if(packetType == "create")
 			{
-				
-				
-				
-
 				packet >> creationResult;
 				if(creationResult == "success")
 				{

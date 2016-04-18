@@ -21,7 +21,7 @@ MenuScene::MenuScene(float screenWidth, float screenHeight) :
 	startButton.setPressedSprite(pressedButtonSprite);
 	startButton.setOnReleaseCallback([this]()
 	{
-		SceneManager::getInstance()->startScene(std::make_shared<ConnectScene>(this->screenWidth, this->screenHeight));
+		SceneManager::getInstance()->startScene(std::make_shared<ConnectScene>(this->screenWidth, this->screenHeight, false));
 	});
 	
 	optionsButton.setNormalSprite(normalButtonSprite);
@@ -62,7 +62,7 @@ void MenuScene::onEvent(WindowEvent& event)
 	}
 }
 
-ConnectScene::ConnectScene(float screenWidth, float screenHeight) :
+ConnectScene::ConnectScene(float screenWidth, float screenHeight, bool restarted) :
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
 	sendingConnection(false),
@@ -92,7 +92,14 @@ ConnectScene::ConnectScene(float screenWidth, float screenHeight) :
 	text.setColor(sf::Color::Black);
 
 	alertText.setCharacterSize(20);
-	alertText.setText("it's free. just press enter");
+	if(!restarted)
+	{
+		alertText.setText("it's free. just press enter");
+	}
+	else
+	{
+		alertText.setText("server has restarted. ");
+	}
 	alertText.setColor(sf::Color(64,64,64));
 
 	inputField.setInputCallback([this](std::string input)

@@ -43,43 +43,6 @@ int main()
 	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
 	Controller controller(console);
 	RenderSystem renderSystem(console);
-	//NetworkLogic networkLogic(IpAddress(connectAddress, 13337), "testActor", controller, renderSystem);
-	
-
-	
-	
-	
-	//main loop
-	/*
-	while(RenderWindow::getInstance()->window.isOpen())
-	{
-		//window events
-		sf::Event event;
-		while(RenderWindow::getInstance()->window.pollEvent(event))
-		{
-			if(event.type == sf::Event::Closed)
-			{
-				RenderWindow::getInstance()->window.close();
-			}
-			controller.onEvent(event);
-			guiManager.onEvent(event);
-		}
-
-		RenderWindow::getInstance()->window.clear();
-		//rendering game_logic
-		networkLogic.sendEvents();
-		renderSystem.onUpdate(networkLogic.receiveUpdates());
-		renderSystem.draw();
-
-		//rendering gui...
-		guiManager.draw();
-
-		RenderWindow::getInstance()->window.display();
-		
-		
-	
-	*/
-
 	SceneManager::getInstance()->startScene(std::make_shared<MenuScene>(WINDOW_WIDTH, WINDOW_HEIGHT));
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
