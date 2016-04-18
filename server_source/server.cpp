@@ -32,6 +32,29 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 	levelLoader.loadLevel("res", "level1.tmx");
 }
 
+bool GameServer::ensureClient(IpAddress& address, int uniqueID)
+{
+	bool result = true;
+	if(clients.find(uniqueID) == clients.end())
+	{
+		result = false;
+	}
+	else
+	{
+		if(!(clients[uniqueID].address == address))
+		{
+			result = false;
+		}
+	}
+	if(!result)
+	{
+		Packet tempPacket;
+		tempPacket << "incorrect_packet";
+		socket.send(address, tempPacket);
+	}
+	return result;
+}
+
 void GameServer::receiveEvents()
 {
 	Packet packet;
@@ -55,9 +78,14 @@ void GameServer::receiveEvents()
 		}
 		else if(type == "refresh_timeout")
 		{
+		
 			int uniqueID;
 			packet >> uniqueID;
-			refreshTimeout(uniqueID);
+			if(ensureClient(remoteAddress, uniqueID))
+			{
+				refreshTimeout(uniqueID);
+			}
+			
 		}
 		else if(type == "event")
 		{
@@ -70,12 +98,17 @@ void GameServer::receiveEvents()
 			int uniqueID;
 			std::string updateName;
 			int updateNumber;
-			packet >> uniqueID >> actorID >> updateName >> updateNumber;
-			//gameLogic.approve(actorID, updateName,
-			if(clients.find(uniqueID) != clients.end())
+			//packet >> uniqueID >> actorID >> updateName >> updateNumber;
+			packet >> uniqueID;
+			if(ensureClient(remoteAddress, uniqueID))
 			{
-				gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
-			}		
+				packet >> actorID >> updateName >> updateNumber;
+				if(clients.find(uniqueID) != clients.end())
+				{
+					gameLogic.approve(actorID, updateName, clients[uniqueID].systemID, updateNumber);
+				}	
+			}
+				
 		}
 		else if(type == "image_size")
 		{
@@ -108,7 +141,7 @@ void GameServer::receiveGameEvent(Packet& packet, IpAddress& address)
 {
 	int uniqueID;
 	packet >> uniqueID;
-	if(clients.find(uniqueID) != clients.end())
+	if(ensureClient(address, uniqueID))
 	{
 		
 		Event event;
@@ -243,8 +276,13 @@ void GameServer::refreshTimeout(int uniqueID)
 void GameServer::sendUniqueID(IpAddress& remoteAddress)
 {
 	Packet packet;
-	packet << "id" << uniqueCounter;
-	uniqueCounter++;
+	int uniqueID = rand();
+	while(clients.find(uniqueID) != clients.end())
+	{
+		uniqueID = rand();
+	}
+	packet << "id" << uniqueID;
+	//uniqueCounter++;
 	socket.send(remoteAddress, packet);
 }
 

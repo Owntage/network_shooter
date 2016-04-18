@@ -28,6 +28,11 @@ struct GameServer
 	void receiveEvents();
 	void sendUpdates();
 private:
+	//contract:
+	//returns true, if client exists and address matches
+	//returns false and sends "incorrect_packet", if something is not matching
+	bool ensureClient(IpAddress& remoteAddress, int uniqueID);
+	
 	void sendUniqueID(IpAddress& remoteAddress);
 	void createActor(IpAddress& remoteAddress, int uniqueID, std::string actorID);
 	void destroyActor(int uniqueID);
