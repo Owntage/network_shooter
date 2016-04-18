@@ -39,6 +39,10 @@ struct IpAddress
 	uint32_t address; //address is stored in network order
 	uint16_t port; //network order
 	bool isCorrect();
+	bool operator==(const IpAddress& other) const
+	{
+		return other.address == address && other.port == port;
+	}
 private:
 	bool correct;
 };
@@ -51,7 +55,7 @@ struct Packet
 		data.push_back((char) PrimitiveTypes::END);
 	}
 
-	static const int MAX_PACKET_SIZE = 2048;
+	static const int MAX_PACKET_SIZE = 700;
 
 	Packet& operator<<(const std::string& a);
 

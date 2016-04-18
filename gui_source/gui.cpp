@@ -425,22 +425,42 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 				float positionY;
 				switch(i)
 				{
-					case 0: sizeX = firstSizeX; positionX = -middleSizeX / 2.0f - firstSizeX / 2.0f; break;
-					case 1: sizeX = middleSizeX; positionX = 0; break;
-					case 2: sizeX = secondSizeX; positionX = middleSizeX / 2.0f + secondSizeX / 2.0f; break;
+					case 0:
+						sizeX = firstSizeX;
+						positionX = -middleSizeX / 2 - firstSizeX;
+						break;
+					case 1:
+						sizeX = middleSizeX;
+						positionX = -middleSizeX / 2;
+						break;
+					case 2:
+						sizeX = secondSizeX;
+						positionX = middleSizeX / 2.0f;
+						break;
 				}
 				switch(j)
 				{
-					case 0: sizeY = firstSizeY; positionY = -middleSizeY / 2.0f - firstSizeY / 2.0f; break;
-					case 1: sizeY = middleSizeY; positionY = 0; break;
-					case 2: sizeY = secondSizeY; positionY = middleSizeY / 2.0f + secondSizeY / 2.0f; break;
+				case 0:
+					sizeY = firstSizeY;
+					positionY = -middleSizeY / 2 - firstSizeY;
+					break;
+				case 1:
+					sizeY = middleSizeY;
+					positionY = -middleSizeY / 2;
+					break;
+				case 2:
+					sizeY = secondSizeY;
+					positionY = middleSizeY / 2.0f;
+					break;
 				}
-				shapes[i][j].setOrigin(sizeX / 2.0f, sizeY / 2.0f);
+				//shapes[i][j].setOrigin(sizeX / 2.0f, sizeY / 2.0f);
 				shapes[i][j].setSize(sf::Vector2f(sizeX, sizeY));
 				shapes[i][j].setPosition(x + positionX, y + positionY);
 				
 				//RenderWindow::getInstance()->window.draw(shapes[i][j]);
+				
 				renderTarget.draw(shapes[i][j]);
+
 			}
 		}
 		
@@ -450,6 +470,7 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 	{
 		shapes[1][1].setSize(sf::Vector2f(scaleX, scaleY));
 		shapes[1][1].setPosition(x, y);
+		shapes[1][1].setOrigin(scaleX / 2, scaleY / 2);
 		//RenderWindow::getInstance()->window.draw(shapes[1][1]);
 		renderTarget.draw(shapes[1][1]);
 	}

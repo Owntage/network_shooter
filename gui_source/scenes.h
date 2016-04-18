@@ -9,17 +9,20 @@ struct WindowEvent;
 
 struct Scene
 {
-
+	
 	virtual void onFrame() = 0;
 	virtual void onEvent(WindowEvent&) = 0;
 	virtual void onDestroy() {}
 	
 protected:
 
-	Scene() {}
+	Scene() : destroyFlag(false) {}
 	virtual ~Scene() {}
 	Scene(const Scene&) {}
 	Scene& operator=(const Scene&) {}
+private:
+	bool destroyFlag;
+	friend class SceneManager;
 };
 
 struct SceneManager: public Singleton <SceneManager>
