@@ -19,10 +19,11 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isM
 	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
 {
 	rect.setOrigin(0.5f, 0.5f);
-	textureChangeTime = 9999.0f;
-	delay = 0.0f;
+	//textureChangeTime = 9999.0f;
+	//delay = 0.0f;
 	isDrawing = false;
-	currentAnimation = 0;
+	animationStateChanged = false;
+	//currentAnimation = 0;
 }
 
 void DrawableActor::setMain(bool isMain)
@@ -56,8 +57,9 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		}
 		if((*it)->name == "animation")
 		{
-			std::cout << "animation update got" << std::endl;
+			//std::cout << "animation update got" << std::endl;
 			AnimationUpdate& animationUpdate = static_cast<AnimationUpdate&>(*(*it));
+			//std::cout << "state: " << animationUpdate.animationState << std::endl;
 			for(int i = 0; i < animationUpdate.states.size(); i++)
 			{
 				if(animationStates.find(animationUpdate.states[i].stateName) == animationStates.end())
@@ -65,17 +67,20 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 					animationStates[animationUpdate.states[i].stateName] = animationUpdate.states[i];
 				}
 			}
-			currentAnimationState = animationUpdate.animationState;
-			delay = animationStates[currentAnimationState].delay;
+			if(animationLayerStates != animationUpdate.currentLayerStates)
+			{
+				animationStateChanged = true;
+			}
+			//currentAnimationState = animationUpdate.animationState;
+			animationLayerStates = animationUpdate.currentLayerStates;
+			//delay = animationStates[currentAnimationState].delay;
+			layerTime.resize(animationLayerStates.size(), 99999.0f);
+			layerImageIndex.resize(animationLayerStates.size(), 0);
 			isDrawing = true;
 		}
 		if((*it)->name == "tile")
 		{
-			//std::cout << "tile update got" << std::endl;
 			TileUpdate& tileUpdate = static_cast<TileUpdate&>(*(*it));
-			//std::cout << "image: " << tileUpdate.image << std::endl;
-			//std::cout << "x: " << tileUpdate.x << std::endl;
-			//std::cout << "y: " << tileUpdate.y << std::endl;
 			if(renderSystem.imagesInTileset.find(tileUpdate.image) == renderSystem.imagesInTileset.end())
 			{
 				//it may not exist
@@ -132,48 +137,57 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 
 void DrawableActor::draw()
 {
-	textureChangeTime += 1.0f / 60.0f;
-	if(textureChangeTime > delay && delay != 0.0f)
-	{
-		textureChangeTime = 0.0f;
-		currentAnimation = (currentAnimation + 1) % animationStates[currentAnimationState].images.size();
-		std::string nextImage = animationStates[currentAnimationState].images[currentAnimation];
-		if(renderSystem.textures.find(nextImage) == renderSystem.textures.end())
-		{
-			if(isFileExists(nextImage))
-			{
-				sf::Texture newTexture;
-				newTexture.loadFromFile(nextImage);
-				renderSystem.textures[nextImage] = newTexture;
-			}
-			else
-			{
-				if(renderSystem.textures.find(DEFAULT_TEXTURE) == renderSystem.textures.end())
-				{
-					sf::Texture defaultTexture;
-					defaultTexture.loadFromFile(DEFAULT_TEXTURE);
-					renderSystem.textures[DEFAULT_TEXTURE] = defaultTexture;
-				}
-				renderSystem.textures[nextImage] = renderSystem.textures[DEFAULT_TEXTURE];
-				if(renderSystem.imageLoadRequests.find(nextImage) == renderSystem.imageLoadRequests.end())
-				{
-					renderSystem.imagesToLoad.push_back(nextImage);
-				}
-			}
-		}
-		
-		rect.setTexture(&renderSystem.textures[nextImage]);
-	}
 	if(isDrawing)
 	{
-		if(isMain)
+		for(int i = 0; i < layerTime.size(); i++)
 		{
-			float view_x = renderSystem.gameView.getCenter().x;
-			float view_y = renderSystem.gameView.getCenter().y;
-			renderSystem.gameView.setCenter(rect.getPosition().x * 0.05 + view_x * 0.95, rect.getPosition().y * 0.05 + view_y * 0.95);
-			RenderWindow::getInstance()->window.setView(renderSystem.gameView);
+			if(!animationLayerStates[i].first)
+			{
+				continue;
+			}
+			layerTime[i] += 1.0f / 60.0f;
+			if(layerTime[i] > animationStates[animationLayerStates[i].second].delay || animationStateChanged)
+			{
+				animationStateChanged = false;
+				layerTime[i] = 0;
+				layerImageIndex[i] = (layerImageIndex[i] + 1) % animationStates[animationLayerStates[i].second].images.size();
+			}
+			
+			std::string nextImage = animationStates[animationLayerStates[i].second].images[layerImageIndex[i]];
+			if(renderSystem.textures.find(nextImage) == renderSystem.textures.end())
+			{
+				if(isFileExists(nextImage))
+				{
+					sf::Texture newTexture;
+					newTexture.loadFromFile(nextImage);
+					renderSystem.textures[nextImage] = newTexture;
+				}
+				else
+				{
+					if(renderSystem.textures.find(DEFAULT_TEXTURE) == renderSystem.textures.end())
+					{
+						sf::Texture defaultTexture;
+						defaultTexture.loadFromFile(DEFAULT_TEXTURE);
+						renderSystem.textures[DEFAULT_TEXTURE] = defaultTexture;
+					}
+					renderSystem.textures[nextImage] = renderSystem.textures[DEFAULT_TEXTURE];
+					if(renderSystem.imageLoadRequests.find(nextImage) == renderSystem.imageLoadRequests.end())
+					{
+						renderSystem.imagesToLoad.push_back(nextImage);
+					}
+				}
+			}
+			rect.setTexture(&renderSystem.textures[nextImage]);
+			if(isMain)
+			{
+				float view_x = renderSystem.gameView.getCenter().x;
+				float view_y = renderSystem.gameView.getCenter().y;
+				renderSystem.gameView.setCenter(rect.getPosition().x * 0.05 + view_x * 0.95, rect.getPosition().y * 0.05 + view_y * 0.95);
+				RenderWindow::getInstance()->window.setView(renderSystem.gameView);
+				RenderWindow::getInstance()->window.draw(rect);
+			}
+
 		}
-		RenderWindow::getInstance()->window.draw(rect);
 	}
 	
 }

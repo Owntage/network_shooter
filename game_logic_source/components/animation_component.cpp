@@ -10,8 +10,12 @@ void AnimationComponent::onEvent(const Event& event)
 		AnimationEvent& animationEvent = (AnimationEvent&) event;
 		if(states.find(animationEvent.animationState) != states.end())
 		{
-			currentState = animationEvent.animationState;
+			currentLayerStates[animationEvent.layerNumber] = std::make_pair(animationEvent.isActive, animationEvent.animationState);
 			currentDataNumber++;
+		}
+		else
+		{
+			std::cout << "no such state: " << animationEvent.animationState << std::endl;
 		}
 	}
 }
@@ -24,10 +28,9 @@ bool AnimationComponent::hasUpdate(int systemID)
 
 std::shared_ptr<ComponentUpdate> AnimationComponent::getUpdate(int systemID)
 {
-	std::shared_ptr<AnimationUpdate> result = std::make_shared<AnimationUpdate>(currentState, currentDataNumber);
+	std::shared_ptr<AnimationUpdate> result = std::make_shared<AnimationUpdate>(currentLayerStates, currentDataNumber);
 	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
 	{
-		//result->states = states;
 		for(auto it = states.begin(); it != states.end(); it++)
 		{
 			result->states.push_back(it->second);
@@ -40,6 +43,7 @@ std::shared_ptr<IComponent> AnimationComponent::loadFromXml(const boost::propert
 {
 	std::shared_ptr<AnimationComponent> result = std::make_shared<AnimationComponent>();
 	bool first = true;
+	std::string firstState;
 	BOOST_FOREACH(auto& v, tree)
 	{
 		if(v.first == "state")
@@ -66,9 +70,41 @@ std::shared_ptr<IComponent> AnimationComponent::loadFromXml(const boost::propert
 			if(first)
 			{
 				first = false;
-				result->currentState = animationState.stateName;
+				firstState = animationState.stateName;
 			}
 			result->states[animationState.stateName] = animationState;
+		}
+	}
+
+	int layerCount = tree.get("layer_count", 1);
+	result->currentLayerStates.resize(layerCount, std::make_pair(false, ""));
+	result->currentLayerStates[0].first = true;
+	result->currentLayerStates[0].second = firstState;
+
+	BOOST_FOREACH(auto& v, tree)
+	{
+		if(v.first == "layer")
+		{
+			int layer_number;
+			bool is_active;
+			std::string state;
+			BOOST_FOREACH(auto& layer_v, v.second)
+			{
+				if(layer_v.first == "layer_number")
+				{
+					layer_number = layer_v.second.get_value<int>();
+				}
+				if(layer_v.first == "is_active")
+				{
+					std::string is_active_str = layer_v.second.get_value<std::string>();
+					is_active = is_active_str == "true";
+				}
+				if(layer_v.first == "state")
+				{
+					state = layer_v.second.get_value<std::string>();
+				}
+			}
+			result->currentLayerStates[layer_number] = std::make_pair(is_active, state);
 		}
 	}
 

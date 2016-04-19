@@ -9,24 +9,47 @@ void GameLogic::onEvent(const Event& event)
 		for(auto it = actors.begin(); it != actors.end(); it++)
 		{
 			it->second->onEvent(event);
-			while(it->second->getGlobalEvents().size() > 0)
+			
+			auto globalEvents = it->second->getGlobalEvents();
+			while(globalEvents.size() > 0)
 			{
-				auto globalEvent = it->second->getGlobalEvents().back();
+				auto globalEvent = globalEvents.back();
 				globalEvent->global = true;
 				onEvent(*globalEvent);
-				it->second->getGlobalEvents().pop_back();
+				globalEvents.pop_back();
+			}
+			
+			auto localEvents = it->second->getLocalEvents();
+			while(localEvents.size() > 0)
+			{
+				auto localEvent = localEvents.back();
+				localEvent->global = false;
+				localEvent->actorID = it->first;
+				onEvent(*localEvent);
+				localEvents.pop_back();
 			}
 		}
 	}
 	else
 	{
 		actors[event.actorID]->onEvent(event);
-		while(actors[event.actorID]->getGlobalEvents().size() > 0)
+		auto globalEvents = actors[event.actorID]->getGlobalEvents();
+		while(globalEvents.size() > 0)
 		{
-			auto globalEvent = actors[event.actorID]->getGlobalEvents().back();
+			auto globalEvent = globalEvents.back();
 			globalEvent->global = true;
 			onEvent(*globalEvent);
-			actors[event.actorID]->getGlobalEvents().pop_back();
+			globalEvents.pop_back();
+		}
+
+		auto localEvents = actors[event.actorID]->getLocalEvents();
+		while(localEvents.size() > 0)
+		{
+			auto localEvent = localEvents.back();
+			localEvent->global = false;
+			localEvent->actorID = event.actorID;
+			onEvent(*localEvent);
+			localEvents.pop_back();
 		}
 	}
 }

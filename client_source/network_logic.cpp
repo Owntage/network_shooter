@@ -197,18 +197,6 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 
 					bool shouldBeWritten = true;
 
-					/*
-					if(updateNumbers.find(componentUpdate.name) == updateNumbers.end())
-					{
-						shouldBeWritten = true;
-						updateNumbers[componentUpdate.name] = componentUpdate.number;
-					}
-					else
-					{
-						shouldBeWritten = updateNumbers[componentUpdate.name] < componentUpdate.number;
-					}
-					*/
-
 					if(componentUpdate.name == "move")
 						addUpdate<MoveUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "chat")

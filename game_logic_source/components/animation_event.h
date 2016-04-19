@@ -5,9 +5,17 @@
 
 struct AnimationEvent : Event
 {
-	AnimationEvent(std::string animationState, int actorID) : Event("animation", false, actorID), animationState(animationState) {}
+	AnimationEvent(int layerNumber, std::string animationState, bool isActive, int actorID) : 
+		Event("animation", false, actorID), 
+		layerNumber(layerNumber),
+		animationState(animationState),
+		isActive(isActive)
+	{}
 	std::string animationState;
+	int layerNumber;
+	bool isActive;
 
+	/*
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, AnimationEvent& e)
 	{
@@ -21,6 +29,7 @@ struct AnimationEvent : Event
 		s >> e.animationState;
 		return s;
 	}
+	*/
 };
 
 #endif

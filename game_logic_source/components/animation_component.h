@@ -48,7 +48,7 @@ struct AnimationComponent : IComponent
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
 	std::map<std::string, AnimationState> states;
-	std::string currentState;
+	std::vector<std::pair<bool, std::string> > currentLayerStates;
 };
 
 #endif

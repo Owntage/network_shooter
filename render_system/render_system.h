@@ -23,11 +23,16 @@ struct DrawableActor
 private:
 	bool isMain;
 	bool isDrawing;
-	float textureChangeTime;
-	float delay;
-	int currentAnimation;
+	bool animationStateChanged;
+	//float textureChangeTime;
+	//float delay;
+	//int currentAnimation;
 	
-	std::string currentAnimationState;
+	//std::string currentAnimationState;
+	std::vector<std::pair<bool, std::string> > animationLayerStates;
+	std::vector<float> layerTime;
+	std::vector<int> layerImageIndex;
+	//std::vector<float> layerDelay;
 	int lastMessagePrinted;
 	sf::RectangleShape rect;
 	sf::Vertex vertices[4];

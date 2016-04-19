@@ -31,6 +31,8 @@ ActorUpdate Actor::getUpdates(int systemID)
 	return result;
 }
 
+
+
 std::vector<std::shared_ptr<Event> > Actor::getGlobalEvents()
 {
 	std::vector<std::shared_ptr<Event> > result;
@@ -40,6 +42,20 @@ std::vector<std::shared_ptr<Event> > Actor::getGlobalEvents()
 		{
 			result.push_back((*it)->globalEvents.back());
 			(*it)->globalEvents.pop_back();
+		}
+	}
+	return result;
+}
+
+std::vector<std::shared_ptr<Event> > Actor::getLocalEvents()
+{
+	std::vector<std::shared_ptr<Event> > result;
+	for(auto it = components.begin(); it != components.end(); it++)
+	{
+		while((*it)->localEvents.size() > 0)
+		{
+			result.push_back((*it)->localEvents.back());
+			(*it)->localEvents.pop_back();
 		}
 	}
 	return result;

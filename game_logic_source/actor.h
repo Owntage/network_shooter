@@ -15,6 +15,7 @@ struct Actor
 	bool hasEvents();
 	ActorUpdate getUpdates(int systemID);
 	std::vector<std::shared_ptr<Event> > getGlobalEvents();
+	std::vector<std::shared_ptr<Event> > getLocalEvents();
 	void onEvent(const Event& event);
 	void approve(std::string component, int systemID, int number);
 	friend class ActorFactory;
