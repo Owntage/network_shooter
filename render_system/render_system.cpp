@@ -159,7 +159,9 @@ void DrawableActor::draw()
 				continue;
 			}
 			layerTime[i] += 1.0f / 60.0f;
-			if(layerTime[i] > animationStates[animationLayerStates[i].state].delay || animationStateChanged)
+			
+			
+			if(layerTime[i] > animationStates[animationLayerStates[i].state].delay) //no check if animation state is changed
 			{
 				animationStateChanged = false;
 				layerTime[i] = 0;
@@ -206,9 +208,14 @@ void DrawableActor::draw()
 				float view_x = renderSystem.gameView.getCenter().x;
 				float view_y = renderSystem.gameView.getCenter().y;
 				renderSystem.gameView.setCenter(rect.getPosition().x * 0.05 + view_x * 0.95, rect.getPosition().y * 0.05 + view_y * 0.95);
-				RenderWindow::getInstance()->window.setView(renderSystem.gameView);
-				RenderWindow::getInstance()->window.draw(rect);
+				renderSystem.cameraX = renderSystem.gameView.getCenter().x;
+				renderSystem.cameraY = renderSystem.gameView.getCenter().y;
+				renderSystem.playerX = rect.getPosition().x;
+				renderSystem.playerY = rect.getPosition().y;
+				
 			}
+			RenderWindow::getInstance()->window.setView(renderSystem.gameView);
+			RenderWindow::getInstance()->window.draw(rect);
 
 		}
 	}
@@ -310,4 +317,24 @@ void RenderSystem::onImageLoaded(std::string image)
 		int tileset_y = pos / TILESET_WIDTH;
 		tileset.update(sfImage, tileset_x * TILE_SIZE, tileset_y * TILE_SIZE);
 	}
+}
+
+float RenderSystem::getCameraX()
+{
+	return cameraX;
+}
+
+float RenderSystem::getCameraY()
+{
+	return cameraY;
+}
+
+float RenderSystem::getPlayerX()
+{
+	return playerX;
+}
+
+float RenderSystem::getPlayerY()
+{
+	return playerY;
 }

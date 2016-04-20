@@ -39,10 +39,10 @@ int main()
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
 	
 	//game logic init
-	GuiManager guiManager(800, 600);
-	Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
-	Controller controller(console);
-	RenderSystem renderSystem(console);
+	//GuiManager guiManager(800, 600);
+	//Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
+	//Controller controller(console, TILE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
+	//RenderSystem renderSystem(console);
 	SceneManager::getInstance()->startScene(std::make_shared<MenuScene>(WINDOW_WIDTH, WINDOW_HEIGHT));
 	while(RenderWindow::getInstance()->window.isOpen())
 	{

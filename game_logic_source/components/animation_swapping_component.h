@@ -2,6 +2,7 @@
 #define ANIMATION_SWAPPING_COMPONENT_H
 
 #include "icomponent.h"
+#include "move_event.h"
 
 struct AnimationSwappingComponent : IComponent
 {
@@ -13,6 +14,8 @@ struct AnimationSwappingComponent : IComponent
 private:
 	std::string runningTexture;
 	std::string normalTexture;
+	std::string bodyTexture;
+	MoveEvent moveEvent;
 };
 
 #endif

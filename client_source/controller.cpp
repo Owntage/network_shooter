@@ -1,8 +1,16 @@
 #include "controller.h"
+#include <math.h>
 #include <iostream>
 #include <components/chat_event.h>
 
-Controller::Controller(Console& console) : moveEvent(std::make_shared<MoveEvent>(false, false, false, false, -1)), console(console)
+#define PI 3.1415926536
+
+Controller::Controller(Console& console, int tileSize, int screenWidth, int screenHeight) : 
+	moveEvent(std::shared_ptr<MoveEvent>(new MoveEvent(false, false, false, false, 0.0f, -1))), 
+	console(console),
+	tileSize(tileSize),
+	screenWidth(screenWidth),
+	screenHeight(screenHeight)
 {
 	currentNumbers["move"] = 0;
 	currentNumbers["chat"] = 0;
@@ -11,9 +19,7 @@ Controller::Controller(Console& console) : moveEvent(std::make_shared<MoveEvent>
 	isMessageSent = false;
 	console.setInputCallback([this](std::string input)
 	{
-		//std::cout << "hello from console callback! " << std::endl;
-		//std::cout << "currentNumber " << currentNumbers["chat"] << std::endl;
-		//std::cout << "last approved number: " << approvedNumbers["chat"] << std::endl;
+		
 		currentNumbers["chat"]++;
 		message = input;
 	});
@@ -47,6 +53,19 @@ void Controller::onEvent(sf::Event event)
 			currentNumbers["move"]++;
 		}
 
+	}
+	if(event.type == sf::Event::MouseMoved)
+	{
+		
+		mouseX = event.mouseMove.x - screenWidth / 2;
+		mouseY = event.mouseMove.y - screenHeight / 2;
+		mouseX /= tileSize;
+		mouseY /= tileSize;
+		
+		//mouseX += cameraDeltaX;
+		//mouseY += cameraDeltaY;
+
+		
 	}
 	
 }
@@ -90,3 +109,44 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 	return result;
 }
 
+void Controller::updateFromRenderSystem(RenderSystem& renderSystem)
+{
+	cameraX = renderSystem.getCameraX();
+	cameraY = renderSystem.getCameraY();
+	playerX = renderSystem.getPlayerX();
+	playerY = renderSystem.getPlayerY();
+
+	float cameraDeltaX = playerX - cameraX;
+	float cameraDeltaY = playerY - cameraY;
+
+	mouseX -= cameraDeltaX;
+	mouseY -= cameraDeltaY;
+
+	float newAngle;
+	if(mouseX < 0)
+	{
+		newAngle = atan(mouseY / mouseX) + PI;
+	}
+	else
+	{
+		if(mouseY < 0)
+		{
+			newAngle = atan(mouseY / mouseX) + PI * 2;
+		}
+		else
+		{
+			newAngle = atan(mouseY / mouseX);
+		}
+	}
+	if(moveEvent->angle != newAngle)
+	{
+		currentNumbers["move"]++;
+		newAngle /= PI;
+		newAngle *= 180.0f;
+		moveEvent->angle = newAngle;
+	}
+	
+	mouseX += cameraDeltaX;
+	mouseY += cameraDeltaY;
+
+}

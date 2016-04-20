@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include <gui.h>
 #include <map>
+#include <render_system.h>
 
 struct WindowEvent
 {
@@ -23,13 +24,27 @@ struct WindowEvent
 
 struct Controller
 {
-	Controller(Console& console);
+	Controller(Console& console, int tileSize, int screenWidth, int screenHeight);
 	void onEvent(sf::Event event);
 	void onEvent(WindowEvent& event);
 	void setActorID(int actorID);
 	void approve(std::string type, int number);
+	void updateFromRenderSystem(RenderSystem& renderSystem);
 	std::vector<std::shared_ptr<Event> > getGameEvents();
 private:
+	int tileSize;
+	int screenWidth;
+	int screenHeight;
+	float cameraX;
+	float cameraY;
+	float playerX;
+	float playerY;
+
+	float mouseX;
+	float mouseY;
+	float cameraDeltaX;
+	float cameraDeltaY;
+
 	bool isMessageSent;
 	std::string message;
 	std::shared_ptr<MoveEvent> moveEvent;

@@ -10,6 +10,8 @@
 #include <set>
 #include <components/animation_component.h>
 
+
+
 #define DEFAULT_TEXTURE "res/graphic/default.png"
 
 struct RenderSystem;
@@ -46,14 +48,23 @@ struct RenderSystem
 	void draw();
 	void setMainActor(int mainActor);
 	void onImageLoaded(std::string image);
+	float getCameraX();
+	float getCameraY();
+	float getPlayerX();
+	float getPlayerY();
 	std::vector<std::string> imagesToLoad;
 private:
+	
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
 	std::map<std::string, sf::Texture> textures;
 	std::map<std::string, int> imagesInTileset;
 	std::set<int> deletedActors;
 	std::set<std::string> imageLoadRequests;
 	int mainActor;
+	float playerX;
+	float playerY;
+	float cameraX;
+	float cameraY;
 	sf::View gameView;
 	sf::VertexArray tileVertices;
 	sf::Texture tileset;

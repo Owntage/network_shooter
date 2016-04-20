@@ -9,15 +9,20 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 	{
 		//std::cout << "animation swapping component received move event" << std::endl;
 		const MoveEvent& moveEvent = (const MoveEvent&) event;
-		bool moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
-		if(moving)
+		if(!(this->moveEvent == moveEvent))
 		{
-			localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, 45.0f), 0));
+			bool moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
+			if(moving)
+			{
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, 0.0f), 0));
+			}
+			else
+			{
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, true, 0.0f), 0));
+			}
+			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, moveEvent.angle), 0));
 		}
-		else
-		{
-			localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, true, 0.0f), 0));
-		}
+		
 	}
 }
 
@@ -40,6 +45,7 @@ std::shared_ptr<IComponent> AnimationSwappingComponent::loadFromXml(const boost:
 	auto result = std::make_shared<AnimationSwappingComponent>();
 	result->normalTexture = tree.get("normal_texture", "normal_texture");
 	result->runningTexture = tree.get("running_texture", "running_texture");
+	result->bodyTexture = tree.get("body_texture", "body_texture");
 	return result;
 }
 
