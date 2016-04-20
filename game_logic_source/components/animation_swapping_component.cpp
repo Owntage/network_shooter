@@ -12,11 +12,11 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 		bool moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
 		if(moving)
 		{
-			localEvents.push_back(std::make_shared<AnimationEvent>(0, runningTexture, true, 0));
+			localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, 45.0f), 0));
 		}
 		else
 		{
-			localEvents.push_back(std::make_shared<AnimationEvent>(0, normalTexture, true, 0));
+			localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, true, 0.0f), 0));
 		}
 	}
 }

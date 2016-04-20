@@ -24,15 +24,9 @@ private:
 	bool isMain;
 	bool isDrawing;
 	bool animationStateChanged;
-	//float textureChangeTime;
-	//float delay;
-	//int currentAnimation;
-	
-	//std::string currentAnimationState;
-	std::vector<std::pair<bool, std::string> > animationLayerStates;
+	std::vector<LayerState> animationLayerStates;
 	std::vector<float> layerTime;
 	std::vector<int> layerImageIndex;
-	//std::vector<float> layerDelay;
 	int lastMessagePrinted;
 	sf::RectangleShape rect;
 	sf::Vertex vertices[4];

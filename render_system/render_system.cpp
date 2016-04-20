@@ -19,11 +19,8 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isM
 	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
 {
 	rect.setOrigin(0.5f, 0.5f);
-	//textureChangeTime = 9999.0f;
-	//delay = 0.0f;
 	isDrawing = false;
 	animationStateChanged = false;
-	//currentAnimation = 0;
 }
 
 void DrawableActor::setMain(bool isMain)
@@ -33,6 +30,7 @@ void DrawableActor::setMain(bool isMain)
 
 void DrawableActor::onUpdate(ActorUpdate& update)
 {
+	//std::cout << "onUpdate started" << std::endl;
 	for(auto it = update.updates.begin(); it != update.updates.end(); it++)
 	{
 		if((*it)->name == "move")
@@ -43,7 +41,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		}
 		if((*it)->name == "chat" && isMain)
 		{
-			std::cout << "received chat message." << std::endl;
+			//std::cout << "received chat message." << std::endl;
 			ChatUpdate& chatUpdate = static_cast<ChatUpdate&> (*(*it));
 			
 			for(int i = 0; i < chatUpdate.messages.size(); i++)
@@ -67,13 +65,25 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 					animationStates[animationUpdate.states[i].stateName] = animationUpdate.states[i];
 				}
 			}
-			if(animationLayerStates != animationUpdate.currentLayerStates)
+			
+			if(animationLayerStates.size() != animationUpdate.currentLayerStates.size())
 			{
 				animationStateChanged = true;
 			}
-			//currentAnimationState = animationUpdate.animationState;
+			else
+			{
+				animationStateChanged = false;
+				for(int i = 0; i < animationLayerStates.size(); i++)
+				{
+					if(animationLayerStates[i] != animationUpdate.currentLayerStates[i])
+					{
+						animationStateChanged = true;
+						break;
+					}
+				}
+			}
+			
 			animationLayerStates = animationUpdate.currentLayerStates;
-			//delay = animationStates[currentAnimationState].delay;
 			layerTime.resize(animationLayerStates.size(), 99999.0f);
 			layerImageIndex.resize(animationLayerStates.size(), 0);
 			isDrawing = true;
@@ -83,10 +93,10 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			TileUpdate& tileUpdate = static_cast<TileUpdate&>(*(*it));
 			if(renderSystem.imagesInTileset.find(tileUpdate.image) == renderSystem.imagesInTileset.end())
 			{
-				//it may not exist
 				sf::Image image;
 				if(!isFileExists(tileUpdate.image))
 				{
+					//std::cout << "loading image in tile update" << std::endl;
 					image.loadFromFile(DEFAULT_TEXTURE);
 					if(renderSystem.imageLoadRequests.find(tileUpdate.image) == renderSystem.imageLoadRequests.end())
 					{
@@ -96,6 +106,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				}
 				else
 				{
+					//std::cout << "loading default image in tile update" << std::endl;
 					image.loadFromFile(tileUpdate.image);
 				}
 				
@@ -131,34 +142,40 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			}
 		}
 	}
+	//std::cout << "onUpdate finished" << std::endl;
 }
 
 
 
 void DrawableActor::draw()
 {
+	
 	if(isDrawing)
 	{
 		for(int i = 0; i < layerTime.size(); i++)
 		{
-			if(!animationLayerStates[i].first)
+			if(!animationLayerStates[i].isDrawing)
 			{
 				continue;
 			}
 			layerTime[i] += 1.0f / 60.0f;
-			if(layerTime[i] > animationStates[animationLayerStates[i].second].delay || animationStateChanged)
+			if(layerTime[i] > animationStates[animationLayerStates[i].state].delay || animationStateChanged)
 			{
 				animationStateChanged = false;
 				layerTime[i] = 0;
-				layerImageIndex[i] = (layerImageIndex[i] + 1) % animationStates[animationLayerStates[i].second].images.size();
+				
+				layerImageIndex[i] = (layerImageIndex[i] + 1) % animationStates[animationLayerStates[i].state].images.size();
+				
 			}
 			
-			std::string nextImage = animationStates[animationLayerStates[i].second].images[layerImageIndex[i]];
+			layerImageIndex[i] = layerImageIndex[i] % animationStates[animationLayerStates[i].state].images.size();
+			std::string nextImage = animationStates[animationLayerStates[i].state].images[layerImageIndex[i]];
 			if(renderSystem.textures.find(nextImage) == renderSystem.textures.end())
 			{
-				if(isFileExists(nextImage))
+				if(isFileExists(nextImage) && nextImage != "")
 				{
 					sf::Texture newTexture;
+					//std::cout << "loading  image in drawing method" << std::endl;
 					newTexture.loadFromFile(nextImage);
 					renderSystem.textures[nextImage] = newTexture;
 				}
@@ -167,6 +184,11 @@ void DrawableActor::draw()
 					if(renderSystem.textures.find(DEFAULT_TEXTURE) == renderSystem.textures.end())
 					{
 						sf::Texture defaultTexture;
+						//std::cout << "loading default image in drawing method" << std::endl;
+						//std::cout << "layer: " << i << std::endl;
+						//std::cout << "state: " << animationLayerStates[i].state << std::endl;
+						//std::cout  << "image index: " << layerImageIndex[i] << std::endl;
+						//std::cout << "number of images: " << animationStates[animationLayerStates[i].state].images.size();
 						defaultTexture.loadFromFile(DEFAULT_TEXTURE);
 						renderSystem.textures[DEFAULT_TEXTURE] = defaultTexture;
 					}
@@ -178,6 +200,7 @@ void DrawableActor::draw()
 				}
 			}
 			rect.setTexture(&renderSystem.textures[nextImage]);
+			rect.setRotation(animationLayerStates[i].angle);
 			if(isMain)
 			{
 				float view_x = renderSystem.gameView.getCenter().x;
@@ -189,6 +212,7 @@ void DrawableActor::draw()
 
 		}
 	}
+	
 	
 }
 
@@ -215,7 +239,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 					for(int i = 0; i < deleteUpdate.deletedActors.size(); i++)
 					{
 						int deletedActor = deleteUpdate.deletedActors[i];
-						std::cout << "deleted actor: " << deletedActor << std::endl;
+						//std::cout << "deleted actor: " << deletedActor << std::endl;
 						if(actors.find(deletedActor) != actors.end())
 						{
 							deletedActors.insert(deletedActor);
@@ -272,12 +296,14 @@ void RenderSystem::onImageLoaded(std::string image)
 	if(textures.find(image) != textures.end())
 	{
 		sf::Texture texture;
+		//std::cout << "loading image in onImageLoaded" << std::endl;
 		texture.loadFromFile(image);
 		textures[image] = texture;
 	}
 	if(imagesInTileset.find(image) != imagesInTileset.end())
 	{
 		sf::Image sfImage;
+		//std::cout << "loading image for tileset in onImageLoaded" << std::endl;
 		sfImage.loadFromFile(image);
 		int pos = imagesInTileset[image];
 		int tileset_x = pos % TILESET_WIDTH;

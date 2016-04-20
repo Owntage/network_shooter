@@ -8,14 +8,14 @@ void AnimationComponent::onEvent(const Event& event)
 	if(event.name == "animation")
 	{
 		AnimationEvent& animationEvent = (AnimationEvent&) event;
-		if(states.find(animationEvent.animationState) != states.end())
+		if(states.find(animationEvent.layerState.state) != states.end())
 		{
-			currentLayerStates[animationEvent.layerNumber] = std::make_pair(animationEvent.isActive, animationEvent.animationState);
+			currentLayerStates[animationEvent.layerNumber] = animationEvent.layerState;
 			currentDataNumber++;
 		}
 		else
 		{
-			std::cout << "no such state: " << animationEvent.animationState << std::endl;
+			std::cout << "no such state: " << animationEvent.layerState.state << std::endl;
 		}
 	}
 }
@@ -77,9 +77,9 @@ std::shared_ptr<IComponent> AnimationComponent::loadFromXml(const boost::propert
 	}
 
 	int layerCount = tree.get("layer_count", 1);
-	result->currentLayerStates.resize(layerCount, std::make_pair(false, ""));
-	result->currentLayerStates[0].first = true;
-	result->currentLayerStates[0].second = firstState;
+	result->currentLayerStates.resize(layerCount, LayerState("", false, 0.0f));
+	result->currentLayerStates[0].isDrawing = true;
+	result->currentLayerStates[0].state = firstState;
 
 	BOOST_FOREACH(auto& v, tree)
 	{
@@ -87,6 +87,7 @@ std::shared_ptr<IComponent> AnimationComponent::loadFromXml(const boost::propert
 		{
 			int layer_number;
 			bool is_active;
+			float angle;
 			std::string state;
 			BOOST_FOREACH(auto& layer_v, v.second)
 			{
@@ -103,8 +104,12 @@ std::shared_ptr<IComponent> AnimationComponent::loadFromXml(const boost::propert
 				{
 					state = layer_v.second.get_value<std::string>();
 				}
+				if(layer_v.first == "angle")
+				{
+					angle = layer_v.second.get_value<float>();
+				}
 			}
-			result->currentLayerStates[layer_number] = std::make_pair(is_active, state);
+			result->currentLayerStates[layer_number] = LayerState(state, is_active, angle);
 		}
 	}
 

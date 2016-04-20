@@ -39,6 +39,28 @@ struct AnimationState
 	}
 };
 
+struct LayerState
+{
+	LayerState(std::string state, bool isDrawing, float angle) :
+		state(state),
+		isDrawing(isDrawing),
+		angle(angle)
+	{}
+	LayerState() {}
+	bool operator==(const LayerState& other)
+	{
+		return isDrawing == other.isDrawing && state == other.state &&
+			angle == other.angle;
+	}
+	bool operator!=(const LayerState& other)
+	{
+		return !(*this == other);
+	}
+	std::string state;
+	bool isDrawing;
+	float angle;
+};
+
 struct AnimationComponent : IComponent
 {
 	void onEvent(const Event& event);
@@ -48,7 +70,7 @@ struct AnimationComponent : IComponent
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
 	std::map<std::string, AnimationState> states;
-	std::vector<std::pair<bool, std::string> > currentLayerStates;
+	std::vector<LayerState> currentLayerStates;
 };
 
 #endif

@@ -2,18 +2,17 @@
 #define ANIMATION_EVENT_H
 
 #include "../event.h"
+#include "animation_component.h"
 
 struct AnimationEvent : Event
 {
-	AnimationEvent(int layerNumber, std::string animationState, bool isActive, int actorID) : 
+	AnimationEvent(int layerNumber, LayerState layerState, int actorID) : 
 		Event("animation", false, actorID), 
 		layerNumber(layerNumber),
-		animationState(animationState),
-		isActive(isActive)
+		layerState(layerState)
 	{}
-	std::string animationState;
 	int layerNumber;
-	bool isActive;
+	LayerState layerState;
 
 	/*
 	template<typename STREAM_T>

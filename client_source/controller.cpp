@@ -11,9 +11,9 @@ Controller::Controller(Console& console) : moveEvent(std::make_shared<MoveEvent>
 	isMessageSent = false;
 	console.setInputCallback([this](std::string input)
 	{
-		std::cout << "hello from console callback! " << std::endl;
-		std::cout << "currentNumber " << currentNumbers["chat"] << std::endl;
-		std::cout << "last approved number: " << approvedNumbers["chat"] << std::endl;
+		//std::cout << "hello from console callback! " << std::endl;
+		//std::cout << "currentNumber " << currentNumbers["chat"] << std::endl;
+		//std::cout << "last approved number: " << approvedNumbers["chat"] << std::endl;
 		currentNumbers["chat"]++;
 		message = input;
 	});
@@ -53,8 +53,8 @@ void Controller::onEvent(sf::Event event)
 
 void Controller::approve(std::string type, int number)
 {
-	std::cout << "number received for " << type << ": " << number << std::endl;
-	std::cout << "last number: " << approvedNumbers[type] << std::endl;
+	//std::cout << "number received for " << type << ": " << number << std::endl;
+	//std::cout << "last number: " << approvedNumbers[type] << std::endl;
 	approvedNumbers[type] = number;
 }
 
@@ -82,7 +82,7 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 	if(approvedNumbers["chat"] < currentNumbers["chat"])
 	{
 		//isMessageSent = true;
-		std::cout << "pushed message: " << message << std::endl;
+		//std::cout << "pushed message: " << message << std::endl;
 		std::shared_ptr<ChatEvent> chatEvent = std::make_shared<ChatEvent>(message, moveEvent->actorID);
 		chatEvent->number = currentNumbers["chat"];
 		result.push_back(chatEvent);

@@ -9,14 +9,14 @@
 
 struct AnimationUpdate : ComponentUpdate
 {
-	AnimationUpdate(std::vector<std::pair<bool, std::string> > currentLayerStates, int number) : 
+	AnimationUpdate(std::vector<LayerState> currentLayerStates, int number) : 
 		ComponentUpdate("animation"), 
 		currentLayerStates(currentLayerStates)
 	{
 		this->number = number;
 	}
 	AnimationUpdate() {}
-	std::vector<std::pair<bool, std::string> > currentLayerStates;
+	std::vector<LayerState> currentLayerStates;
 	std::vector<AnimationState> states;
 
 	template<typename STREAM_T>
@@ -30,8 +30,9 @@ struct AnimationUpdate : ComponentUpdate
 		s << (int) u.currentLayerStates.size();
 		for(int i = 0; i < u.currentLayerStates.size(); i++)
 		{
-			s << (uint8_t) u.currentLayerStates[i].first;
-			s << u.currentLayerStates[i].second;
+			s << (uint8_t) u.currentLayerStates[i].isDrawing;
+			s << u.currentLayerStates[i].state;
+			s << u.currentLayerStates[i].angle;
 		}
 		return s;
 	}
@@ -52,8 +53,9 @@ struct AnimationUpdate : ComponentUpdate
 		{
 			bool active;
 			std::string state;
-			s >> (uint8_t&) active >> state;
-			u.currentLayerStates.push_back(std::make_pair(active, state));
+			float angle;
+			s >> (uint8_t&) active >> state >> angle;
+			u.currentLayerStates.push_back(LayerState(state, active, angle));
 		}
 		return s;
 	}
