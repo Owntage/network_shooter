@@ -16,7 +16,7 @@ struct GameLogic
 	void onEvent(const Event& event);
 	void approve(int actorID, std::string component, int systemID, int number);
 	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID);
-	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID, float x, float y);
+	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID, float x, float y, float updateRadius);
 	int registerSystem();
 	int createActor(std::string id);
 	void destroyActor(int number);

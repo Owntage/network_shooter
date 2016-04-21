@@ -15,12 +15,23 @@ bool isFileExists(std::string filename)
 	return file.good();
 }
 
-DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : isMain(false),
-	rect(sf::Vector2f(1.0f, 1.0f)), console(console), lastMessagePrinted(-1), renderSystem(renderSystem)
+DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : 
+	isMain(false),
+	rect(sf::Vector2f(1.0f, 1.0f)), 
+	console(console), 
+	lastMessagePrinted(-1), 
+	renderSystem(renderSystem),
+	deltaTime(0.0f),
+	positionX(0.0f),
+	positionY(0.0f),
+	speedX(0.0f),
+	speedY(0.0f)
 {
 	rect.setOrigin(0.5f, 0.5f);
 	isDrawing = false;
 	animationStateChanged = false;
+	serverTime = -1.0f;
+	
 }
 
 void DrawableActor::setMain(bool isMain)
@@ -36,8 +47,12 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		if((*it)->name == "move")
 		{
 			MoveUpdate& moveUpdate = static_cast<MoveUpdate&> (*(*it));
-			rect.setPosition(moveUpdate.x, moveUpdate.y);
-			
+			positionX = moveUpdate.x;
+			positionY = moveUpdate.y;
+			speedX = moveUpdate.speedX;
+			speedY = moveUpdate.speedY;
+			serverTime = moveUpdate.time;
+			deltaTime = 0;
 		}
 		if((*it)->name == "chat" && isMain)
 		{
@@ -150,6 +165,9 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 void DrawableActor::draw()
 {
 	
+	rect.setPosition(positionX + speedX * deltaTime, positionY + speedY + deltaTime);
+	deltaTime += 1.0f / 60.0f;
+
 	if(isDrawing)
 	{
 		for(int i = 0; i < layerTime.size(); i++)

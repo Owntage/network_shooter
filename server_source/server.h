@@ -12,11 +12,15 @@
 
 struct ClientData
 {
+	ClientData() :
+		radiusMultiplier(1.0f)
+	{}
 	IpAddress address;
 	unsigned short port;
 	int gameLogicID;
 	int systemID;
 	float time;
+	float radiusMultiplier;
 	std::map<std::string, int> eventNumbers;
 };
 

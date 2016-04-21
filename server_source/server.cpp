@@ -212,30 +212,11 @@ void GameServer::sendUpdates()
 		
 		int clientActorID = client_it->second.gameLogicID;
 		ActorCoords mainActorCoords = serverView.getCoords(clientActorID);
-		auto updates = gameLogic.getUpdates(client_it->second.systemID, mainActorCoords.x, mainActorCoords.y);
-		/*
-		std::sort(updates.begin(), updates.end(), [this, clientActorID](std::shared_ptr<ActorUpdate> actorUpdate1, std::shared_ptr<ActorUpdate> actorUpdate2)
-		{
-			ActorCoords coords1 = serverView.getCoords(actorUpdate1->actorID);
-			ActorCoords coords2 = serverView.getCoords(actorUpdate2->actorID);
-			if(!coords1.hasCoords) return true;
-			if(!coords2.hasCoords) return false;
-			ActorCoords clientCoords = serverView.getCoords(clientActorID);
-			if(!clientCoords.hasCoords) return true; //weird, but possible. Client could be a game mode manager, or admin or smth like that.
-			return pow(coords1.x - clientCoords.x, 2) + pow(coords1.y - clientCoords.y, 2) < pow(coords2.x - clientCoords.x, 2)
-				+ pow(coords2.y - clientCoords.y, 2);
-		});
-		*/
-
 		
-
+		bool packed = false;
+		auto updates = gameLogic.getUpdates(client_it->second.systemID, mainActorCoords.x, mainActorCoords.y, client_it->second.radiusMultiplier * UPDATE_RADIUS);
 		for(auto actor_it = updates.begin(); actor_it != updates.end(); actor_it++)
 		{
-
-			//if((*actor_it)->actor->hasCoords && sqrt(pow(mainActorCoords.x - (*actor_it)->actor->x, 2) + pow(mainActorCoords.y - (*actor_it)->actor->y, 2)) >= 10)
-			//{
-			//	continue;
-			//}
 
 			for(auto component_it = (*actor_it)->updates.begin(); component_it != (*actor_it)->updates.end(); component_it++)
 			{
@@ -253,9 +234,22 @@ void GameServer::sendUpdates()
 				if(packet.isPacked())
 				{
 					packet.revertToCursor();
+					client_it->second.radiusMultiplier = 1.0f;
+					packed = true;
 				}
 			}
 		}
+
+		//if there are not enough updates in this range, update radius is increased
+		//if there is too much updates to put in one packet, radius is dropped back to default
+		if(!packed)
+		{
+			if(client_it->second.radiusMultiplier < 100)
+			{
+				client_it->second.radiusMultiplier += 1.0f;
+			}
+		}
+		
 		
 		socket.send(client_it->second.address, packet);
 		

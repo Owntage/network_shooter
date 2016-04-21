@@ -26,6 +26,13 @@ private:
 	bool isMain;
 	bool isDrawing;
 	bool animationStateChanged;
+	float serverTime;
+
+	float deltaTime;
+	float positionX;
+	float positionY;
+	float speedX;
+	float speedY;
 	std::vector<LayerState> animationLayerStates;
 	std::vector<float> layerTime;
 	std::vector<int> layerImageIndex;

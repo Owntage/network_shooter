@@ -102,14 +102,14 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID)
 	return result;
 }
 
-std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID, float x, float y)
+std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID, float x, float y, float updateRadius)
 {
 	std::vector<std::shared_ptr<ActorUpdate> > result;
 	for(auto it = actors.begin(); it != actors.end(); it++)
 	{
 		if(it->second->hasUpdates(systemID))
 		{
-			if(it->second->hasCoords && sqrt(pow(it->second->x - x, 2) + pow(it->second->y - y, 2)) >= UPDATE_RADIUS)
+			if(it->second->hasCoords && sqrt(pow(it->second->x - x, 2) + pow(it->second->y - y, 2)) >= updateRadius)
 			{
 				continue;
 			}

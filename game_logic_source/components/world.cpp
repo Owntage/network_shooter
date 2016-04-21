@@ -6,6 +6,7 @@ World::World()
 	world = new b2World(gravity);
 	contactListener = new MyContactListener;
 	world->SetContactListener(contactListener);
+	time = 0;
 }
 
 World::~World()
@@ -17,6 +18,12 @@ World::~World()
 void World::update(double fps)
 {
 	world->Step(1.0/fps,6,2);
+	time += 1.0 / fps;
+}
+
+float World::getTime()
+{
+	return time;
 }
 
 b2World* World::getWorld()

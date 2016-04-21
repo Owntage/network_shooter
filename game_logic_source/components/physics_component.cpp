@@ -93,7 +93,8 @@ std::string PhysicsComponent::getName()
 
 std::shared_ptr<ComponentUpdate> PhysicsComponent::getUpdate(int syatemID)
 {
-	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y);
+	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
+		body->GetLinearVelocity().x, body->GetLinearVelocity().y, World::getInstance()->getTime());
 	result->number = currentDataNumber;
 	return result;
 }

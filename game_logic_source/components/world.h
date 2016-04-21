@@ -43,10 +43,12 @@ class World: public Singleton<World>
 private:
 	b2World* world;
 	b2ContactListener* contactListener;
+	float time;
 public:
 	World();
 	~World();
 	void update(double fps);
+	float getTime();
 	b2World* getWorld();
 	b2Body* createStaticBody(double x, double y, double width = 0.5, double height = 0.5);
 	b2Body* createDynamicBody(double x, double y);
