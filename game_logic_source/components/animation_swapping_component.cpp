@@ -2,6 +2,9 @@
 #include "move_event.h"
 #include "string_event.h"
 #include "animation_event.h"
+#include <math.h>
+
+#define PI 3.1415926536
 
 void AnimationSwappingComponent::onEvent(const Event& event)
 {
@@ -12,13 +15,41 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 		if(!(this->moveEvent == moveEvent))
 		{
 			bool moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
-			if(moving)
+			//here I should count an angle
+			float dirX = 0.0f;
+			float dirY = 0.0f;
+			if(moveEvent.up) dirY -= 1.0f;
+			if(moveEvent.down) dirY += 1.0f;
+			if(moveEvent.left) dirX -= 1.0f;
+			if(moveEvent.right) dirX += 1.0f;
+
+			float angle;
+
+			if(dirX < 0)
 			{
-				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, 0.0f), 0));
+				angle = atan(dirY / dirX) + PI;
 			}
 			else
 			{
-				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, true, 0.0f), 0));
+				if(dirY < 0)
+				{
+					angle = atan(dirY / dirX) + 2 * PI;
+				}
+				else
+				{
+					angle = atan(dirY / dirX);
+				}
+			}
+
+			angle = angle / PI * 180.0f;
+
+			if(moving)
+			{
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, angle), 0));
+			}
+			else
+			{
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, false, moveEvent.angle), 0));
 			}
 			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, moveEvent.angle), 0));
 		}
