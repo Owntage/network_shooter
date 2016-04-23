@@ -48,7 +48,6 @@ add_definitions(-std=c++11 -g)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-#set(SFML_ROOT ${PROJECT_SOURCE_DIR})
 find_package(SFML REQUIRED system window graphics network audio)
 
 #insert your boost root here
