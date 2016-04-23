@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <Box2D/box2d.h>
+#include <Box2D/Box2D.h>
 #include <string>
 #include <memory>
 #include <utility>
