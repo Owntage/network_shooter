@@ -11,6 +11,10 @@ struct AnimationState
 	std::vector<std::string> images;
 	float delay;
 	std::string stateName;
+
+	AnimationState() :
+			delay(0)
+	{}
 	
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, AnimationState& a)
@@ -46,7 +50,11 @@ struct LayerState
 		isDrawing(isDrawing),
 		angle(angle)
 	{}
-	LayerState() {}
+	LayerState() :
+			state(0),
+			isDrawing(false),
+			angle(0)
+	{}
 	bool operator==(const LayerState& other)
 	{
 		return isDrawing == other.isDrawing && state == other.state &&
