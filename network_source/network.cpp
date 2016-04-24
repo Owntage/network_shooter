@@ -463,7 +463,7 @@ bool UdpSocket::setNonBlocking()
 	#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
 
 	int nonBlocking = 1;
-	if (fcntl( handle, F_SETFL, O_NONBLOCK, nonBlocking ) == -1)
+	if (fcntl( fd, F_SETFL, O_NONBLOCK, nonBlocking ) == -1)
 	{
 		std::cout << "failed to set socket into non-blocking mode" << std::endl;
 		return false;
