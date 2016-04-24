@@ -25,6 +25,7 @@ private:
 	unsigned short localPort;
 	int uniqueID;
 	int actorID;
+	bool scenePushed;
 	std::string actorType;
 	Packet packet;
 	std::map<std::string, File> downloadingFiles;

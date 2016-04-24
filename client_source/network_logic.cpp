@@ -10,12 +10,18 @@
 #include "game_scenes.h"
 
 
-NetworkLogic::NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem) : address(address), state(State::GETTING_UNIQUE_ID), actorType(actorType), controller(controller), renderSystem(renderSystem)
+NetworkLogic::NetworkLogic(IpAddress address, std::string actorType, Controller& controller, RenderSystem& renderSystem) : 
+	address(address), 
+	state(State::GETTING_UNIQUE_ID), 
+	actorType(actorType), controller(controller), 
+	renderSystem(renderSystem),
+	scenePushed(false)
 {
 	//receivingSocket.bind(sf::UdpSocket::AnyPort);
 	socket.bind(0);
 	localPort = socket.getLocalPort();
 	socket.setNonBlocking();
+	
 }
 
 void NetworkLogic::refreshTimeout()
@@ -137,9 +143,15 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 		packet >> packetType;
 		if(packetType == "incorrect_packet")
 		{
-			std::cout << "server is restarted. popping the scene from scene stack" << std::endl;
-			SceneManager::getInstance()->closeScene();
-			SceneManager::getInstance()->startScene(std::make_shared<ConnectScene>(800, 600, true));
+			//std::cout << "server is restarted. popping the scene from scene stack" << std::endl;
+			
+			if(!scenePushed)
+			{
+				SceneManager::getInstance()->closeScene();
+				SceneManager::getInstance()->startScene(std::make_shared<ConnectScene>(800, 600, true));
+				scenePushed = true;
+			}
+			
 		}
 		switch(state)
 		{
