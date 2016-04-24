@@ -174,7 +174,10 @@ Packet& Packet::operator<<(uint64_t a)
 
 Packet& Packet::operator<<(float a)
 {
-	std::string a_str = stringConverter<float, std::string>(a);
+	char buffer[64];
+	int size = sprintf(buffer, "%f", a);
+	//std::string a_str = stringConverter<float, std::string>(a);
+	std::string a_str(buffer, size);
 	//std::cout << "float string: ." << a_str <<". " << std::endl;
 	stringByte = (char) PrimitiveTypes::FLOAT;
 	*this << a_str;

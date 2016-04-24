@@ -165,7 +165,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 void DrawableActor::draw()
 {
 	
-	rect.setPosition(positionX + speedX * deltaTime, positionY + speedY + deltaTime);
+	rect.setPosition(positionX + speedX * deltaTime, positionY + speedY * deltaTime);
 	deltaTime += 1.0f / 60.0f;
 
 	if(isDrawing)

@@ -46,7 +46,7 @@ add_dependencies(shooter_test gui game_logic render_system network)
 
 add_definitions(-std=c++11 -g)
 
-
+set(SFML_ROOT ${PROJECT_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(SFML REQUIRED system window graphics network audio)
 
@@ -63,10 +63,20 @@ if(SFML_FOUND AND Boost_FOUND)
 	include_directories(${PROJECT_SOURCE_DIR}/render_system)
 	include_directories(${PROJECT_SOURCE_DIR}/network_source)
 	include_directories(${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(game_logic ${PROJECT_SOURCE_DIR}/lib/libBox2D.a)
+	#target_link_libraries(game_logic ${PROJECT_SOURCE_DIR}/lib/libBox2D.a)
+	if(MSVC)
+		target_link_libraries(game_logic ${PROJECT_SOURCE_DIR}/lib/Box2D.lib)
+	else()
+		target_link_libraries(game_logic ${PROJECT_SOURCE_DIR}/lib/libBox2D.a)
+	endif()
+		
+	target_link_libraries(gui ${SFML_LIBRARIES})
     	target_link_libraries(shooter_server ${SFML_LIBRARIES} gui game_logic render_system network)
 	target_link_libraries(shooter_client ${SFML_LIBRARIES} gui game_logic render_system network)
 	target_link_libraries(shooter_test ${SFML_LIBRARIES} gui game_logic render_system network)
+	if(WIN32)
+  		target_link_libraries(network wsock32 ws2_32)
+	endif(WIN32)
 endif()
 
 

@@ -30,13 +30,13 @@ struct MoveUpdate : ComponentUpdate
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, MoveUpdate& moveUpdate)
 	{
-		s << moveUpdate.x << moveUpdate.y;
+		s << moveUpdate.x << moveUpdate.y << moveUpdate.speedX << moveUpdate.speedY << moveUpdate.time;
 		return s;
 	}
 	template<typename STREAM_T>
 	friend STREAM_T& operator>>(STREAM_T& s, MoveUpdate& moveUpdate)
 	{
-		s >> moveUpdate.x >> moveUpdate.y;
+		s >> moveUpdate.x >> moveUpdate.y >> moveUpdate.speedX >> moveUpdate.speedY >> moveUpdate.time;
 		return s;
 	}
 };
