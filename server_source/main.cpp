@@ -3,8 +3,9 @@
 #include <string>
 #include "server.h"
 #include <game_logic.h>
-#include <thread>
-#include <chrono>
+//#include <thread>
+#include <SFML/System.hpp>
+//#include <chrono>
 #include <network.h>
 #include <string>
 #include <components/world.h>
@@ -28,12 +29,13 @@ int main()
 	GameLogic gameLogic(actorFactory);
 	GameServer gameServer(gameLogic, RECEIVE_PORT);
 	
-	auto time = chrono::system_clock::now();
+	//auto time = chrono::system_clock::now();
 	
 	while(true)
 	{
-		this_thread::sleep_until(time);
-		time = time + chrono::milliseconds(16);
+		//this_thread::sleep_until(time);
+		sf::sleep(sf::milliseconds(16));
+		//time = time + chrono::milliseconds(16);
 		gameServer.receiveEvents();
 		gameServer.sendUpdates();
 		World::getInstance()->update(60.0f);

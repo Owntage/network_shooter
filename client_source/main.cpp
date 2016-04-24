@@ -56,7 +56,8 @@ int main()
 			}
 			if(!SceneManager::getInstance()->isEmpty())
 			{
-				SceneManager::getInstance()->onEvent(WindowEvent(event));
+				WindowEvent windowEvent(event);
+				SceneManager::getInstance()->onEvent(windowEvent);
 			}
 		}
 		if(SceneManager::getInstance()->isEmpty())
