@@ -463,10 +463,16 @@ int UdpSocket::getLocalPort()
 
 bool UdpSocket::setNonBlocking()
 {
+	std::cout << "setNonBlocking started" << std::endl;
+
 	#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
 
 	int nonBlocking = 1;
-	if (fcntl( fd, F_SETFL, O_NONBLOCK, nonBlocking ) == -1)
+
+	std::cout << "hello from setNonBlocking" << std::endl;
+
+	int status = fcntl(fd, F_GETFL);
+	if (fcntl(fd, F_SETFL, status | O_NONBLOCK) == -1)
 	{
 		std::cout << "failed to set socket into non-blocking mode" << std::endl;
 		return false;
@@ -481,7 +487,8 @@ bool UdpSocket::setNonBlocking()
 		return false;
 	}
 
-	#endif
+    #endif
+    return true;
 }
 
 bool UdpSocket::send(const IpAddress& address, const char* data, int dataSize)

@@ -30,52 +30,24 @@ int main()
 	GameServer gameServer(gameLogic, RECEIVE_PORT);
 	
 	//auto time = chrono::system_clock::now();
+
+	sf::Clock clock;
 	
 	while(true)
 	{
 		//this_thread::sleep_until(time);
-		sf::sleep(sf::milliseconds(16));
+		//sf::sleep(sf::milliseconds(16));
 		//time = time + chrono::milliseconds(16);
 		gameServer.receiveEvents();
 		gameServer.sendUpdates();
 		World::getInstance()->update(60.0f);
 		Event timerEvent("timer");
 		gameLogic.onEvent(timerEvent);
+		sf::sleep(sf::milliseconds(16) - clock.getElapsedTime());
+		clock.restart();
 	}
 	
 	UdpSocket::shutdownSockets();
-	
-	
-	/*
-	UdpSocket::initializeSockets();
 
-	UdpSocket socket;
-	socket.bind(13337);
-	socket.setNonBlocking();
-
-	while(true)
-	{
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		//std::cout << "waiting for message" << std::endl;
-		IpAddress remoteAddress;
-		Packet packet;
-		if(socket.receive(packet, remoteAddress))
-		{
-			std::cout << "received packet" << std::endl;
-			std::cout << "messages: " << std::endl;
-			while(!packet.isEnd())
-			{
-				float temp;
-				packet >> temp;
-				std::cout << "message: " << temp << std::endl;
-			}
-		}
-		
-	}
-
-	UdpSocket::shutdownSockets();
-	*/
-	
-	
 	return 0;
 }

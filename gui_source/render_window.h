@@ -6,7 +6,10 @@
 
 struct RenderWindow: Singleton<RenderWindow>
 {
-	RenderWindow() : window(sf::VideoMode(800, 600), "network_shooter") {}
+	RenderWindow() : window(sf::VideoMode(800, 600), "network_shooter")
+	{
+		window.setKeyRepeatEnabled(false);
+	}
 	sf::RenderWindow window;
 };
 

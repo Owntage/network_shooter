@@ -18,6 +18,7 @@
 #elif PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
 #endif

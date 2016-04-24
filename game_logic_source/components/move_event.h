@@ -22,7 +22,7 @@ struct MoveEvent : Event
 			right == other.right && 
 			up == other.up && 
 			down == other.down &&
-			angle == angle;
+			angle == other.angle;
 	}
 
 	template<typename STREAM_T>

@@ -6,15 +6,17 @@
 #define PI 3.1415926536
 
 Controller::Controller(Console& console, int tileSize, int screenWidth, int screenHeight) : 
-	moveEvent(std::shared_ptr<MoveEvent>(new MoveEvent(false, false, false, false, 0.0f, -1))), 
+	moveEvent(false, false, false, false, 0.0f, -1),
 	console(console),
 	tileSize(tileSize),
 	screenWidth(screenWidth),
-	screenHeight(screenHeight)
+	screenHeight(screenHeight),
+	mouseX(0),
+	mouseY(0)
 {
 	currentNumbers["move"] = 0;
 	currentNumbers["chat"] = 0;
-	approvedNumbers["move"] = 0;
+	approvedNumbers["move"] = -1;
 	approvedNumbers["chat"] = 0;
 	isMessageSent = false;
 	console.setInputCallback([this](std::string input)
@@ -32,23 +34,23 @@ void Controller::onEvent(sf::Event event)
 		
 		bool isPressed = event.type == sf::Event::KeyPressed;
 		//std::cout << "button state: " << (bool) isPressed << std::endl;
-		MoveEvent lastEvent = *moveEvent;
+		MoveEvent lastEvent = moveEvent;
 		switch(event.key.code)
 		{
 		case sf::Keyboard::W:
-			moveEvent->up = isPressed;
+			moveEvent.up = isPressed;
 			break;
 		case sf::Keyboard::A:
-			moveEvent->left = isPressed;
+			moveEvent.left = isPressed;
 			break;
 		case sf::Keyboard::D:
-			moveEvent->right = isPressed;
+			moveEvent.right = isPressed;
 			break;
 		case sf::Keyboard::S:
-			moveEvent->down = isPressed;
+			moveEvent.down = isPressed;
 			break;
 		}
-		if(!(lastEvent == *moveEvent))
+		if(!(lastEvent == moveEvent))
 		{
 			currentNumbers["move"]++;
 		}
@@ -86,7 +88,7 @@ void Controller::onEvent(WindowEvent& event)
 
 void Controller::setActorID(int actorID)
 {
-	moveEvent->actorID = actorID;
+	moveEvent.actorID = actorID;
 }
 
 std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
@@ -95,14 +97,14 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 	
 	if(approvedNumbers["move"] < currentNumbers["move"])
 	{
-		moveEvent->number = currentNumbers["move"];
-		result.push_back(moveEvent);
+		moveEvent.number = currentNumbers["move"];
+		result.push_back(std::make_shared<MoveEvent>(moveEvent));
 	}
 	if(approvedNumbers["chat"] < currentNumbers["chat"])
 	{
 		//isMessageSent = true;
 		//std::cout << "pushed message: " << message << std::endl;
-		std::shared_ptr<ChatEvent> chatEvent = std::make_shared<ChatEvent>(message, moveEvent->actorID);
+		std::shared_ptr<ChatEvent> chatEvent = std::make_shared<ChatEvent>(message, moveEvent.actorID);
 		chatEvent->number = currentNumbers["chat"];
 		result.push_back(chatEvent);
 	}
@@ -138,12 +140,12 @@ void Controller::updateFromRenderSystem(RenderSystem& renderSystem)
 			newAngle = atan(mouseY / mouseX);
 		}
 	}
-	if(moveEvent->angle != newAngle)
+	if(moveEvent.angle != newAngle)
 	{
 		currentNumbers["move"]++;
 		newAngle /= PI;
 		newAngle *= 180.0f;
-		moveEvent->angle = newAngle;
+		moveEvent.angle = newAngle;
 	}
 	
 	mouseX += cameraDeltaX;

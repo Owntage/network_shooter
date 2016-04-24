@@ -122,6 +122,8 @@ ConnectScene::ConnectScene(float screenWidth, float screenHeight, bool restarted
 	text.makeChildOf(panel);
 	inputField.makeChildOf(panel);
 	alertText.makeChildOf(panel);
+
+	socket.setNonBlocking();
 }
 
 void ConnectScene::onPingSuccessful()

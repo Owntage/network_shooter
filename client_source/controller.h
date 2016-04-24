@@ -47,7 +47,7 @@ private:
 
 	bool isMessageSent;
 	std::string message;
-	std::shared_ptr<MoveEvent> moveEvent;
+	MoveEvent moveEvent;
 	std::map<int, MoveEvent> mappedEvents;
 	std::map<std::string, int> approvedNumbers;
 	std::map<std::string, int> currentNumbers;

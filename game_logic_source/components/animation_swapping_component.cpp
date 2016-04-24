@@ -2,6 +2,7 @@
 #include "move_event.h"
 #include "string_event.h"
 #include "animation_event.h"
+#include <iostream>
 #include <math.h>
 
 #define PI 3.1415926536
@@ -45,6 +46,7 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 
 			if(moving)
 			{
+
 				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, angle), 0));
 			}
 			else
