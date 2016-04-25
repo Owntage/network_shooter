@@ -39,7 +39,7 @@ void PhysicsComponent::onEvent(const Event& event)
 		if(left) direction += b2Vec2(-1, 0);
 		if(up) direction += b2Vec2(0, -1);
 		if(down) direction += b2Vec2(0, 1);
-		if(direction.LengthSquared() != 0)
+		if(body->GetLinearVelocity().LengthSquared() > 0)
 		{
 			currentDataNumber++;
 		}
@@ -82,16 +82,16 @@ bool PhysicsComponent::hasUpdate(int systemID)
 	}
 	else
 	{
-		return lastSystemApproved[systemID] < systemID;
+		return lastSystemApproved[systemID] < currentDataNumber;
 	}
 }
 
 std::string PhysicsComponent::getName()
 {
-	return "physics";
+	return "move";
 }
 
-std::shared_ptr<ComponentUpdate> PhysicsComponent::getUpdate(int syatemID)
+std::shared_ptr<ComponentUpdate> PhysicsComponent::getUpdate(int systemID)
 {
 	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
 		body->GetLinearVelocity().x, body->GetLinearVelocity().y, World::getInstance()->getTime());
