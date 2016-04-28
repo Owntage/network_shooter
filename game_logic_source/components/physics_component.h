@@ -20,6 +20,7 @@ private:
 	float density;
 	float friction;
 	float restitution;
+	bool wasMoving;
 	b2Body* body;
 
 };

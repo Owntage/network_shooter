@@ -8,6 +8,7 @@ PhysicsComponent::PhysicsComponent() :
 	down(false),
 	left(false),
 	right(false),
+	wasMoving(false),
 	speed(3.0f)
 {
 	body = nullptr;
@@ -42,6 +43,15 @@ void PhysicsComponent::onEvent(const Event& event)
 		if(body->GetLinearVelocity().LengthSquared() > 0)
 		{
 			currentDataNumber++;
+			wasMoving = true;
+		}
+		else
+		{
+			if(wasMoving)
+			{
+				currentDataNumber++;
+				wasMoving = false;
+			}
 		}
 		direction.Normalize();
 		if(body->GetLinearVelocity().LengthSquared() < speed * speed)
