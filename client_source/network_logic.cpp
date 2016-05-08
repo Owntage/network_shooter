@@ -6,6 +6,7 @@
 #include <components/chat_component.h>
 #include <components/animation_update.h>
 #include <components/tile_update.h>
+#include <components/render_component.h>
 #include <delete_update.h>
 #include "game_scenes.h"
 
@@ -219,6 +220,8 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<AnimationUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "tile")
 						addUpdate<TileUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					if(componentUpdate.name == "render")
+						addUpdate<RenderUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					
 
 					

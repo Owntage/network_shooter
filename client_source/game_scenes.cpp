@@ -209,7 +209,7 @@ MainScene::MainScene(float windowWidth, float windowHeight, std::string address)
 	guiManager(windowWidth, windowHeight),
 	console(-windowWidth / 2 + CONSOLE_WIDTH / 2, windowHeight / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager),
 	controller(console, TILE_SIZE, windowWidth, windowHeight),
-	renderSystem(console),
+	renderSystem(console, windowWidth, windowHeight),
 	networkLogic(IpAddress(address, SERVER_PORT), "testActor", controller, renderSystem)
 {}
 

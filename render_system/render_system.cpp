@@ -17,8 +17,8 @@ LightManager::LightManager(float screenWidth, float screenHeight) :
 	vertices.setPrimitiveType(sf::Quads);
 	renderTexture.create(screenWidth / 4, screenHeight / 4);
 
-	shape.setSize(sf::Vector2f(screenWidth, screenHeight));
-	shape.setOrigin(screenWidth / 2, screenHeight / 2);
+	shape.setSize(sf::Vector2f(screenWidth /32, screenHeight / 32));
+	shape.setOrigin(screenWidth / 64, screenHeight / 64);
 }
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
@@ -43,14 +43,21 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	sf::RenderStates renderStates;
 	renderStates.shader = &shader;
 	renderStates.blendMode = sf::BlendAdd;
-	shader.setParameter("offset", renderTarget.getView().getCenter());
-	renderTexture.setView(renderTarget.getView());
+	sf::Vector2f center = renderTarget.getView().getCenter();
+	center.x *= 32;
+	center.y *= 32;
+	shader.setParameter("offset", center);
+	sf::View lightView;
+	lightView.setCenter(sf::Vector2f(0, 0));
+	lightView.setSize(screenWidth, screenHeight);
+	renderTexture.setView(lightView);
 	renderTexture.clear();
 	renderTexture.draw(vertices, renderStates);
 	renderTexture.display();
 	shape.setTexture(&renderTexture.getTexture());
 	shape.setPosition(renderTarget.getView().getCenter());
-	renderTarget.draw(shape);
+	renderTarget.draw(shape, sf::BlendMultiply);
+	//renderTarget.draw(shape, sf::BlendAdd);
 }
 
 void LightManager::setPosition(int lightSourceIndex, sf::Vector2f pos)
@@ -74,7 +81,7 @@ bool isFileExists(std::string filename)
 	return file.good();
 }
 
-DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) : 
+DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, std::shared_ptr<LightManager> lightManager) : 
 	isMain(false),
 	rect(sf::Vector2f(1.0f, 1.0f)), 
 	console(console), 
@@ -84,13 +91,23 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem) :
 	positionX(0.0f),
 	positionY(0.0f),
 	speedX(0.0f),
-	speedY(0.0f)
+	speedY(0.0f),
+	lightManager(lightManager),
+	hasLightSource(false)
 {
 	rect.setOrigin(0.5f, 0.5f);
 	isDrawing = false;
 	animationStateChanged = false;
 	serverTime = -1.0f;
 	
+}
+
+DrawableActor::~DrawableActor()
+{
+	if(hasLightSource)
+	{
+		lightManager->removeLightSource(lightSourceID);
+	}
 }
 
 void DrawableActor::setMain(bool isMain)
@@ -112,6 +129,11 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			speedY = moveUpdate.speedY;
 			serverTime = moveUpdate.time;
 			deltaTime = 0;
+		}
+		if((*it)->name == "render")
+		{
+			RenderUpdate& renderUpdate = static_cast<RenderUpdate&> (*(*it));
+			renderData = renderUpdate.renderData;
 		}
 		if((*it)->name == "chat" && isMain)
 		{
@@ -227,6 +249,8 @@ void DrawableActor::draw()
 	rect.setPosition(positionX + speedX * deltaTime, positionY + speedY * deltaTime);
 	deltaTime += 1.0f / 60.0f;
 
+	
+
 	if(isDrawing)
 	{
 		for(int i = 0; i < layerTime.size(); i++)
@@ -254,7 +278,6 @@ void DrawableActor::draw()
 				if(isFileExists(nextImage) && nextImage != "")
 				{
 					sf::Texture newTexture;
-					//std::cout << "loading  image in drawing method" << std::endl;
 					newTexture.loadFromFile(nextImage);
 					renderSystem.textures[nextImage] = newTexture;
 				}
@@ -263,11 +286,6 @@ void DrawableActor::draw()
 					if(renderSystem.textures.find(DEFAULT_TEXTURE) == renderSystem.textures.end())
 					{
 						sf::Texture defaultTexture;
-						//std::cout << "loading default image in drawing method" << std::endl;
-						//std::cout << "layer: " << i << std::endl;
-						//std::cout << "state: " << animationLayerStates[i].state << std::endl;
-						//std::cout  << "image index: " << layerImageIndex[i] << std::endl;
-						//std::cout << "number of images: " << animationStates[animationLayerStates[i].state].images.size();
 						defaultTexture.loadFromFile(DEFAULT_TEXTURE);
 						renderSystem.textures[DEFAULT_TEXTURE] = defaultTexture;
 					}
@@ -292,19 +310,38 @@ void DrawableActor::draw()
 				
 			}
 			RenderWindow::getInstance()->window.setView(renderSystem.gameView);
-			RenderWindow::getInstance()->window.draw(rect);
+			if(renderData.spriteIsVisible)
+			{
+				rect.setScale(sf::Vector2f(renderData.spriteScale, renderData.spriteScale));
+				RenderWindow::getInstance()->window.draw(rect);
+
+			}
+			
 
 		}
 	}
 	
+	if(renderData.lightIsVisible)
+	{
+		if(!hasLightSource)
+		{
+			lightSourceID = lightManager->addLightSource(sf::Vector2f(0, 0), 
+				sf::Color(renderData.lightR, renderData.lightG, renderData.lightB), 
+				renderData.lightIntensity);
+			hasLightSource = true;
+		}
+		lightManager->setPosition(lightSourceID, sf::Vector2f(positionX * 32.0f, positionY * 32.0f));
+	}
 	
 }
 
-RenderSystem::RenderSystem(Console& console) : gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(800.0f / 32.0f, 600.0f / 32.0f)), 
+RenderSystem::RenderSystem(Console& console, float screenWidth, float screenHeight) : 
+	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / 32.0f, screenHeight / 32.0f)), 
 	mainActor(-1), console(console)
 {
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
 	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
+	lightManager = std::make_shared<LightManager>(screenWidth, screenHeight);
 }
 
 void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
@@ -342,7 +379,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 				continue;
 			}
 			//std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
-			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this);
+			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this, lightManager);
 			if((*it)->actorID == mainActor)
 			{
 				actors[(*it)->actorID]->setMain(true);
@@ -367,6 +404,8 @@ void RenderSystem::draw()
 	{
 		it->second->draw();
 	}
+	lightManager->draw(RenderWindow::getInstance()->window);
+
 }
 
 void RenderSystem::setMainActor(int mainActor)

@@ -9,6 +9,7 @@
 #include <gui.h>
 #include <set>
 #include <components/animation_component.h>
+#include <components/render_component.h>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
@@ -36,7 +37,8 @@ struct RenderSystem;
 
 struct DrawableActor
 {
-	DrawableActor(Console& console, RenderSystem& renderSystem);
+	DrawableActor(Console& console, RenderSystem& renderSystem, std::shared_ptr<LightManager> lightManager);
+	~DrawableActor();
 	void onUpdate(ActorUpdate& actorUpdate);
 	void draw();
 	void setMain(bool isMain);
@@ -51,15 +53,25 @@ private:
 	float positionY;
 	float speedX;
 	float speedY;
+
 	std::vector<LayerState> animationLayerStates;
 	std::vector<float> layerTime;
 	std::vector<int> layerImageIndex;
-	int lastMessagePrinted;
+	std::map<std::string, AnimationState> animationStates;
+
 	sf::RectangleShape rect;
 	sf::Vertex vertices[4];
-	std::map<std::string, AnimationState> animationStates;
+	
 	Console& console;
+	int lastMessagePrinted;
 	RenderSystem& renderSystem;
+
+	std::shared_ptr<LightManager> lightManager;
+	bool hasLightSource;
+	int lightSourceID;
+
+	RenderData renderData;
+
 };
 
 #define TILE_SIZE 32
@@ -68,7 +80,7 @@ private:
 
 struct RenderSystem
 {
-	RenderSystem(Console& console);
+	RenderSystem(Console& console, float screenWidth, float screenHeight);
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw();
 	void setMainActor(int mainActor);
@@ -94,6 +106,7 @@ private:
 	sf::VertexArray tileVertices;
 	sf::Texture tileset;
 	Console& console;
+	std::shared_ptr<LightManager> lightManager;
 	friend class DrawableActor;
 };
 

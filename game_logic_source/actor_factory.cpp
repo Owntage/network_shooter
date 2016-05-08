@@ -7,6 +7,7 @@
 #include "components/tile_component.h"
 #include "components/physics_component.h"
 #include "components/animation_swapping_component.h"
+#include "components/render_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -36,6 +37,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "tile") component = std::make_shared<TileComponent>();
 		if(v.first == "physics") component = std::make_shared<PhysicsComponent>();
 		if(v.first == "animation_swapping") component = std::make_shared<AnimationSwappingComponent>();
+		if(v.first == "render") component = std::make_shared<RenderComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;
