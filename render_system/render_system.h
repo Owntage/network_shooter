@@ -10,8 +10,8 @@
 #include <set>
 #include <components/animation_component.h>
 
-#define LIGHT_VERTEX_SHADER "light_vertex_shader.txt"
-#define LIGHT_FRAGMENT_SHADER "light_fragment_shader.txt"
+#define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
+#define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
 
 struct LightManager
 {

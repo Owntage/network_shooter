@@ -9,6 +9,7 @@
 #include <string>
 #include <chrono>
 #include <sstream>
+#include <render_system.h>
 #include <network.h>
 using namespace std;
 
@@ -21,69 +22,7 @@ using namespace std;
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 
-struct LightManager
-{
-	LightManager(float screenWidth, float screenHeight) :
-		screenWidth(screenWidth),
-		screenHeight(screenHeight)
-	{
-		shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
-		vertices.setPrimitiveType(sf::Quads);
-		renderTexture.create(screenWidth / 4, screenHeight / 4);
-		
-		shape.setSize(sf::Vector2f(screenWidth, screenHeight));
-		shape.setOrigin(screenWidth / 2, screenHeight / 2);
-	}
-	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
-	{
-		sf::Vertex vertex;
-		vertex.color = color;
-		vertex.color.a = intensity;
-		vertex.texCoords = pos;
-		vertex.position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-		vertices.append(vertex);
-		vertex.position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-		vertices.append(vertex);
-		vertex.position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-		vertices.append(vertex);
-		vertex.position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-		vertices.append(vertex);
-		return vertices.getVertexCount() / 4 - 1;
-	}
-	void draw(sf::RenderTarget& renderTarget)
-	{
-		sf::RenderStates renderStates;
-		renderStates.shader = &shader;
-		renderStates.blendMode = sf::BlendAdd;
-		shader.setParameter("offset", renderTarget.getView().getCenter());
-		renderTexture.setView(renderTarget.getView());
-		renderTexture.clear();
-		renderTexture.draw(vertices, renderStates);
-		renderTexture.display();
-		shape.setTexture(&renderTexture.getTexture());
-		shape.setPosition(renderTarget.getView().getCenter());
-		renderTarget.draw(shape);
-	}
-	void setPosition(int lightSourceIndex, sf::Vector2f pos)
-	{
-		vertices[lightSourceIndex * 4].texCoords = pos;
-		vertices[lightSourceIndex * 4 + 1].texCoords = pos;
-		vertices[lightSourceIndex * 4 + 2].texCoords = pos;
-		vertices[lightSourceIndex * 4 + 3].texCoords = pos;
-	}
-	void removeLightSource(int lightSourceIndex)
-	{
-		std::copy(&vertices[vertices.getVertexCount() - 4], &vertices[vertices.getVertexCount() - 4] + 4, &vertices[lightSourceIndex * 4]);
-		vertices.resize(vertices.getVertexCount() - 4);
-	}
-private:
-	sf::VertexArray vertices;
-	sf::Shader shader;
-	sf::RectangleShape shape;
-	sf::RenderTexture renderTexture;
-	float screenWidth;
-	float screenHeight;
-};
+
 
 
 int main()
