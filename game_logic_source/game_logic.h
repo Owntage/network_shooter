@@ -21,6 +21,7 @@ struct GameLogic
 	int createActor(std::string id);
 	void destroyActor(int number);
 private:
+	void thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID);
 	ActorFactory& actorFactory;
 	int systemCount;
 	int actorCount;

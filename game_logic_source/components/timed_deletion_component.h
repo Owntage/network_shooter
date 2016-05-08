@@ -1,0 +1,6 @@
+#ifndef TIMED_DELETION_COMPONENT_H
+#define TIMED_DELETION_COMPONENT_H
+
+
+
+#endif

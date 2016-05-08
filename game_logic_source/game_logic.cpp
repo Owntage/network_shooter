@@ -2,6 +2,19 @@
 #include "delete_update.h"
 #include <iostream>
 
+void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID)
+{
+	while(events.size() > 0)
+	{
+		auto event = events.back();
+		event->global = global;
+		event->actorID = actorID;
+		//here I should catch delete event...
+		onEvent(*event);
+		events.pop_back();
+	}
+}
+
 void GameLogic::onEvent(const Event& event)
 {
 	if(event.global)
@@ -9,48 +22,19 @@ void GameLogic::onEvent(const Event& event)
 		for(auto it = actors.begin(); it != actors.end(); it++)
 		{
 			it->second->onEvent(event);
-			
 			auto globalEvents = it->second->getGlobalEvents();
-			while(globalEvents.size() > 0)
-			{
-				auto globalEvent = globalEvents.back();
-				globalEvent->global = true;
-				onEvent(*globalEvent);
-				globalEvents.pop_back();
-			}
-			
+			thrownEventHandler(globalEvents, true, 0);
 			auto localEvents = it->second->getLocalEvents();
-			while(localEvents.size() > 0)
-			{
-				auto localEvent = localEvents.back();
-				localEvent->global = false;
-				localEvent->actorID = it->first;
-				onEvent(*localEvent);
-				localEvents.pop_back();
-			}
+			thrownEventHandler(localEvents, false, it->first);
 		}
 	}
 	else
 	{
 		actors[event.actorID]->onEvent(event);
 		auto globalEvents = actors[event.actorID]->getGlobalEvents();
-		while(globalEvents.size() > 0)
-		{
-			auto globalEvent = globalEvents.back();
-			globalEvent->global = true;
-			onEvent(*globalEvent);
-			globalEvents.pop_back();
-		}
-
+		thrownEventHandler(globalEvents, true, 0);
 		auto localEvents = actors[event.actorID]->getLocalEvents();
-		while(localEvents.size() > 0)
-		{
-			auto localEvent = localEvents.back();
-			localEvent->global = false;
-			localEvent->actorID = event.actorID;
-			onEvent(*localEvent);
-			localEvents.pop_back();
-		}
+		thrownEventHandler(localEvents, false, event.actorID);
 	}
 }
 
