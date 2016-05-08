@@ -14,9 +14,11 @@
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
 
+#define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
+
 struct LightManager
 {
-	LightManager(float screenWidth, float screenHeight);
+	LightManager(float screenWidth, float screenHeight, float tileWidth);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
 	void draw(sf::RenderTarget& renderTarget);
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
@@ -24,10 +26,12 @@ struct LightManager
 private:
 	sf::VertexArray vertices;
 	sf::Shader shader;
+	sf::Shader multiplyShader;
 	sf::RectangleShape shape;
 	sf::RenderTexture renderTexture;
 	float screenWidth;
 	float screenHeight;
+	float tileWidth;
 };
 
 

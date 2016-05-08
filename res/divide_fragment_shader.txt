@@ -1,0 +1,8 @@
+#version 120
+
+uniform float multiplier;
+
+void main(void)
+{
+	gl_FragColor = gl_Color * multiplier;
+}

@@ -27,7 +27,7 @@ using namespace std;
 
 int main()
 {
-	LightManager lightManager(800, 600);
+	LightManager lightManager(800, 600, 1);
 	for(int i = 0; i < 50; i++)
 	{
 		int x = (rand() % 100) - 50;

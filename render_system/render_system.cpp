@@ -9,16 +9,18 @@
 #include <delete_update.h>
 
 
-LightManager::LightManager(float screenWidth, float screenHeight) :
+LightManager::LightManager(float screenWidth, float screenHeight, float tileWidth) :
 	screenWidth(screenWidth),
-	screenHeight(screenHeight)
+	screenHeight(screenHeight),
+	tileWidth(tileWidth)
 {
 	shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
+	multiplyShader.loadFromFile(MULTIPLY_FRAGMENT_SHADER, sf::Shader::Fragment);
 	vertices.setPrimitiveType(sf::Quads);
 	renderTexture.create(screenWidth / 4, screenHeight / 4);
 
-	shape.setSize(sf::Vector2f(screenWidth /32, screenHeight / 32));
-	shape.setOrigin(screenWidth / 64, screenHeight / 64);
+	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
+	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
 }
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
@@ -44,9 +46,10 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderStates.shader = &shader;
 	renderStates.blendMode = sf::BlendAdd;
 	sf::Vector2f center = renderTarget.getView().getCenter();
-	center.x *= 32;
-	center.y *= 32;
+	center.x *= tileWidth;
+	center.y *= tileWidth;
 	shader.setParameter("offset", center);
+	multiplyShader.setParameter("multiplier", 0.3);
 	sf::View lightView;
 	lightView.setCenter(sf::Vector2f(0, 0));
 	lightView.setSize(screenWidth, screenHeight);
@@ -56,6 +59,11 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderTexture.display();
 	shape.setTexture(&renderTexture.getTexture());
 	shape.setPosition(renderTarget.getView().getCenter());
+
+	sf::RenderStates multiplyRenderStates;
+	multiplyRenderStates.blendMode = sf::BlendAdd;
+	multiplyRenderStates.shader = &multiplyShader;
+	renderTarget.draw(shape, multiplyRenderStates);
 	renderTarget.draw(shape, sf::BlendMultiply);
 	//renderTarget.draw(shape, sf::BlendAdd);
 }
@@ -330,18 +338,18 @@ void DrawableActor::draw()
 				renderData.lightIntensity);
 			hasLightSource = true;
 		}
-		lightManager->setPosition(lightSourceID, sf::Vector2f(positionX * 32.0f, positionY * 32.0f));
+		lightManager->setPosition(lightSourceID, sf::Vector2f(positionX * TILE_SIZE, positionY * TILE_SIZE));
 	}
 	
 }
 
 RenderSystem::RenderSystem(Console& console, float screenWidth, float screenHeight) : 
-	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / 32.0f, screenHeight / 32.0f)), 
+	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE, screenHeight / TILE_SIZE)), 
 	mainActor(-1), console(console)
 {
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
 	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
-	lightManager = std::make_shared<LightManager>(screenWidth, screenHeight);
+	lightManager = std::make_shared<LightManager>(screenWidth, screenHeight, TILE_SIZE);
 }
 
 void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)

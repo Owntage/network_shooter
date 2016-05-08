@@ -1,6 +1,7 @@
 #include "move_component.h"
 #include "move_event.h"
 #include "world.h"
+#include "coord_event.h"
 #include <iostream>
 
 void MoveComponent::onEvent(const Event& event)
@@ -23,6 +24,13 @@ void MoveComponent::onEvent(const Event& event)
 		{
 			currentDataNumber++;
 		}
+	}
+	else if(event.name == "set_coords")
+	{
+		const CoordEvent& coordEvent = (const CoordEvent&) event;
+		x = coordEvent.x;
+		y = coordEvent.y;
+		currentDataNumber++;
 	}
 }
 
