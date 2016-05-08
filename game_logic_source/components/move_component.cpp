@@ -1,5 +1,7 @@
 #include "move_component.h"
 #include "move_event.h"
+#include "world.h"
+#include <iostream>
 
 void MoveComponent::onEvent(const Event& event)
 {
@@ -39,7 +41,7 @@ bool MoveComponent::hasUpdate(int systemID)
 
 std::shared_ptr<ComponentUpdate> MoveComponent::getUpdate(int systemID)
 {
-	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(x, y);
+	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(x, y, 0, 0, World::getInstance()->getTime());
 	result->number = currentDataNumber;
 	return result;
 }

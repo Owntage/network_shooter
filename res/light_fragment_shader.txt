@@ -1,0 +1,14 @@
+#version 120
+
+varying vec2 pos_vec;
+varying vec2 tex_vec;
+
+uniform vec2 offset;
+
+void main(void)
+{
+	float len = length(pos_vec + offset - tex_vec);
+	float intensity = gl_Color.a * 255;
+	float len_power = 1.5;
+	gl_FragColor = gl_FragColor + vec4(gl_Color.r * intensity / pow(len, len_power), gl_Color.g * intensity  / pow(len, len_power), gl_Color.b * intensity / pow(len, len_power), 1.0);
+}

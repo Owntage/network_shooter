@@ -1,8 +1,9 @@
 <properties>
 	<testActor>
 		<physics>
-			<type>dynamic</type>
+			<type>circle</type>
 			<id>player</id>
+			
 			<x>0.0</x>
 			<y>0.0</y>
 			<speed>15.0</speed>
@@ -52,6 +53,7 @@
 		<physics>
 			<type>static</type>
 			<id>wall</id>
+			
 		</physics>
 	</wall>
 </properties>

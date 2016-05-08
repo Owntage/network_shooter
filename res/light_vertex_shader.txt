@@ -1,0 +1,22 @@
+#version 120
+
+uniform vec2 offset;
+
+varying vec2 pos_vec;
+varying vec2 tex_vec;
+
+void main(void)
+{
+	// transform the vertex position
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_Position.z = gl_Position.x;
+	
+	pos_vec = gl_Vertex.xy;
+	tex_vec = gl_MultiTexCoord0.xy;
+	
+    // transform the texture coordinates
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+    // forward the vertex color
+    gl_FrontColor = gl_Color;
+}

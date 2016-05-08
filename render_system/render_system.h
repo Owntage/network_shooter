@@ -10,6 +10,24 @@
 #include <set>
 #include <components/animation_component.h>
 
+#define LIGHT_VERTEX_SHADER "light_vertex_shader.txt"
+#define LIGHT_FRAGMENT_SHADER "light_fragment_shader.txt"
+
+struct LightManager
+{
+	LightManager(float screenWidth, float screenHeight);
+	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	void draw(sf::RenderTarget& renderTarget);
+	void setPosition(int lightSourceIndex, sf::Vector2f pos);
+	void removeLightSource(int lightSourceIndex);
+private:
+	sf::VertexArray vertices;
+	sf::Shader shader;
+	sf::RectangleShape shape;
+	sf::RenderTexture renderTexture;
+	float screenWidth;
+	float screenHeight;
+};
 
 
 #define DEFAULT_TEXTURE "res/graphic/default.png"
