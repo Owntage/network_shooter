@@ -53,6 +53,32 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 	}
 	if(shouldDelete)
 	{
+		for(auto it = actors.begin(); it != actors.end(); it++)
+		{
+			auto requests = it->second->getRequests();
+			while(requests.size() > 0)
+			{
+				if(requests.back()->global)
+				{
+					for(auto it2 = actors.begin(); it2 != actors.end(); it2++)
+					{
+						it2->second->onRequest(*requests.back());
+					}
+				}
+				else
+				{
+					if(actors.find(requests.back()->actorID) != actors.end())
+					{
+						actors[requests.back()->actorID]->onRequest(*requests.back());
+					}
+				}
+				
+				requests.pop_back();
+
+			}
+		}
+
+
 		for(auto it = actorsMarkedToDelete.begin(); it != actorsMarkedToDelete.end(); it++)
 		{
 			destroyActor(*it);

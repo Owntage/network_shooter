@@ -6,6 +6,7 @@
 #include "actor_update.h"
 #include "components/icomponent.h"
 #include "event.h"
+#include "request.h"
 
 
 struct Actor
@@ -16,7 +17,9 @@ struct Actor
 	ActorUpdate getUpdates(int systemID);
 	std::vector<std::shared_ptr<Event> > getGlobalEvents();
 	std::vector<std::shared_ptr<Event> > getLocalEvents();
+	std::vector<std::shared_ptr<Request> > getRequests();
 	void onEvent(const Event& event);
+	void onRequest(const Request& request);
 	void approve(std::string component, int systemID, int number);
 	friend class ActorFactory;
 	

@@ -3,6 +3,7 @@
 #include "move_update.h"
 #include "coord_event.h"
 
+
 PhysicsComponent::PhysicsComponent() :
 	up(false),
 	down(false),
@@ -21,6 +22,14 @@ PhysicsComponent::~PhysicsComponent()
 		World::getInstance()->destroyBody(body);
 	}
 	
+}
+
+void PhysicsComponent::onRequest(const Request& request)
+{
+	if(request.name == "coords")
+	{
+		request.callback(CoordEvent("", 0, body->GetPosition().x, body->GetPosition().y));
+	}
 }
 
 void PhysicsComponent::onEvent(const Event& event)

@@ -23,6 +23,7 @@ struct PhysicsComponent : IComponent
 	PhysicsComponent();
 	~PhysicsComponent();
 	void onEvent(const Event& event);
+	void onRequest(const Request& request);
 	bool hasUpdate(int systemID);
 	std::string getName();
 	std::shared_ptr<ComponentUpdate> getUpdate(int syatemID);

@@ -2,6 +2,7 @@
 #include "move_event.h"
 #include "string_event.h"
 #include "animation_event.h"
+#include "coord_event.h"
 #include <iostream>
 #include <math.h>
 

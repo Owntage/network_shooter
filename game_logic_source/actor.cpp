@@ -61,11 +61,33 @@ std::vector<std::shared_ptr<Event> > Actor::getLocalEvents()
 	return result;
 }
 
+std::vector<std::shared_ptr<Request> > Actor::getRequests()
+{
+	std::vector<std::shared_ptr<Request> > result;
+	for(auto it = components.begin(); it != components.end(); it++)
+	{
+		while((*it)->requests.size() > 0)
+		{
+			result.push_back((*it)->requests.back());
+			(*it)->requests.pop_back();
+		}
+	}
+	return result;
+}
+
 void Actor::onEvent(const Event& event)
 {
 	for(auto it = components.begin(); it != components.end(); it++)
 	{
 		(*it)->onEvent(event);
+	}
+}
+
+void Actor::onRequest(const Request& request)
+{
+	for(auto it = components.begin(); it != components.end(); it++)
+	{
+		(*it)->onRequest(request);
 	}
 }
 
