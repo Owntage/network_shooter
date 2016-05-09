@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <set>
 #include "actor_factory.h"
 #include "actor_update.h"
 #include "event.h"
@@ -24,7 +25,7 @@ struct GameLogic
 private:
 	void thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID);
 	void onEvent(const Event& event, bool shouldDelete);
-	std::vector<int> actorsMarkedToDelete;
+	std::set<int> actorsMarkedToDelete;
 
 	ActorFactory& actorFactory;
 	int systemCount;

@@ -49,7 +49,7 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	center.x *= tileWidth;
 	center.y *= tileWidth;
 	shader.setParameter("offset", center);
-	multiplyShader.setParameter("multiplier", 0.3);
+	
 	sf::View lightView;
 	lightView.setCenter(sf::Vector2f(0, 0));
 	lightView.setSize(screenWidth, screenHeight);
@@ -61,11 +61,16 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	shape.setPosition(renderTarget.getView().getCenter());
 
 	sf::RenderStates multiplyRenderStates;
+
 	multiplyRenderStates.blendMode = sf::BlendAdd;
+	multiplyShader.setParameter("multiplier", 5.0f * 0.2f);
 	multiplyRenderStates.shader = &multiplyShader;
 	renderTarget.draw(shape, multiplyRenderStates);
-	renderTarget.draw(shape, sf::BlendMultiply);
-	//renderTarget.draw(shape, sf::BlendAdd);
+
+	multiplyRenderStates.blendMode = sf::BlendMultiply;
+	multiplyShader.setParameter("multiplier", 5.0f);
+	multiplyRenderStates.shader = &multiplyShader;
+	renderTarget.draw(shape, multiplyRenderStates);
 }
 
 void LightManager::setPosition(int lightSourceIndex, sf::Vector2f pos)

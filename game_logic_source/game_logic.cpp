@@ -13,7 +13,7 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 		if(event->name == "delete")
 		{
 			std::cout << "cached delete event" << std::endl;
-			actorsMarkedToDelete.push_back(actorID);
+			actorsMarkedToDelete.insert(actorID);
 			events.pop_back();
 		}
 		else
@@ -53,11 +53,11 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 	}
 	if(shouldDelete)
 	{
-		while(actorsMarkedToDelete.size() > 0)
+		for(auto it = actorsMarkedToDelete.begin(); it != actorsMarkedToDelete.end(); it++)
 		{
-			destroyActor(actorsMarkedToDelete.back());
-			actorsMarkedToDelete.pop_back();
+			destroyActor(*it);
 		}
+		actorsMarkedToDelete.clear();
 	}
 }
 
@@ -164,9 +164,11 @@ int GameLogic::createActor(std::string actorID)
 
 void GameLogic::destroyActor(int actorID)
 {
-	std::cout << "destroying actor: " << actorID << std::endl;
-	deletedActors.push_back(actorID);
-	actors.erase(actors.find(actorID));
+	if(actors.find(actorID) != actors.end())
+	{
+		deletedActors.push_back(actorID);
+		actors.erase(actors.find(actorID));
+	}
 }
 
 
