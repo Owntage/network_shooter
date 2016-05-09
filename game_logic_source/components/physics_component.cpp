@@ -25,6 +25,11 @@ PhysicsComponent::~PhysicsComponent()
 
 void PhysicsComponent::onEvent(const Event& event)
 {
+	if(event.name == "actor_id")
+	{
+		thisActorID = event.actorID;
+		contactData.actorID = thisActorID;
+	}
 	if(event.name == "move")
 	{
 		const MoveEvent& moveEvent = (const MoveEvent&) event;
@@ -58,7 +63,16 @@ void PhysicsComponent::onEvent(const Event& event)
 		{
 			body->ApplyForceToCenter(60.0 * direction, true);
 		}
-		//here should be handled hit
+		
+		if(contactData.hit)
+		{
+			contactData.hit = false;
+			localEvents.push_back(std::make_shared<PhysicsEvent>(thisActorID, 
+				contactData.otherActorID, 
+				contactData.otherType,
+				contactData.release));
+		}
+
 	}
 	if(event.name == "set_coords")
 	{
@@ -142,7 +156,7 @@ std::shared_ptr<IComponent> PhysicsComponent::loadFromXml(const boost::property_
 	World::setDensity(result->body, density);
 	World::setRestitution(result->body, restitution);
 	World::setFriction(result->body, friction);
-	result->contactData.id = id;
+	result->contactData.type = id;
 	World::setContactData(result->body, result->contactData);
 	return result;
 }

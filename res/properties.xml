@@ -98,4 +98,26 @@
 		</render>
 		<move>.</move>
 	</green_light>
+	<box>
+		<physics>
+			<type>dynamic</type>
+			<id>box</id>
+		</physics>
+		<animation>
+			<state>
+				<name>texture</name>
+				<image>res/graphic/default.png</image>
+				<delay>1</delay>
+			</state>
+			<layer_count>1</layer_count>
+			<layer>
+				<layer_number>0</layer_number>
+				<is_active>true</is_active>
+				<state>texture</state>
+			</layer>
+		</animation>
+		<contact_deletion>
+			<deleter_type>player</deleter_type>
+		</contact_deletion>
+	</box>
 </properties>

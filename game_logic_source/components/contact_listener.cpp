@@ -19,12 +19,13 @@ void MyContactListener::BeginContact(b2Contact* contact)
 	{
 		((ContactData*)(fixtureA->GetUserData()))->hit = true;
 		((ContactData*)(fixtureA->GetUserData()))->release = false;
-		((ContactData*)(fixtureA->GetUserData()))->hit_id = ((ContactData*)(fixtureB->GetUserData()))->id;
+		((ContactData*)(fixtureA->GetUserData()))->otherType = ((ContactData*)(fixtureB->GetUserData()))->type;
+		((ContactData*)(fixtureA->GetUserData()))->otherActorID = ((ContactData*)(fixtureB->GetUserData()))->actorID;
 		
 
 		((ContactData*)(fixtureB->GetUserData()))->hit = true;
 		((ContactData*)(fixtureB->GetUserData()))->release = false;
-		((ContactData*)(fixtureB->GetUserData()))->hit_id = ((ContactData*)(fixtureA->GetUserData()))->id;
+		((ContactData*)(fixtureB->GetUserData()))->otherActorID = ((ContactData*)(fixtureA->GetUserData()))->actorID;
 		
 		
 	}
@@ -39,11 +40,12 @@ void MyContactListener::EndContact(b2Contact* contact)
 	{
 		((ContactData*)(fixtureA->GetUserData()))->hit = true;
 		((ContactData*)(fixtureA->GetUserData()))->release = true;
-		((ContactData*)(fixtureA->GetUserData()))->hit_id = ((ContactData*)(fixtureB->GetUserData()))->id;
+		((ContactData*)(fixtureA->GetUserData()))->otherType = ((ContactData*)(fixtureB->GetUserData()))->type;
+		((ContactData*)(fixtureA->GetUserData()))->otherActorID = ((ContactData*)(fixtureB->GetUserData()))->actorID;
 
 		((ContactData*)(fixtureB->GetUserData()))->hit = true;
 		((ContactData*)(fixtureB->GetUserData()))->release = true;
-		((ContactData*)(fixtureB->GetUserData()))->hit_id = ((ContactData*)(fixtureA->GetUserData()))->id;
+		((ContactData*)(fixtureB->GetUserData()))->otherActorID = ((ContactData*)(fixtureA->GetUserData()))->actorID;
 	}
 }
 

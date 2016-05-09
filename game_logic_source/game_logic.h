@@ -14,6 +14,7 @@ struct GameLogic
 {
 	GameLogic(ActorFactory& actorFactory): actorFactory(actorFactory), systemCount(0), actorCount(0) {}
 	void onEvent(const Event& event);
+	
 	void approve(int actorID, std::string component, int systemID, int number);
 	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID);
 	std::vector<std::shared_ptr<ActorUpdate> > getUpdates(int systemID, float x, float y, float updateRadius);
@@ -22,6 +23,9 @@ struct GameLogic
 	void destroyActor(int number);
 private:
 	void thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID);
+	void onEvent(const Event& event, bool shouldDelete);
+	std::vector<int> actorsMarkedToDelete;
+
 	ActorFactory& actorFactory;
 	int systemCount;
 	int actorCount;

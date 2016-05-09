@@ -8,6 +8,8 @@
 #include "components/physics_component.h"
 #include "components/animation_swapping_component.h"
 #include "components/render_component.h"
+#include "components/timed_deletion_component.h"
+#include "components/contact_deletion_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -38,6 +40,8 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "physics") component = std::make_shared<PhysicsComponent>();
 		if(v.first == "animation_swapping") component = std::make_shared<AnimationSwappingComponent>();
 		if(v.first == "render") component = std::make_shared<RenderComponent>();
+		if(v.first == "timed_deletion") component = std::make_shared<TimedDeletionComponent>();
+		if(v.first == "contact_deletion") component = std::make_shared<ContactDeletionComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

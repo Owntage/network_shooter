@@ -10,12 +10,27 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 		event->global = global;
 		event->actorID = actorID;
 		//here I should catch delete event...
-		onEvent(*event);
-		events.pop_back();
+		if(event->name == "delete")
+		{
+			std::cout << "cached delete event" << std::endl;
+			actorsMarkedToDelete.push_back(actorID);
+			events.pop_back();
+		}
+		else
+		{
+			onEvent(*event, false);
+			events.pop_back();
+		}
+		
 	}
 }
 
 void GameLogic::onEvent(const Event& event)
+{
+	onEvent(event, true);
+}
+
+void GameLogic::onEvent(const Event& event, bool shouldDelete)
 {
 	if(event.global)
 	{
@@ -23,7 +38,7 @@ void GameLogic::onEvent(const Event& event)
 		{
 			it->second->onEvent(event);
 			auto globalEvents = it->second->getGlobalEvents();
-			thrownEventHandler(globalEvents, true, 0);
+			thrownEventHandler(globalEvents, true, it->first);
 			auto localEvents = it->second->getLocalEvents();
 			thrownEventHandler(localEvents, false, it->first);
 		}
@@ -32,9 +47,17 @@ void GameLogic::onEvent(const Event& event)
 	{
 		actors[event.actorID]->onEvent(event);
 		auto globalEvents = actors[event.actorID]->getGlobalEvents();
-		thrownEventHandler(globalEvents, true, 0);
+		thrownEventHandler(globalEvents, true, event.actorID);
 		auto localEvents = actors[event.actorID]->getLocalEvents();
 		thrownEventHandler(localEvents, false, event.actorID);
+	}
+	if(shouldDelete)
+	{
+		while(actorsMarkedToDelete.size() > 0)
+		{
+			destroyActor(actorsMarkedToDelete.back());
+			actorsMarkedToDelete.pop_back();
+		}
 	}
 }
 
@@ -74,7 +97,6 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID)
 		auto deleteUpdate = std::make_shared<DeleteUpdate>(deletedActors.size() - 1);
 		for(int i = deletedActorApproves[systemID] + 1; i < deletedActors.size(); i++)
 		{
-			//std::cout << "deleted actor: " << deletedActors[i] << std::endl;
 			deleteUpdate->deletedActors.push_back(deletedActors[i]);
 		}
 		deleteUpdate->actorID = -1;
@@ -136,11 +158,13 @@ int GameLogic::createActor(std::string actorID)
 {
 	actorCount++;
 	actors[actorCount] = actorFactory.createActor(actorID);
+	onEvent(Event("actor_id", false, actorCount));
 	return actorCount;
 }
 
 void GameLogic::destroyActor(int actorID)
 {
+	std::cout << "destroying actor: " << actorID << std::endl;
 	deletedActors.push_back(actorID);
 	actors.erase(actors.find(actorID));
 }

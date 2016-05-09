@@ -20,8 +20,10 @@ public:
 	}
 	bool hit;
 	bool release;
-	std::string id;
-	std::string hit_id;
+	std::string type;
+	std::string otherType;
+	int actorID;
+	int otherActorID;
 };
 
 
