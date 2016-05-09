@@ -12,6 +12,7 @@ struct AnimationSwappingComponent : IComponent
 	std::shared_ptr<ComponentUpdate> getUpdate(int syatemID);
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
+	
 	std::string runningTexture;
 	std::string normalTexture;
 	std::string bodyTexture;

@@ -10,6 +10,7 @@
 
 void AnimationSwappingComponent::onEvent(const Event& event)
 {
+	
 	if(event.name == "move")
 	{
 		//std::cout << "animation swapping component received move event" << std::endl;
@@ -48,13 +49,13 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 			if(moving)
 			{
 
-				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, angle), 0));
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, angle), event.actorID));
 			}
 			else
 			{
-				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, false, moveEvent.angle), 0));
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, false, moveEvent.angle), event.actorID));
 			}
-			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, moveEvent.angle), 0));
+			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, moveEvent.angle), event.actorID));
 		}
 		
 	}

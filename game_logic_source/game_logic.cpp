@@ -1,5 +1,6 @@
 #include "game_logic.h"
 #include "delete_update.h"
+#include "components/create_event.h"
 #include <iostream>
 
 void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID)
@@ -8,8 +9,7 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 	{
 		auto event = events.back();
 		event->global = global;
-		event->actorID = actorID;
-		//here I should catch delete event...
+		
 		if(event->name == "delete")
 		{
 			std::cout << "cached delete event" << std::endl;
@@ -18,8 +18,18 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 		}
 		else
 		{
-			onEvent(*event, false);
-			events.pop_back();
+			if(event->name == "create")
+			{
+				std::cout << "cached create event" << std::endl;
+				createEvents.push_back(event);
+				events.pop_back();
+			}
+			else
+			{
+				onEvent(*event, false);
+				events.pop_back();
+			}
+			
 		}
 		
 	}
@@ -78,6 +88,29 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 			}
 		}
 
+		
+		while(createEvents.size() > 0)
+		{
+			//std::cout << "started creating" << std::endl;
+			//std::cout << "createEvents.size: " << createEvents.size() << std::endl;
+			//std::cout << "creating actor..." << std::endl;
+			CreateEvent& createEvent = (CreateEvent&) *createEvents.back();
+			int createdActor = createActor(createEvent.type);
+			//std::cout << "createEvent.events.size: " << createEvent.events.size() << std::endl;
+			while(createEvent.events.size() > 0)
+			{
+				//std::cout << "createEvent.event.size: " << createEvent.events.size() << std::endl;
+				createEvent.events.back()->global = false;
+				createEvent.events.back()->actorID = createdActor;
+				onEvent(*createEvent.events.back(), false);
+				createEvent.events.pop_back();
+			}
+			
+			createEvents.pop_back();
+			//std::cout << "createEvents size after pop back: " << createEvents.size() << std::endl;
+			//std::cout << "finished creating" << std::endl;
+		}
+		
 
 		for(auto it = actorsMarkedToDelete.begin(); it != actorsMarkedToDelete.end(); it++)
 		{
@@ -182,9 +215,10 @@ int GameLogic::registerSystem()
 
 int GameLogic::createActor(std::string actorID)
 {
+	
 	actorCount++;
 	actors[actorCount] = actorFactory.createActor(actorID);
-	onEvent(Event("actor_id", false, actorCount));
+	onEvent(Event("actor_id", false, actorCount), false);
 	return actorCount;
 }
 

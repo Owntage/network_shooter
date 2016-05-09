@@ -4,6 +4,14 @@
 #include "coord_event.h"
 #include <iostream>
 
+void MoveComponent::onRequest(const Request& request)
+{
+	if(request.name == "coords")
+	{
+		request.callback(CoordEvent("", 0, x, y));
+	}
+}
+
 void MoveComponent::onEvent(const Event& event)
 {
 	if(event.name == "move")

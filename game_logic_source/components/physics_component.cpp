@@ -88,6 +88,11 @@ void PhysicsComponent::onEvent(const Event& event)
 		const CoordEvent& coordEvent = (const CoordEvent&) event;
 		body->SetTransform(b2Vec2(coordEvent.x, coordEvent.y), body->GetAngle());
 	}
+	if(event.name == "set_speed")
+	{
+		const CoordEvent& coordEvent = (const CoordEvent&) event;
+		body->SetLinearVelocity(b2Vec2(coordEvent.x, coordEvent.y));
+	}
 	if(event.name == "set_scale")
 	{
 		const CoordEvent& coordEvent = (const CoordEvent&) event;

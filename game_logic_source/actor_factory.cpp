@@ -10,6 +10,7 @@
 #include "components/render_component.h"
 #include "components/timed_deletion_component.h"
 #include "components/contact_deletion_component.h"
+#include "components/spawner_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -42,6 +43,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "render") component = std::make_shared<RenderComponent>();
 		if(v.first == "timed_deletion") component = std::make_shared<TimedDeletionComponent>();
 		if(v.first == "contact_deletion") component = std::make_shared<ContactDeletionComponent>();
+		if(v.first == "spawner") component = std::make_shared<SpawnerComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

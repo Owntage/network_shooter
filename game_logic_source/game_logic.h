@@ -26,6 +26,7 @@ private:
 	void thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID);
 	void onEvent(const Event& event, bool shouldDelete);
 	std::set<int> actorsMarkedToDelete;
+	std::vector<std::shared_ptr<Event> > createEvents;
 
 	ActorFactory& actorFactory;
 	int systemCount;
