@@ -74,6 +74,12 @@ void NetworkLogic::sendEvents()
 				packet << localPort << "event" << uniqueID << (Event&) chatEvent << chatEvent;
 				socket.send(address, packet);
 			}
+			if((*it)->name == "shoot")
+			{
+				packet.reset();
+				packet << localPort << "event" << uniqueID << *(*it);
+				socket.send(address, packet);
+			}
 		}
 
 		//send request for images;
@@ -248,6 +254,12 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					int number;
 					packet >>number;
 					controller.approve("chat", number);
+				}
+				else if(approveType == "shoot")
+				{
+					int number;
+					packet >> number;
+					controller.approve("shoot", number);
 				}
 			}
 			else if(packetType == "image_size")

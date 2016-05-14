@@ -18,6 +18,7 @@ struct XmlVisitor
 
 void walkXml(std::string filename, const XmlVisitor& visitor);
 
+/*
 template<class VISITOR_T, class STRUCT_T>
 struct XmlLoader : Singleton<XmlLoader<VISITOR_T, STRUCT_T> >
 {
@@ -31,6 +32,6 @@ private:
 	}
 	std::map<std::string, STRUCT_T> properties;
 };
-
+*/
 
 #endif

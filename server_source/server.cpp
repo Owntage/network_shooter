@@ -170,6 +170,11 @@ void GameServer::receiveGameEvent(Packet& packet, IpAddress& address)
 				packet >> chatEvent;
 				gameLogic.onEvent(chatEvent);
 			}
+			if(event.name == "shoot")
+			{
+				gameLogic.onEvent(event);
+
+			}
 		}
 		packet.reset();
 		packet << "approve" << event.name << event.number;

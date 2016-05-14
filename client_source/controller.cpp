@@ -18,6 +18,8 @@ Controller::Controller(Console& console, int tileSize, int screenWidth, int scre
 	currentNumbers["chat"] = 0;
 	approvedNumbers["move"] = -1;
 	approvedNumbers["chat"] = 0;
+	currentNumbers["mouse"] = 0;
+	approvedNumbers["move"] = 0;
 	isMessageSent = false;
 	console.setInputCallback([this](std::string input)
 	{
@@ -69,6 +71,10 @@ void Controller::onEvent(sf::Event event)
 
 		
 	}
+	if(event.type == sf::Event::MouseButtonPressed)
+	{
+		currentNumbers["mouse"]++;
+	}
 	
 }
 
@@ -107,6 +113,13 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 		std::shared_ptr<ChatEvent> chatEvent = std::make_shared<ChatEvent>(message, moveEvent.actorID);
 		chatEvent->number = currentNumbers["chat"];
 		result.push_back(chatEvent);
+	}
+	if(approvedNumbers["mouse"] < currentNumbers["mouse"])
+	{
+		auto event = std::make_shared<Event>("shoot", false, moveEvent.actorID);
+		event->number = currentNumbers["mouse"];
+		result.push_back(event);
+		//result.push_back(std::make_shared<Event>("shoot", false, moveEvent.actorID));
 	}
 	return result;
 }
