@@ -18,6 +18,17 @@ struct PhysicsEvent : Event
 	std::string otherType;
 };
 
+struct AngleEvent : Event
+{
+	AngleEvent(int actorID, float angle) : 
+		Event("angle", false, actorID),
+		angle(angle) {}
+
+	float angle;
+
+
+};
+
 struct PhysicsComponent : IComponent
 {
 	PhysicsComponent();
@@ -31,6 +42,11 @@ struct PhysicsComponent : IComponent
 private:
 	int thisActorID;
 	ContactData contactData;
+
+	float bodyAngle;
+	float mouseAngle;
+	float angularSpeed;
+
 	bool up, down, left, right;
 	float speed;
 	float density;

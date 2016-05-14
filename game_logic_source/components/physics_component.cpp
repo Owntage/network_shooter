@@ -2,6 +2,7 @@
 #include "move_event.h"
 #include "move_update.h"
 #include "coord_event.h"
+#include <math.h>
 
 
 PhysicsComponent::PhysicsComponent() :
@@ -10,7 +11,9 @@ PhysicsComponent::PhysicsComponent() :
 	left(false),
 	right(false),
 	wasMoving(false),
-	speed(3.0f)
+	speed(3.0f),
+	bodyAngle(0.0f),
+	mouseAngle(0.0f)
 {
 	body = nullptr;
 }
@@ -30,6 +33,45 @@ void PhysicsComponent::onRequest(const Request& request)
 	{
 		request.callback(CoordEvent("", 0, body->GetPosition().x, body->GetPosition().y));
 	}
+	if(request.name == "angle")
+	{
+		request.callback(AngleEvent(0, bodyAngle));
+	}
+}
+
+static const float PI = 3.141593;
+
+static float getAngle(float x, float y)
+{
+	
+	if(x < 0)
+	{
+		return atan(y / x) + PI;
+	}
+	else
+	{
+		if(y < 0)
+		{
+			return atan(y / x) + 2 * PI;
+		}
+		else
+		{
+			return atan(y / x);
+		}
+	}
+}
+
+//contract: 0 <= destAngle, currentAngle <= 2 * PI
+//return value: how much should add to currentAngle to become destAngle
+static float getRelativeAngle(float destAngle, float currentAngle)
+{
+	float deltaAngle = destAngle - currentAngle;
+	if(deltaAngle < 0)
+	{
+		deltaAngle += PI * 2;
+	}
+	//std::cout << "delta angle: " << deltaAngle;
+	return deltaAngle;
 }
 
 void PhysicsComponent::onEvent(const Event& event)
@@ -46,9 +88,31 @@ void PhysicsComponent::onEvent(const Event& event)
 		down = moveEvent.down;
 		left = moveEvent.left;
 		right = moveEvent.right;
+		mouseAngle = moveEvent.angle / 180.0f * PI;
 	}
 	if(event.name == "timer")
 	{
+
+		if(abs(mouseAngle - bodyAngle) > angularSpeed / 60.0f)
+		{
+			int direction = 1;
+			//std::cout << "relatinveAngle: " << getRelativeAngle(mouseAngle, bodyAngle) << std::endl;
+			if(getRelativeAngle(mouseAngle, bodyAngle) > PI)
+			{
+				direction = -1;
+			}
+			bodyAngle += direction * angularSpeed / 60.0f;
+			if(direction == 1 && bodyAngle > 2 * PI)
+			{
+				bodyAngle -= 2 * PI;
+			}
+			else if(direction == -1 && bodyAngle < 0)
+			{
+				bodyAngle += 2 * PI;
+			}
+		}
+
+
 		b2Vec2 direction(0, 0);
 		if(right) direction += b2Vec2(1, 0);
 		if(left) direction += b2Vec2(-1, 0);
@@ -67,6 +131,7 @@ void PhysicsComponent::onEvent(const Event& event)
 				wasMoving = false;
 			}
 		}
+
 		direction.Normalize();
 		if(body->GetLinearVelocity().LengthSquared() < speed * speed)
 		{
@@ -164,6 +229,9 @@ std::shared_ptr<IComponent> PhysicsComponent::loadFromXml(const boost::property_
 	double density = tree.get("density", 1.0);
 	double restitution = tree.get("restitution", 0.2);
 	double friction = tree.get("friction", 0.5);
+	
+	result->angularSpeed = tree.get("angular_speed", 3.14f);
+
 	result->density = density;
 	result->restitution = restitution;
 	result->friction = friction;

@@ -3,17 +3,13 @@
 World::World()
 {
 	b2Vec2 gravity(0,0);
-	world = new b2World(gravity);
-	contactListener = new MyContactListener;
-	world->SetContactListener(contactListener);
+	//world = new b2World(gravity);
+	world = std::make_shared<b2World>(gravity);
+	contactListener = std::make_shared<MyContactListener>();
+	world->SetContactListener(&*contactListener);
 	time = 0;
 }
 
-World::~World()
-{
-	delete(world);
-	delete(contactListener);
-}
 
 void World::update(double fps)
 {
@@ -26,10 +22,12 @@ float World::getTime()
 	return time;
 }
 
+/*
 b2World* World::getWorld()
 {
 	return world;
 }
+*/
 
 b2Body* World::createStaticBody(double x, double y, double width, double height)
 {

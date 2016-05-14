@@ -34,25 +34,14 @@ void SpawnerComponent::onEvent(const Event& event)
 					index = currentType;
 					currentType = (currentType + 1) % spawnerTypes.size();
 				}
-				/*
-				auto createEvent = std::make_shared<CreateEvent>();
-				createEvent->actorID = thisActorID;
-				createEvent->type = spawnerTypes[index];
-				createEvent->events.push_back(std::make_shared<CoordEvent>("set_coords", 0, 
-					body->))
-					*/
-				std::cout << "index: " << index << std::endl;
+				
 				requests.push_back(std::make_shared<Request>("coords", false, thisActorID, 
 					[this, index](const Event& event)
 				{
-					std::cout << "hello from request" << std::endl;
 					const CoordEvent& thisCoordEvent = (const CoordEvent&) event;
 					auto createEvent = std::make_shared<CreateEvent>();
 					createEvent->actorID = thisActorID;
 					createEvent->type = spawnerTypes[index];
-					std::cout << "type: " << spawnerTypes[index] << std::endl;
-					std::cout << "x: " << thisCoordEvent.x << std::endl;
-					std::cout << "y: " << thisCoordEvent.y << std::endl;
 					createEvent->events.push_back(std::make_shared<CoordEvent>("set_coords", 0, thisCoordEvent.x, thisCoordEvent.y));
 					float angle = rand() % 100;
 					angle /= 100.0f;

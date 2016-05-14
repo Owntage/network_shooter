@@ -2,6 +2,7 @@
 #include "move_event.h"
 #include "string_event.h"
 #include "animation_event.h"
+#include "physics_component.h"
 #include "coord_event.h"
 #include <iostream>
 #include <math.h>
@@ -10,14 +11,38 @@
 
 void AnimationSwappingComponent::onEvent(const Event& event)
 {
-	
+	if(event.name == "actor_id")
+	{
+		thisActorID = event.actorID;
+	}
+	if(event.name == "timer")
+	{
+		requests.push_back(std::make_shared<Request>("angle", false, thisActorID, 
+			[this](const Event& event)
+		{
+			
+			const AngleEvent& angleEvent = (const AngleEvent&) event;
+			if(moving)
+			{
+
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(runningTexture, true, angle), thisActorID));
+			}
+			else
+			{
+				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, false, angleEvent.angle * 180 / PI), thisActorID));
+			}
+			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, angleEvent.angle * 180 / PI), thisActorID));
+			//std::cout << "request response finished" << std::endl;
+		}));
+	}
 	if(event.name == "move")
 	{
 		//std::cout << "animation swapping component received move event" << std::endl;
 		const MoveEvent& moveEvent = (const MoveEvent&) event;
 		if(!(this->moveEvent == moveEvent))
 		{
-			bool moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
+			moving = moveEvent.up || moveEvent.down || moveEvent.left || moveEvent.right;
+			
 			//here I should count an angle
 			float dirX = 0.0f;
 			float dirY = 0.0f;
@@ -26,7 +51,8 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 			if(moveEvent.left) dirX -= 1.0f;
 			if(moveEvent.right) dirX += 1.0f;
 
-			float angle;
+
+			//float angle;
 
 			if(dirX < 0)
 			{
@@ -45,7 +71,9 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 			}
 
 			angle = angle / PI * 180.0f;
+			
 
+			/*
 			if(moving)
 			{
 
@@ -56,6 +84,8 @@ void AnimationSwappingComponent::onEvent(const Event& event)
 				localEvents.push_back(std::make_shared<AnimationEvent>(0, LayerState(normalTexture, false, moveEvent.angle), event.actorID));
 			}
 			localEvents.push_back(std::make_shared<AnimationEvent>(1, LayerState(bodyTexture, true, moveEvent.angle), event.actorID));
+			*/
+			
 		}
 		
 	}

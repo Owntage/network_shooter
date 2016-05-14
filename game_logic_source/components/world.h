@@ -5,6 +5,8 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <map>
+#include <set>
 #include <vector>
 #include "../gui_source/singleton.h"
 
@@ -30,7 +32,7 @@ public:
 class MyContactListener: public b2ContactListener
 {
 private:
-	std::vector<std::pair<std::string, std::string>> pairs;
+	std::set<std::pair<std::string, std::string>> pairs;
 public:
 	void addPair(std::pair<std::string, std::string> p);
 	void clearPairs();
@@ -43,15 +45,14 @@ public:
 class World: public Singleton<World>
 {
 private:
-	b2World* world;
-	b2ContactListener* contactListener;
+	std::shared_ptr<b2World> world;
+	std::shared_ptr<b2ContactListener> contactListener;
 	float time;
 public:
 	World();
-	~World();
 	void update(double fps);
 	float getTime();
-	b2World* getWorld();
+	//b2World* getWorld();
 	b2Body* createStaticBody(double x, double y, double width = 0.5, double height = 0.5);
 	b2Body* createDynamicBody(double x, double y);
 	b2Body* createDynamicCircle(double x, double y, double r = 0.5);

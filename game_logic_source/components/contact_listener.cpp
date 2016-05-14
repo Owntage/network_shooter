@@ -2,7 +2,11 @@
 
 void MyContactListener::addPair(std::pair<std::string, std::string> p)
 {
-	pairs.push_back(p);
+	pairs.insert(p);
+	std::pair<std::string, std::string> mirrored;
+	mirrored.first = p.second;
+	mirrored.second = p.first;
+	pairs.insert(mirrored);
 }
 
 void MyContactListener::clearPairs()
