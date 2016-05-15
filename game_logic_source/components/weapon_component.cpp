@@ -3,6 +3,7 @@
 #include "coord_event.h"
 #include "create_event.h"
 
+
 std::map<std::string, WeaponDef> WeaponComponent::weaponDefinitions;
 
 std::string WeaponPropertiesVisitor::getPropertiesFilename() const
@@ -19,6 +20,7 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 	weaponDef.period = tree.get("period", 0.5f);
 	weaponDef.bulletType = tree.get<std::string>("bullet_type");
 	weaponDef.dispersion = tree.get("dispersion", 0.3f);
+	weaponDef.bulletSpeed = tree.get("bullet_speed", 10.0f);
 	WeaponComponent::weaponDefinitions[nodeName] = weaponDef;
 }
 
@@ -52,19 +54,31 @@ void WeaponComponent::onEvent(const Event& event)
 	}
 	if(event.name == "shoot")
 	{
-		std::cout << "shooting..." << std::endl;
 		if(weapons.size() > 0)
 		{
-			Request request("angle", false, thisActorID, [this](const Event& event)
+			auto request = std::make_shared<Request>("angle", false, thisActorID, [this](const Event& event)
 			{
 				const AngleEvent& angleEvent = (const AngleEvent&) event;
 				float angle = angleEvent.angle;
-				Request coordRequest("coords", false, thisActorID, [this, angle](const Event& event)
+				auto coordRequest = std::make_shared<Request>("coords", false, thisActorID, [this, angle](const Event& event)
 				{
 					const CoordEvent& coordEvent = (const CoordEvent&) event;
+					//std::cout << "angle: " << angle << std::endl;
+					//std::cout << "coords: " << coordEvent.x << " " << coordEvent.y << std::endl;
+					auto createEvent = std::make_shared<CreateEvent>();
+					createEvent->type = weapons[currentWeapon].bulletType;
+					createEvent->actorID = thisActorID;
+					
+					auto newCoordEvent = std::make_shared<CoordEvent>("set_coords", 0, coordEvent.x + 1.5 * cos(angle), coordEvent.y + 1.5 * sin(angle));
+					auto speedCoordEvent = std::make_shared<CoordEvent>("set_speed", 0, weapons[currentWeapon].bulletSpeed * cos(angle), weapons[currentWeapon].bulletSpeed * sin(angle));
+					createEvent->events.push_back(newCoordEvent);
+					createEvent->events.push_back(speedCoordEvent);
+					localEvents.push_back(createEvent);
 					
 				});
+				requests.push_back(coordRequest);
 			});
+			requests.push_back(request);
 		}
 	}
 }

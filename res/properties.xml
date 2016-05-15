@@ -1,5 +1,8 @@
 <properties>
 	<testActor>
+		<weapon>
+			<default_weapon>shotgun</default_weapon>
+		</weapon>
 		<render>
 			<sprite_is_visible>true</sprite_is_visible>
 			<light_is_visible>true</light_is_visible>
@@ -69,7 +72,7 @@
 		<render>
 			<light_is_visible>true</light_is_visible>
 			<sprite_is_visible>false</sprite_is_visible>
-			<light_intensity>1</light_intensity>
+			<light_intensity>5</light_intensity>
 			<light_r>0</light_r>
 			<light_g>255</light_g>
 			<light_b>255</light_b>
@@ -79,7 +82,8 @@
 	<red_light>
 		<render>
 			<light_is_visible>true</light_is_visible>
-			<sprite_is_visible>false</sprite_is_visible>
+			<sprite_is_visible>true</sprite_is_visible>
+			<sprite_scale>1</sprite_scale>
 			<light_intensity>10</light_intensity>
 			<light_r>255</light_r>
 			<light_g>0</light_g>
@@ -103,6 +107,15 @@
 			<type>dynamic</type>
 			<id>box</id>
 		</physics>
+		<render>
+			<sprite_is_visible>true</sprite_is_visible>
+			<light_is_visible>true</light_is_visible>
+			<light_intensity>2</light_intensity>
+			<sprite_scale>1</sprite_scale>
+			<light_r>255</light_r>
+			<light_g>128</light_g>
+			<light_b>255</light_b>
+		</render>
 		<animation>
 			<state>
 				<name>texture</name>
@@ -120,4 +133,11 @@
 			<deleter_type>player</deleter_type>
 		</contact_deletion>
 	</box>
+	<spawner1>
+		<move>.</move>
+		<spawner>
+			<time>5</time>
+			<type>box</type>
+		</spawner>
+	</spawner1>
 </properties>

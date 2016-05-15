@@ -22,6 +22,7 @@ struct WeaponPropertiesVisitor : XmlVisitor
 struct WeaponDef
 {
 	float period;
+	float bulletSpeed;
 	float reloadTime;
 	float dispersion; //in radians
 	int holders;

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <delete_update.h>
+#include <vector>
 
 
 LightManager::LightManager(float screenWidth, float screenHeight, float tileWidth) :
@@ -16,7 +17,7 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 {
 	shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
 	multiplyShader.loadFromFile(MULTIPLY_FRAGMENT_SHADER, sf::Shader::Fragment);
-	vertices.setPrimitiveType(sf::Quads);
+	//vertices.setPrimitiveType(sf::Quads);
 	renderTexture.create(screenWidth / 4, screenHeight / 4);
 
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
@@ -30,14 +31,16 @@ int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intens
 	vertex.color.a = intensity;
 	vertex.texCoords = pos;
 	vertex.position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-	vertices.append(vertex);
+	vertices.push_back(vertex);
 	vertex.position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-	vertices.append(vertex);
+	vertices.push_back(vertex);
 	vertex.position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-	vertices.append(vertex);
+	vertices.push_back(vertex);
 	vertex.position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-	vertices.append(vertex);
-	return vertices.getVertexCount() / 4 - 1;
+	vertices.push_back(vertex);
+	IDToIndex[vertices.size() / 4 - 1] = vertices.size() / 4 - 1;
+	indexToID[vertices.size() / 4 - 1] = vertices.size() / 4 - 1;
+	return vertices.size() / 4 - 1;
 }
 
 void LightManager::draw(sf::RenderTarget& renderTarget)
@@ -55,7 +58,7 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	lightView.setSize(screenWidth, screenHeight);
 	renderTexture.setView(lightView);
 	renderTexture.clear();
-	renderTexture.draw(vertices, renderStates);
+	renderTexture.draw(&vertices[0], vertices.size(), sf::Quads, renderStates);
 	renderTexture.display();
 	shape.setTexture(&renderTexture.getTexture());
 	shape.setPosition(renderTarget.getView().getCenter());
@@ -73,18 +76,31 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderTarget.draw(shape, multiplyRenderStates);
 }
 
-void LightManager::setPosition(int lightSourceIndex, sf::Vector2f pos)
+void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 {
+	int lightSourceIndex = IDToIndex[lightSourceID];
 	vertices[lightSourceIndex * 4].texCoords = pos;
 	vertices[lightSourceIndex * 4 + 1].texCoords = pos;
 	vertices[lightSourceIndex * 4 + 2].texCoords = pos;
 	vertices[lightSourceIndex * 4 + 3].texCoords = pos;
 }
 
-void LightManager::removeLightSource(int lightSourceIndex)
+void LightManager::removeLightSource(int lightSourceID)
 {
-	std::copy(&vertices[vertices.getVertexCount() - 4], &vertices[vertices.getVertexCount() - 4] + 4, &vertices[lightSourceIndex * 4]);
-	vertices.resize(vertices.getVertexCount() - 4);
+	int lightSourceIndex = IDToIndex[lightSourceID];
+	//std::cout << "removed light id: " << lightSourceIndex << std::endl;
+	//std::copy(&vertices[vertices.getVertexCount() - 4], &vertices[vertices.getVertexCount() - 4] + 3, &vertices[lightSourceIndex * 4]);
+	int lastID = indexToID[vertices.size() / 4 - 1];
+	IDToIndex[lastID] = lightSourceIndex;
+	indexToID[lightSourceIndex] = lastID;
+	IDToIndex.erase(IDToIndex.find(lightSourceID));
+	indexToID.erase(indexToID.find(vertices.size() / 4 - 1));
+	vertices[lightSourceIndex * 4] = vertices[vertices.size() - 4];
+	vertices[lightSourceIndex * 4 + 1] = vertices[vertices.size() - 3];
+	vertices[lightSourceIndex * 4 + 2] = vertices[vertices.size() - 2];
+	vertices[lightSourceIndex * 4 + 3] = vertices[vertices.size() - 1];
+	vertices.resize(vertices.size() - 4);
+	//std::cout << "number of lights multiplied by 4: " << vertices.size() << std::endl;
 }
 
 

@@ -12,7 +12,7 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 		
 		if(event->name == "delete")
 		{
-			std::cout << "cached delete event" << std::endl;
+			
 			actorsMarkedToDelete.insert(actorID);
 			events.pop_back();
 		}
@@ -20,7 +20,6 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 		{
 			if(event->name == "create")
 			{
-				std::cout << "cached create event" << std::endl;
 				createEvents.push_back(event);
 				events.pop_back();
 			}

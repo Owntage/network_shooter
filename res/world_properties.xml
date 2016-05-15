@@ -1,0 +1,4 @@
+<cancel_collision>
+    <first>player</first>
+	<second>player</second>
+</cancel_collision>

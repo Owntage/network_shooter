@@ -24,7 +24,9 @@ struct LightManager
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
 	void removeLightSource(int lightSourceIndex);
 private:
-	sf::VertexArray vertices;
+	std::vector<sf::Vertex> vertices;
+	std::map<int, int> IDToIndex;
+	std::map<int, int> indexToID;
 	sf::Shader shader;
 	sf::Shader multiplyShader;
 	sf::RectangleShape shape;
