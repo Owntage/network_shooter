@@ -1,5 +1,20 @@
 #include "world.h"
 
+
+std::string WorldPropertiesVisitor::getPropertiesFilename() const
+{
+	return WORLD_PROPERTIES;
+}
+
+void WorldPropertiesVisitor::onVisit(const boost::property_tree::ptree& node, std::string nodeName) const
+{
+	if(nodeName == "cancel_collision")
+	{
+		World::getInstance()->addPair(node.get<std::string>("first"), node.get<std::string>("second"));
+	}
+}
+
+
 World::World()
 {
 	b2Vec2 gravity(0,0);
@@ -8,11 +23,24 @@ World::World()
 	contactListener = std::make_shared<MyContactListener>();
 	world->SetContactListener(&*contactListener);
 	time = 0;
+	propertiesLoaded = false;
+	//WorldPropertiesVisitor visitor;
+	//walkXml(visitor.getPropertiesFilename(), visitor);
 }
 
+void World::addPair(std::string first, std::string second)
+{
+	contactListener->addPair(std::make_pair(first, second));
+}
 
 void World::update(double fps)
 {
+	if(!propertiesLoaded)
+	{
+		WorldPropertiesVisitor visitor;
+		walkXml(visitor.getPropertiesFilename(), visitor);
+		propertiesLoaded = true;
+	}
 	world->Step(1.0/fps,6,2);
 	time += 1.0 / fps;
 }

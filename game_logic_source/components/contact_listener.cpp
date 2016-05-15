@@ -55,7 +55,18 @@ void MyContactListener::EndContact(b2Contact* contact)
 
 void MyContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldManifold) 
 {
-	
+	b2Fixture* fixtureA = contact->GetFixtureA();
+	b2Fixture* fixtureB = contact->GetFixtureB();
+	if(fixtureA->GetUserData() && fixtureB->GetUserData())
+	{
+		ContactData* firstBody = (ContactData*) fixtureA->GetUserData();
+		ContactData* secondBody = (ContactData*) fixtureB->GetUserData();
+		auto p = std::make_pair(firstBody->type, secondBody->type);
+		if(pairs.find(p) != pairs.end())
+		{
+			contact->SetEnabled(false);
+		}
+	}
 }
 
 void MyContactListener::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
