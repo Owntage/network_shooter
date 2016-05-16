@@ -74,6 +74,12 @@ void Controller::onEvent(sf::Event event)
 	if(event.type == sf::Event::MouseButtonPressed)
 	{
 		currentNumbers["mouse"]++;
+		shootingEventName = "shooting_begin";
+	}
+	if(event.type == sf::Event::MouseButtonReleased)
+	{
+		currentNumbers["mouse"]++;
+		shootingEventName = "shooting_end";
 	}
 	
 }
@@ -82,7 +88,10 @@ void Controller::approve(std::string type, int number)
 {
 	//std::cout << "number received for " << type << ": " << number << std::endl;
 	//std::cout << "last number: " << approvedNumbers[type] << std::endl;
-	approvedNumbers[type] = number;
+	if(approvedNumbers.find(type) != approvedNumbers.end())
+	{
+		approvedNumbers[type] = number;
+	}
 }
 
 
@@ -116,7 +125,7 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 	}
 	if(approvedNumbers["mouse"] < currentNumbers["mouse"])
 	{
-		auto event = std::make_shared<Event>("shoot", false, moveEvent.actorID);
+		auto event = std::make_shared<Event>(shootingEventName, false, moveEvent.actorID);
 		event->number = currentNumbers["mouse"];
 		result.push_back(event);
 		//result.push_back(std::make_shared<Event>("shoot", false, moveEvent.actorID));

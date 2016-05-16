@@ -47,6 +47,7 @@ private:
 
 	bool isMessageSent;
 	std::string message;
+	std::string shootingEventName;
 	MoveEvent moveEvent;
 	std::map<int, MoveEvent> mappedEvents;
 	std::map<std::string, int> approvedNumbers;

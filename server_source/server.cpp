@@ -156,12 +156,14 @@ void GameServer::receiveGameEvent(Packet& packet, IpAddress& address)
 		if(event.number > clients[uniqueID].eventNumbers[event.name])
 		{
 			clients[uniqueID].eventNumbers[event.name] = event.number;
+			bool isSpecialEvent = false;
 			if(event.name == "move")
 			{
 				MoveEvent moveEvent;
 				(Event&) moveEvent = event;
 				packet >> moveEvent;
 				gameLogic.onEvent(moveEvent);
+				isSpecialEvent = true;
 			}
 			if(event.name == "chat")
 			{
@@ -169,11 +171,18 @@ void GameServer::receiveGameEvent(Packet& packet, IpAddress& address)
 				(Event&) chatEvent = event;
 				packet >> chatEvent;
 				gameLogic.onEvent(chatEvent);
+				isSpecialEvent = true;
 			}
+			/*
 			if(event.name == "shoot")
 			{
 				gameLogic.onEvent(event);
 
+			}
+			*/
+			if(!isSpecialEvent)
+			{
+				gameLogic.onEvent(event);
 			}
 		}
 		packet.reset();

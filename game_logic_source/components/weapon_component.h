@@ -49,11 +49,30 @@ struct WeaponComponent : IComponent
 	std::shared_ptr<ComponentUpdate> getUpdate(int syatemID);
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
+	void shoot();
 	friend class WeaponPropertiesVisitor;
 	static std::map<std::string, WeaponDef> weaponDefinitions;
 	std::vector<WeaponDef> weapons;
-	int currentWeapon;
 	int thisActorID;
+
+	
+	int currentWeapon;
+	bool isShooting;
+	struct WeaponData
+	{
+		WeaponData() :
+			timeSinceShot(9999.0f),
+			timeSinceReload(9999.0f),
+			shotsMade(0),
+			holdersSpent(0)
+		{}
+		
+		float timeSinceShot;
+		float timeSinceReload;
+		int shotsMade;
+		int holdersSpent;
+	};
+	std::vector<WeaponData> weaponData;
 };
 
 #endif

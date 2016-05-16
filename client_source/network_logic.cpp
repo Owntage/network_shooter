@@ -60,26 +60,18 @@ void NetworkLogic::sendEvents()
 		auto events = controller.getGameEvents();
 		for(auto it = events.begin(); it != events.end(); it++)
 		{
+			
+			packet.reset();
+			packet << localPort << "event" << uniqueID << (*(*it));
 			if((*it)->name == "move")
 			{
-				MoveEvent& moveEvent = static_cast<MoveEvent&>(*(*it));
-				packet.reset();
-				packet << localPort << "event" << uniqueID << (Event&) moveEvent << moveEvent;
-				socket.send(address, packet);
+				packet << (MoveEvent&) (*(*it));
 			}
 			if((*it)->name == "chat")
 			{
-				ChatEvent& chatEvent = static_cast<ChatEvent&>(*(*it));
-				packet.reset();
-				packet << localPort << "event" << uniqueID << (Event&) chatEvent << chatEvent;
-				socket.send(address, packet);
+				packet << (ChatEvent&) (*(*it));
 			}
-			if((*it)->name == "shoot")
-			{
-				packet.reset();
-				packet << localPort << "event" << uniqueID << *(*it);
-				socket.send(address, packet);
-			}
+			socket.send(address, packet);
 		}
 
 		//send request for images;
@@ -241,7 +233,10 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 			else if(packetType == "approve")
 			{
 				std::string approveType;
-				packet >> approveType;
+				int number;
+				packet >> approveType >> number;
+				controller.approve(approveType, number);
+				/*
 				if(approveType == "move")
 				{
 					
@@ -261,6 +256,8 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					packet >> number;
 					controller.approve("shoot", number);
 				}
+				*/
+
 			}
 			else if(packetType == "image_size")
 			{
