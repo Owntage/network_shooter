@@ -8,6 +8,7 @@
 #include <components/tile_update.h>
 #include <components/render_component.h>
 #include <components/weapon_component.h>
+#include <components/hp_component.h>
 #include <delete_update.h>
 #include "game_scenes.h"
 
@@ -223,6 +224,8 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<RenderUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "weapon")
 						addUpdate<WeaponUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					if(componentUpdate.name == "hp")
+						addUpdate<HpUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					
 
 					
