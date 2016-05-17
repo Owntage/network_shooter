@@ -21,18 +21,21 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 	weaponDef.bulletType = tree.get<std::string>("bullet_type");
 	weaponDef.dispersion = tree.get("dispersion", 0.3f);
 	weaponDef.bulletSpeed = tree.get("bullet_speed", 10.0f);
+	weaponDef.weaponTexture = tree.get<std::string>("texture");
 	WeaponComponent::weaponDefinitions[nodeName] = weaponDef;
 }
 
 WeaponComponent::WeaponComponent() :
 	currentWeapon(0),
-	isShooting(false)
+	isShooting(false),
+	state(WeaponUpdate::WeaponState::CHANGE)
 {
 	if(weaponDefinitions.size() == 0)
 	{
 		WeaponPropertiesVisitor visitor;
 		walkXml(visitor.getPropertiesFilename(), visitor);
 	}
+	currentDataNumber = 0;
 }
 
 void WeaponComponent::shoot()
@@ -55,6 +58,8 @@ void WeaponComponent::shoot()
 				createEvent->events.push_back(newCoordEvent);
 				createEvent->events.push_back(speedCoordEvent);
 				localEvents.push_back(createEvent);
+
+				
 
 			});
 			requests.push_back(coordRequest);
@@ -106,6 +111,8 @@ void WeaponComponent::onEvent(const Event& event)
 					shoot();
 					weaponData[currentWeapon].shotsMade++;
 					weaponData[currentWeapon].timeSinceShot = 0;
+					state = WeaponUpdate::WeaponState::SHOOT;
+					currentDataNumber++;
 				}
 				else
 				{
@@ -115,6 +122,8 @@ void WeaponComponent::onEvent(const Event& event)
 						weaponData[currentWeapon].timeSinceReload = 0;
 						weaponData[currentWeapon].timeSinceShot = 0;
 						weaponData[currentWeapon].holdersSpent++;
+						state = WeaponUpdate::WeaponState::RELOAD;
+						currentDataNumber++;
 					}
 				}
 			}
@@ -124,7 +133,19 @@ void WeaponComponent::onEvent(const Event& event)
 
 bool WeaponComponent::hasUpdate(int systemID)
 {
-	return false;
+	
+	if(weapons.size() == 0)
+	{
+		return false;
+	}
+
+	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
+	{
+		return true;
+	}
+	
+	
+	return lastSystemApproved[systemID] < currentDataNumber;
 }
 
 std::string WeaponComponent::getName()
@@ -134,7 +155,8 @@ std::string WeaponComponent::getName()
 
 std::shared_ptr<ComponentUpdate> WeaponComponent::getUpdate(int syatemID)
 {
-	std::shared_ptr<ComponentUpdate> result;
+	auto result = std::make_shared<WeaponUpdate>(weapons[currentWeapon], weaponData[currentWeapon], state);
+	result->number = currentDataNumber;
 	return result;
 }
 

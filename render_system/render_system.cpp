@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <delete_update.h>
+#include <math.h>
 #include <vector>
 
 
@@ -163,6 +164,15 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		{
 			RenderUpdate& renderUpdate = static_cast<RenderUpdate&> (*(*it));
 			renderData = renderUpdate.renderData;
+		}
+		if((*it)->name == "weapon")
+		{
+			
+			WeaponUpdate& weaponUpdate = static_cast<WeaponUpdate&> (*(*it));
+			if(isMain)
+			{
+				renderSystem.gameGuiManager.setWeaponUpdate(weaponUpdate);
+			}
 		}
 		if((*it)->name == "chat" && isMain)
 		{
@@ -366,11 +376,26 @@ void DrawableActor::draw()
 
 RenderSystem::RenderSystem(Console& console, float screenWidth, float screenHeight) : 
 	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE, screenHeight / TILE_SIZE)), 
-	mainActor(-1), console(console)
+	mainActor(-1), console(console), 
+	gameGuiManager(screenWidth, screenHeight)
 {
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
 	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
 	lightManager = std::make_shared<LightManager>(screenWidth, screenHeight, TILE_SIZE);
+
+	WeaponData weaponData;
+	weaponData.timeSinceReload = 0;
+	weaponData.timeSinceShot = 0;
+	weaponData.shotsMade = 0;
+
+	WeaponDef weaponDef;
+	weaponDef.weaponTexture = NO_WEAPON_TEXTURE;
+	weaponDef.bulletsPerHolder = 10;
+	weaponDef.reloadTime = 4.0f;
+	weaponDef.period = 1.0f;
+
+	WeaponUpdate weaponUpdate(weaponDef, weaponData, WeaponUpdate::WeaponState::CHANGE);
+	gameGuiManager.setWeaponUpdate(weaponUpdate);
 }
 
 void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
@@ -434,6 +459,9 @@ void RenderSystem::draw()
 		it->second->draw();
 	}
 	lightManager->draw(RenderWindow::getInstance()->window);
+
+	gameGuiManager.onTimer();
+	gameGuiManager.draw(RenderWindow::getInstance()->window);
 
 }
 

@@ -10,11 +10,41 @@
 #include <set>
 #include <components/animation_component.h>
 #include <components/render_component.h>
+#include <components/weapon_component.h>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
 
 #define MULTIPLY_FRAGMENT_SHADER "res/divide_fragment_shader.txt"
+
+#define HP_TEXTURE "res/gui/hp.png"
+#define NO_WEAPON_TEXTURE "res/gui/no_weapon.png"
+
+struct GameGuiManager
+{
+	GameGuiManager(float screenWidth, float screenHeight) :
+		screenWidth(screenWidth),
+		screenHeight(screenHeight),
+		view(sf::Vector2f(0, 0), sf::Vector2f(screenWidth, screenHeight)),
+		shootBlink(0.0f),
+		damageBlink(0.0f)
+	{}
+	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
+	void draw(sf::RenderTarget& renderTarget);
+	void onTimer();
+
+private:
+
+	float screenWidth;
+	float screenHeight;
+	float shootBlink;
+	float damageBlink;
+	sf::View view;
+	sf::RectangleShape shape;
+	std::map<std::string, sf::Texture> textures;
+	WeaponUpdate weaponUpdate;
+	sf::Texture& getTexture(std::string name);
+};
 
 struct LightManager
 {
@@ -84,6 +114,8 @@ private:
 #define TILESET_WIDTH 16
 #define TILESET_HEIGHT 16
 
+
+
 struct RenderSystem
 {
 	RenderSystem(Console& console, float screenWidth, float screenHeight);
@@ -113,6 +145,7 @@ private:
 	sf::Texture tileset;
 	Console& console;
 	std::shared_ptr<LightManager> lightManager;
+	GameGuiManager gameGuiManager;
 	friend class DrawableActor;
 };
 

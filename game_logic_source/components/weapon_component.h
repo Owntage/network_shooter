@@ -28,6 +28,53 @@ struct WeaponDef
 	int holders;
 	int bulletsPerHolder;
 	std::string bulletType;
+	std::string weaponTexture;
+	
+	template<typename STREAM_T>
+	friend STREAM_T& operator<<(STREAM_T& s, WeaponDef& w)
+	{
+		s << w.period << w.bulletSpeed << w.reloadTime << w.dispersion << w.holders << w.bulletsPerHolder
+			<< w.bulletType << w.weaponTexture;
+		return s;
+	}
+	
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, WeaponDef& w)
+	{
+		s >> w.period >> w.bulletSpeed >> w.reloadTime >> w.dispersion >> w.holders >> w.bulletsPerHolder
+			>> w.bulletType >> w.weaponTexture;
+		return s;
+	}
+	
+};
+
+struct WeaponData
+{
+	WeaponData() :
+		timeSinceShot(9999.0f),
+		timeSinceReload(9999.0f),
+		shotsMade(0),
+		holdersSpent(0)
+	{}
+
+	float timeSinceShot;
+	float timeSinceReload;
+	int shotsMade;
+	int holdersSpent;
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator<<(STREAM_T& s, WeaponData& w)
+	{
+		s << w.timeSinceShot << w.timeSinceReload << w.shotsMade << w.holdersSpent;
+		return s;
+	}
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, WeaponData& w)
+	{
+		s >> w.timeSinceShot >> w.timeSinceReload >> w.shotsMade >> w.holdersSpent;
+		return s;
+	}
 };
 
 
@@ -39,6 +86,45 @@ struct WeaponEvent : Event
 	{}
 	std::string weaponID;
 };
+
+struct WeaponUpdate : ComponentUpdate
+{
+	enum class WeaponState;
+	WeaponUpdate(WeaponDef& weaponDef, WeaponData& weaponData, WeaponState state) :
+		ComponentUpdate("weapon"),
+		weaponDef(weaponDef),
+		state(state),
+		weaponData(weaponData)
+	{}
+	WeaponUpdate() :
+		ComponentUpdate("weapon")
+	{}
+	enum class WeaponState
+	{
+		SHOOT,
+		RELOAD,
+		CHANGE
+	};
+	WeaponDef weaponDef;
+	WeaponData weaponData;
+	WeaponState state;
+	
+	template<typename STREAM_T>
+	friend STREAM_T& operator<<(STREAM_T& s, WeaponUpdate& u)
+	{
+		s << u.weaponDef << u.weaponData << (int) u.state;
+		return s;
+	}
+
+	template<typename STREAM_T>
+	friend STREAM_T& operator>>(STREAM_T& s, WeaponUpdate& u)
+	{
+		s >> u.weaponDef >> u.weaponData >> (int&) u.state;
+		return s;
+	}
+};
+
+
 
 struct WeaponComponent : IComponent
 {
@@ -58,20 +144,8 @@ private:
 	
 	int currentWeapon;
 	bool isShooting;
-	struct WeaponData
-	{
-		WeaponData() :
-			timeSinceShot(9999.0f),
-			timeSinceReload(9999.0f),
-			shotsMade(0),
-			holdersSpent(0)
-		{}
-		
-		float timeSinceShot;
-		float timeSinceReload;
-		int shotsMade;
-		int holdersSpent;
-	};
+	WeaponUpdate::WeaponState state;
+	
 	std::vector<WeaponData> weaponData;
 };
 

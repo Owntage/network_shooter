@@ -7,6 +7,7 @@
 #include <components/animation_update.h>
 #include <components/tile_update.h>
 #include <components/render_component.h>
+#include <components/weapon_component.h>
 #include <delete_update.h>
 #include "game_scenes.h"
 
@@ -220,6 +221,8 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<TileUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "render")
 						addUpdate<RenderUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					if(componentUpdate.name == "weapon")
+						addUpdate<WeaponUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					
 
 					
@@ -236,27 +239,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 				int number;
 				packet >> approveType >> number;
 				controller.approve(approveType, number);
-				/*
-				if(approveType == "move")
-				{
-					
-					int number;
-					packet >> number;
-					controller.approve("move", number);
-				}
-				else if(approveType == "chat")
-				{
-					int number;
-					packet >>number;
-					controller.approve("chat", number);
-				}
-				else if(approveType == "shoot")
-				{
-					int number;
-					packet >> number;
-					controller.approve("shoot", number);
-				}
-				*/
+				
 
 			}
 			else if(packetType == "image_size")

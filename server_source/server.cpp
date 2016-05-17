@@ -9,6 +9,7 @@
 #include <components/coord_event.h>
 #include <components/string_event.h>
 #include <components/render_component.h>
+#include <components/weapon_component.h>
 #include <delete_update.h>
 #include "level_loader.h"
 
@@ -246,6 +247,7 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
 				if((*component_it)->name == "tile") packet << (TileUpdate&) *(*component_it);
 				if((*component_it)->name == "render") packet << (RenderUpdate&) *(*component_it);
+				if((*component_it)->name == "weapon") packet << (WeaponUpdate&) *(*component_it);
 
 				if(packet.isPacked())
 				{

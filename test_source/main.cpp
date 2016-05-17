@@ -11,6 +11,8 @@
 #include <sstream>
 #include <render_system.h>
 #include <network.h>
+#include <components/weapon_component.h>
+#include <math.h>
 using namespace std;
 
 
@@ -18,50 +20,34 @@ using namespace std;
 #define CONSOLE_HEIGHT 100
 
 
-#define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
-#define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
-
-
-
-
 int main()
 {
-	LightManager lightManager(800, 600, 1);
-	for(int i = 0; i < 50; i++)
-	{
-		int x = (rand() % 100) - 50;
-		int y = (rand() % 100) - 50;
-		int r = rand() % 255;
-		int g = rand() % 255;
-		int b = rand() % 255;
-		int intensity = rand() % 10 + 1;
-		lightManager.addLightSource(sf::Vector2f(x, y), sf::Color(r, g, b), intensity);
-	}
-
-	int specialLightSource = lightManager.addLightSource(sf::Vector2f(0, 0), sf::Color::Cyan, 20);
-	float phase = 0;
+	
+	GameGuiManager gameGuiManager(800, 600);
 
 	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(100.0, 0.0), sf::Vector2f(800, 600)));
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
 
-	int frameCount = 0;
-	bool deleteFlag = false;
+	WeaponData weaponData;
+	weaponData.timeSinceReload = 0;
+	weaponData.timeSinceShot = 0;
+	weaponData.shotsMade = 0;
 
+	WeaponDef weaponDef;
+	weaponDef.bulletsPerHolder = 10;
+	weaponDef.reloadTime = 4.0f;
+	weaponDef.period = 1.0f;
+	
+	WeaponUpdate weaponUpdate(weaponDef, weaponData, WeaponUpdate::WeaponState::CHANGE);
+	gameGuiManager.setWeaponUpdate(weaponUpdate);
+	
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
-		phase += 3.14 / 60.0;
-		frameCount++;
-		lightManager.setPosition(specialLightSource, sf::Vector2f(cos(phase) * 400.0f, sin(phase) * 300.0f));
-		
-		if(frameCount > 500 && !deleteFlag)
-		{
-			lightManager.removeLightSource(specialLightSource);
-			deleteFlag = true;
-		}
-
-
 		RenderWindow::getInstance()->window.clear();
-		lightManager.draw(RenderWindow::getInstance()->window);
+
+		gameGuiManager.onTimer();
+		gameGuiManager.draw(RenderWindow::getInstance()->window);
+
 		RenderWindow::getInstance()->window.display();
 		sf::Event event;
 		while(RenderWindow::getInstance()->window.pollEvent(event))
