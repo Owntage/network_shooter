@@ -13,6 +13,7 @@
 #include "components/spawner_component.h"
 #include "components/weapon_component.h"
 #include "components/hp_component.h"
+#include "components/damage_dealer_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -48,6 +49,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "spawner") component = std::make_shared<SpawnerComponent>();
 		if(v.first == "weapon") component = std::make_shared<WeaponComponent>();
 		if(v.first == "hp") component = std::make_shared<HpComponent>();
+		if(v.first == "damage_dealer") component = std::make_shared<DamageDealerComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;
