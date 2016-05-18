@@ -36,7 +36,11 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 
 void GameLogic::onEvent(const Event& event)
 {
-	onEvent(event, true);
+	if(event.global || actors.find(event.actorID) != actors.end())
+	{
+		onEvent(event, true);
+	}
+	
 }
 
 void GameLogic::onEvent(const Event& event, bool shouldDelete)

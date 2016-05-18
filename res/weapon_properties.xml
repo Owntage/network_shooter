@@ -1,4 +1,12 @@
 <shotgun>
-	<bullet_type>box</bullet_type>
-	<bullet_speed>45</bullet_speed>
+	<bullet_type>default_bullet</bullet_type>
+	<bullet_speed>25</bullet_speed>
+	<texture>res/graphic/shotgun.png</texture>
+	<period>0.5</period>
+	<bullets_per_holder>7</bullets_per_holder>
+	<damage>10</damage>
+	<reload_time>2</reload_time>
+	<bullets>20</bullets>
+	<dispersion>0.7</dispersion>
+	<holders>1000</holders>
 </shotgun>

@@ -14,7 +14,8 @@
 LightManager::LightManager(float screenWidth, float screenHeight, float tileWidth) :
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
-	tileWidth(tileWidth)
+	tileWidth(tileWidth),
+	counter(0)
 {
 	shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
 	multiplyShader.loadFromFile(MULTIPLY_FRAGMENT_SHADER, sf::Shader::Fragment);
@@ -27,21 +28,23 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
+	LightSource lightSource;
 	sf::Vertex vertex;
 	vertex.color = color;
 	vertex.color.a = intensity;
 	vertex.texCoords = pos;
 	vertex.position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-	vertices.push_back(vertex);
+	lightSource.vertices[0] = vertex;
 	vertex.position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-	vertices.push_back(vertex);
+	lightSource.vertices[1] = vertex;
 	vertex.position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-	vertices.push_back(vertex);
+	lightSource.vertices[2] = vertex;
 	vertex.position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-	vertices.push_back(vertex);
-	IDToIndex[vertices.size() / 4 - 1] = vertices.size() / 4 - 1;
-	indexToID[vertices.size() / 4 - 1] = vertices.size() / 4 - 1;
-	return vertices.size() / 4 - 1;
+	lightSource.vertices[3] = vertex;
+
+	verticesMap[counter] = lightSource;
+	
+	return counter++;
 }
 
 void LightManager::draw(sf::RenderTarget& renderTarget)
@@ -54,6 +57,15 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	center.y *= tileWidth;
 	shader.setParameter("offset", center);
 	
+	std::vector<sf::Vertex> vertices;
+	for(auto it = verticesMap.begin(); it != verticesMap.end(); it++)
+	{
+		for(int i = 0; i < 4; i++)
+		{
+			vertices.push_back(it->second.vertices[i]);
+		}
+	}
+
 	sf::View lightView;
 	lightView.setCenter(sf::Vector2f(0, 0));
 	lightView.setSize(screenWidth, screenHeight);
@@ -79,15 +91,15 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 
 void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 {
-	int lightSourceIndex = IDToIndex[lightSourceID];
-	vertices[lightSourceIndex * 4].texCoords = pos;
-	vertices[lightSourceIndex * 4 + 1].texCoords = pos;
-	vertices[lightSourceIndex * 4 + 2].texCoords = pos;
-	vertices[lightSourceIndex * 4 + 3].texCoords = pos;
+	verticesMap[lightSourceID].vertices[0].texCoords = pos;
+	verticesMap[lightSourceID].vertices[1].texCoords = pos;
+	verticesMap[lightSourceID].vertices[2].texCoords = pos;
+	verticesMap[lightSourceID].vertices[3].texCoords = pos;
 }
 
 void LightManager::removeLightSource(int lightSourceID)
 {
+	/*
 	int lightSourceIndex = IDToIndex[lightSourceID];
 	//std::cout << "removed light id: " << lightSourceIndex << std::endl;
 	//std::copy(&vertices[vertices.getVertexCount() - 4], &vertices[vertices.getVertexCount() - 4] + 3, &vertices[lightSourceIndex * 4]);
@@ -102,6 +114,8 @@ void LightManager::removeLightSource(int lightSourceID)
 	vertices[lightSourceIndex * 4 + 3] = vertices[vertices.size() - 1];
 	vertices.resize(vertices.size() - 4);
 	//std::cout << "number of lights multiplied by 4: " << vertices.size() << std::endl;
+	*/
+	verticesMap.erase(lightSourceID);
 }
 
 
@@ -172,6 +186,14 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			if(isMain)
 			{
 				renderSystem.gameGuiManager.setWeaponUpdate(weaponUpdate);
+			}
+		}
+		if((*it)->name == "hp")
+		{
+			HpUpdate& hpUpdate = static_cast<HpUpdate&> (*(*it));
+			if(isMain)
+			{
+				renderSystem.gameGuiManager.setHpUpdate(hpUpdate);
 			}
 		}
 		if((*it)->name == "chat" && isMain)
@@ -369,7 +391,7 @@ void DrawableActor::draw()
 				renderData.lightIntensity);
 			hasLightSource = true;
 		}
-		lightManager->setPosition(lightSourceID, sf::Vector2f(positionX * TILE_SIZE, positionY * TILE_SIZE));
+		lightManager->setPosition(lightSourceID, sf::Vector2f((positionX + speedX * deltaTime) * TILE_SIZE, (positionY + speedY * deltaTime) * TILE_SIZE));
 	}
 	
 }

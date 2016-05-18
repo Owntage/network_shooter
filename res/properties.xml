@@ -1,5 +1,9 @@
 <properties>
 	<testActor>
+		<hp>
+			<hp>100</hp>
+		</hp>
+		<damage_dealer>.</damage_dealer>
 		<weapon>
 			<default_weapon>shotgun</default_weapon>
 		</weapon>
@@ -15,9 +19,7 @@
 		<physics>
 			<type>circle</type>
 			<id>player</id>
-			
-			<x>0.0</x>
-			<y>0.0</y>
+			<density>10.0</density>
 			<speed>15.0</speed>
 		</physics>
 		<chat>.</chat>
@@ -72,7 +74,7 @@
 		<render>
 			<light_is_visible>true</light_is_visible>
 			<sprite_is_visible>false</sprite_is_visible>
-			<light_intensity>5</light_intensity>
+			<light_intensity>50</light_intensity>
 			<light_r>0</light_r>
 			<light_g>255</light_g>
 			<light_b>255</light_b>
@@ -106,6 +108,7 @@
 		<physics>
 			<type>dynamic</type>
 			<id>box</id>
+			<friction>0</friction>
 		</physics>
 		<render>
 			<sprite_is_visible>true</sprite_is_visible>
@@ -140,4 +143,29 @@
 			<type>box</type>
 		</spawner>
 	</spawner1>
+	<default_bullet>
+		<bullet>.</bullet>
+		<timed_deletion>
+			<time>1</time>
+		</timed_deletion>
+		<contact_deletion>
+			<deleter_type>all</deleter_type>
+		</contact_deletion>
+		<physics>
+			<type>circle</type>
+			<density>0.0001</density>
+			<radius>0.1</radius>
+			<id>bullet</id>
+			<friction>0</friction>
+			<is_sensor>true</is_sensor>
+		</physics>
+		<render>
+			<sprite_is_visible>false</sprite_is_visible>
+			<light_is_visible>true</light_is_visible>
+			<light_intensity>1</light_intensity>
+			<light_r>250</light_r>
+			<light_g>160</light_g>
+			<light_b>0</light_b>
+		</render>
+	</default_bullet>
 </properties>

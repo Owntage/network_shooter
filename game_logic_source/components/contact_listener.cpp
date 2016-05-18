@@ -65,6 +65,17 @@ void MyContactListener::PreSolve(b2Contact* contact, const b2Manifold* oldManifo
 		if(pairs.find(p) != pairs.end())
 		{
 			contact->SetEnabled(false);
+			firstBody->cancelled = true;
+			secondBody->cancelled = true;
+		}
+		else
+		{
+			firstBody->cancelled = false;
+			secondBody->cancelled = false;
+		}
+		if(firstBody->isSensor || secondBody->isSensor)
+		{
+			contact->SetEnabled(false);
 		}
 	}
 }

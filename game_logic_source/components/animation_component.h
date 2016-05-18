@@ -69,6 +69,19 @@ struct LayerState
 	float angle;
 };
 
+struct AnimationAngleEvent : Event
+{
+	AnimationAngleEvent(float angle, int layer, int actorID) :
+		Event("animation_angle", false, actorID),
+		angle(angle),
+		layer(layer),
+		actorID(actorID)
+	{}
+	float angle;
+	int layer;
+	int actorID;
+};
+
 struct AnimationComponent : IComponent
 {
 	void onEvent(const Event& event);

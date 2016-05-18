@@ -138,7 +138,7 @@ void PhysicsComponent::onEvent(const Event& event)
 			body->ApplyForceToCenter(60.0 * direction, true);
 		}
 		
-		if(contactData.hit)
+		if(contactData.hit && !contactData.cancelled)
 		{
 			contactData.hit = false;
 			localEvents.push_back(std::make_shared<PhysicsEvent>(thisActorID, 
@@ -229,6 +229,8 @@ std::shared_ptr<IComponent> PhysicsComponent::loadFromXml(const boost::property_
 	double density = tree.get("density", 1.0);
 	double restitution = tree.get("restitution", 0.2);
 	double friction = tree.get("friction", 0.5);
+	bool isSensor = tree.get("is_sensor", "false") == "true";
+	result->contactData.isSensor = isSensor;
 	
 	result->angularSpeed = tree.get("angular_speed", 3.14f);
 

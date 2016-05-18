@@ -4,10 +4,20 @@
 void GameGuiManager::setWeaponUpdate(WeaponUpdate& weaponUpdate)
 {
 	this->weaponUpdate = weaponUpdate;
-	if(weaponUpdate.state == WeaponUpdate::WeaponState::SHOOT)
+	if(weaponUpdate.state == WeaponUpdate::WeaponState::SHOOT && weaponUpdate.weaponDef.period >= 0.1)
 	{
 		shootBlink = 1.0f;
 	}
+}
+
+void GameGuiManager::setHpUpdate(HpUpdate& hpUpdate)
+{
+	this->hpUpdate = hpUpdate;
+	if(hpUpdate.currentHp < hpUpdate.maxHp)
+	{
+		damageBlink = 1.0f;
+	}
+	
 }
 
 void GameGuiManager::draw(sf::RenderTarget& renderTarget)
@@ -17,7 +27,7 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	shape.setTexture(nullptr);
 	sf::View targetView = renderTarget.getView();
 	renderTarget.setView(view);
-	shape.setSize(sf::Vector2f(160, 32));
+	shape.setSize(sf::Vector2f(160 * hpUpdate.currentHp / hpUpdate.maxHp, 32));
 	shape.setPosition(screenWidth / 2 - 164, -screenHeight / 2 + 4);
 	shape.setFillColor(sf::Color(128, 0, 128, 255));
 	renderTarget.draw(shape, sf::BlendAdd);
@@ -54,11 +64,15 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 		renderTarget.draw(shape, sf::BlendAdd);
 	}
 
-	//blink
+	//shoot blink
 	shape.setSize(sf::Vector2f(screenWidth, screenHeight));
 	shape.setPosition(-screenWidth / 2, -screenHeight / 2);
 	shape.setTexture(nullptr);
 	shape.setFillColor(sf::Color(192, 255, 255, 32.0f * shootBlink));
+	renderTarget.draw(shape, sf::BlendAdd);
+
+	//damage blink
+	shape.setFillColor(sf::Color(255, 0, 0, 128.0f * damageBlink));
 	renderTarget.draw(shape, sf::BlendAdd);
 }
 
@@ -70,6 +84,11 @@ void GameGuiManager::onTimer()
 	{
 		shootBlink -= 1.0f / 60.0f / weaponUpdate.weaponDef.period;
 	}
+	if(damageBlink > 0)
+	{
+		damageBlink -= 1.0f / 60.0f;
+	}
+	damageBlink = std::max(damageBlink, 0.0f);
 }
 
 

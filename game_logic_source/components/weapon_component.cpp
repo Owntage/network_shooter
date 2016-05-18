@@ -2,6 +2,7 @@
 #include "physics_component.h"
 #include "coord_event.h"
 #include "create_event.h"
+#include "damage_dealer_component.h"
 
 
 std::map<std::string, WeaponDef> WeaponComponent::weaponDefinitions;
@@ -22,6 +23,10 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 	weaponDef.dispersion = tree.get("dispersion", 0.3f);
 	weaponDef.bulletSpeed = tree.get("bullet_speed", 10.0f);
 	weaponDef.weaponTexture = tree.get<std::string>("texture");
+	weaponDef.damage = tree.get("damage", 10.0f);
+	weaponDef.bullets = tree.get("bullets", 1);
+	
+
 	WeaponComponent::weaponDefinitions[nodeName] = weaponDef;
 }
 
@@ -42,29 +47,47 @@ void WeaponComponent::shoot()
 {
 	if(weapons.size() > 0)
 	{
-		auto request = std::make_shared<Request>("angle", false, thisActorID, [this](const Event& event)
+		for(int i = 0; i < weapons[currentWeapon].bullets; i++)
 		{
-			const AngleEvent& angleEvent = (const AngleEvent&) event;
-			float angle = angleEvent.angle;
-			auto coordRequest = std::make_shared<Request>("coords", false, thisActorID, [this, angle](const Event& event)
+			auto request = std::make_shared<Request>("angle", false, thisActorID, [this](const Event& event)
 			{
-				const CoordEvent& coordEvent = (const CoordEvent&) event;
-				auto createEvent = std::make_shared<CreateEvent>();
-				createEvent->type = weapons[currentWeapon].bulletType;
-				createEvent->actorID = thisActorID;
+				const AngleEvent& angleEvent = (const AngleEvent&) event;
+				float angle = angleEvent.angle;
+				float rand_num = std::rand() % 100;
+				rand_num /= 100.0f;
+				rand_num -= 0.5f;
+				angle += rand_num * weapons[currentWeapon].dispersion;
+				auto coordRequest = std::make_shared<Request>("coords", false, thisActorID, [this, angle](const Event& event)
+				{
+					const CoordEvent& coordEvent = (const CoordEvent&) event;
+					auto createEvent = std::make_shared<CreateEvent>();
+					createEvent->type = weapons[currentWeapon].bulletType;
+					createEvent->actorID = thisActorID;
 
-				auto newCoordEvent = std::make_shared<CoordEvent>("set_coords", 0, coordEvent.x + 1.5 * cos(angle), coordEvent.y + 1.5 * sin(angle));
-				auto speedCoordEvent = std::make_shared<CoordEvent>("set_speed", 0, weapons[currentWeapon].bulletSpeed * cos(angle), weapons[currentWeapon].bulletSpeed * sin(angle));
-				createEvent->events.push_back(newCoordEvent);
-				createEvent->events.push_back(speedCoordEvent);
-				localEvents.push_back(createEvent);
+					float rand_num = std::rand() % 100;
+					rand_num /= 100.0f;
+					rand_num -= 0.5f;
 
-				
+					auto newCoordEvent = std::make_shared<CoordEvent>("set_coords", 0, coordEvent.x + 0.8 * cos(angle), coordEvent.y + 0.8 * sin(angle));
+					float speed = weapons[currentWeapon].bulletSpeed;
+					speed += speed * 0.3 * rand_num;
+					auto speedCoordEvent = std::make_shared<CoordEvent>("set_speed", 0, speed * cos(angle), speed * sin(angle));
+					auto damageEvent = std::make_shared<DamageEvent>(
+						weapons[currentWeapon].damage, 
+						weapons[currentWeapon].bulletType,
+						thisActorID, 0);
+					createEvent->events.push_back(newCoordEvent);
+					createEvent->events.push_back(speedCoordEvent);
+					createEvent->events.push_back(damageEvent);
+					localEvents.push_back(createEvent);
 
+
+
+				});
+				requests.push_back(coordRequest);
 			});
-			requests.push_back(coordRequest);
-		});
-		requests.push_back(request);
+			requests.push_back(request);
+		}
 	}
 }
 

@@ -21,9 +21,12 @@ public:
 	{
 		hit = false;
 		release = false;
+		cancelled = false;
 	}
 	bool hit;
 	bool release;
+	bool cancelled;
+	bool isSensor;
 	std::string type;
 	std::string otherType;
 	int actorID;

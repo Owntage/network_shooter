@@ -11,6 +11,7 @@
 #include <components/animation_component.h>
 #include <components/render_component.h>
 #include <components/weapon_component.h>
+#include <components/hp_component.h>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
@@ -28,8 +29,12 @@ struct GameGuiManager
 		view(sf::Vector2f(0, 0), sf::Vector2f(screenWidth, screenHeight)),
 		shootBlink(0.0f),
 		damageBlink(0.0f)
-	{}
+	{
+		hpUpdate.currentHp = 1;
+		hpUpdate.maxHp = 1;
+	}
 	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
+	void setHpUpdate(HpUpdate& hpUpdate);
 	void draw(sf::RenderTarget& renderTarget);
 	void onTimer();
 
@@ -43,6 +48,7 @@ private:
 	sf::RectangleShape shape;
 	std::map<std::string, sf::Texture> textures;
 	WeaponUpdate weaponUpdate;
+	HpUpdate hpUpdate;
 	sf::Texture& getTexture(std::string name);
 };
 
@@ -54,9 +60,13 @@ struct LightManager
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
 	void removeLightSource(int lightSourceIndex);
 private:
-	std::vector<sf::Vertex> vertices;
-	std::map<int, int> IDToIndex;
-	std::map<int, int> indexToID;
+	struct LightSource
+	{
+		sf::Vertex vertices[4];
+	};
+
+	std::map<int, LightSource> verticesMap;
+	int counter;
 	sf::Shader shader;
 	sf::Shader multiplyShader;
 	sf::RectangleShape shape;

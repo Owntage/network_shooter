@@ -53,6 +53,7 @@ private:
 	float friction;
 	float restitution;
 	bool wasMoving;
+	bool isSensor;
 	b2Body* body;
 
 };

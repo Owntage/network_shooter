@@ -57,7 +57,7 @@ struct Packet
 		data.push_back((char) PrimitiveTypes::END);
 	}
 
-	static const int MAX_PACKET_SIZE = 2048;
+	static const int MAX_PACKET_SIZE = 32000;
 
 	Packet& operator<<(const std::string& a);
 

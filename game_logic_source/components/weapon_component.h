@@ -19,13 +19,15 @@ struct WeaponPropertiesVisitor : XmlVisitor
 };
 
 
-struct WeaponDef
+struct WeaponDef //NB: not everything is serialized
 {
 	float period;
 	float bulletSpeed;
 	float reloadTime;
 	float dispersion; //in radians
+	float damage;
 	int holders;
+	int bullets;
 	int bulletsPerHolder;
 	std::string bulletType;
 	std::string weaponTexture;

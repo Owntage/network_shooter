@@ -6,13 +6,15 @@ void DamageDealerComponent::onEvent(const Event& event)
 {
 	if(event.name == "damage")
 	{
+		std::cout << "damage dealer received damage" << std::endl;
 		const DamageEvent& damageEvent = (const DamageEvent&) event;
 		float multiplier = 1.0f;
+		std::cout << "damage: " << damageEvent.damage << std::endl;
 		if(multipliers.find(damageEvent.bulletType) != multipliers.end())
 		{
 			multiplier = multipliers[damageEvent.bulletType];
 		}
-		auto hpEvent = std::make_shared<HpEvent>(damageEvent.damage * multiplier, damageEvent.actorID);
+		auto hpEvent = std::make_shared<HpEvent>(-damageEvent.damage * multiplier, damageEvent.actorID);
 		localEvents.push_back(hpEvent);
 	}
 }

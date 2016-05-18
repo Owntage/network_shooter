@@ -4,6 +4,7 @@
 #include "../event.h"
 #include "animation_component.h"
 
+
 struct AnimationEvent : Event
 {
 	AnimationEvent(int layerNumber, LayerState layerState, int actorID) : 
@@ -14,21 +15,7 @@ struct AnimationEvent : Event
 	int layerNumber;
 	LayerState layerState;
 
-	/*
-	template<typename STREAM_T>
-	friend STREAM_T& operator<<(STREAM_T& s, AnimationEvent& e)
-	{
-		s << e.animationState;
-		return s;
-	}
-
-	template<typename STREAM_T>
-	friend STREAM_T& operator>>(STREAM_T& s, AnimationEvent& e)
-	{
-		s >> e.animationState;
-		return s;
-	}
-	*/
+	
 };
 
 #endif

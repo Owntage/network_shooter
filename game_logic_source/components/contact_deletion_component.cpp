@@ -8,10 +8,12 @@ void ContactDeletionComponent::onEvent(const Event& event)
 	if(event.name == "physics")
 	{
 		const PhysicsEvent& physicsEvent = (const PhysicsEvent&) event;
-		if(deleterTypes.find(physicsEvent.otherType) != deleterTypes.end() && !physicsEvent.release)
+		if(deleterTypes.find(physicsEvent.otherType) != deleterTypes.end() && !physicsEvent.release || allFlag)
 		{
 			localEvents.push_back(std::make_shared<Event>("delete"));
 		}
+		
+		
 	}
 }
 
@@ -39,6 +41,11 @@ std::shared_ptr<IComponent> ContactDeletionComponent::loadFromXml(const boost::p
 		if(v.first == "deleter_type")
 		{
 			result->deleterTypes.insert(v.second.get_value<std::string>());
+			if(v.second.get_value<std::string>() == "all")
+			{
+				result->allFlag = true;
+				
+			}
 		}
 	}
 	return result;

@@ -10,6 +10,6 @@ void main(void)
 	highp float len = length(pos_vec + offset - tex_vec) / 20;
 	highp float intensity = gl_Color.a * 255;
 	highp float len_power = 2;
-	highp float multiplier = min(1.0, intensity / pow(len, len_power)) * 0.2;
+	highp float multiplier = min(10.0, intensity / pow(len, len_power)) * 0.025;
 	gl_FragColor = vec4(gl_Color.r * multiplier, gl_Color.g * multiplier, gl_Color.b * multiplier, 1.0);
 }

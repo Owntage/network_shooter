@@ -12,6 +12,7 @@ struct DamageEvent : Event
 		bulletType(bulletType),
 		shotBy(shotBy)
 	{}
+	DamageEvent() {}
 	float damage;
 	std::string bulletType;
 	int shotBy;

@@ -1,6 +1,7 @@
 #include "animation_component.h"
 #include "animation_event.h"
 #include "animation_update.h"
+#include "physics_component.h"
 #include "boost/foreach.hpp"
 
 void AnimationComponent::onEvent(const Event& event)
@@ -18,6 +19,16 @@ void AnimationComponent::onEvent(const Event& event)
 			std::cout << "no such state: " << animationEvent.layerState.state << std::endl;
 		}
 	}
+	if(event.name == "animation_angle")
+	{
+		const AnimationAngleEvent& animationAngleEvent = (const AnimationAngleEvent&) event;
+		if(animationAngleEvent.layer < currentLayerStates.size())
+		{
+			currentLayerStates[animationAngleEvent.layer].angle = animationAngleEvent.angle;
+		}
+		
+	}
+	
 }
 
 bool AnimationComponent::hasUpdate(int systemID)
