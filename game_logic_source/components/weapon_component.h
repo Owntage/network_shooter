@@ -31,6 +31,7 @@ struct WeaponDef //NB: not everything is serialized
 	int bulletsPerHolder;
 	std::string bulletType;
 	std::string weaponTexture;
+	std::string layerName;
 	
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, WeaponDef& w)

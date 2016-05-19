@@ -1,5 +1,5 @@
 #include "render_system.h"
-
+#include <SFML/Graphics/BlendMode.hpp>
 
 void GameGuiManager::setWeaponUpdate(WeaponUpdate& weaponUpdate)
 {
@@ -30,14 +30,14 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	shape.setSize(sf::Vector2f(160 * hpUpdate.currentHp / hpUpdate.maxHp, 32));
 	shape.setPosition(screenWidth / 2 - 164, -screenHeight / 2 + 4);
 	shape.setFillColor(sf::Color(128, 0, 128, 255));
-	renderTarget.draw(shape, sf::BlendAdd);
+	renderTarget.draw(shape);
 
 	//hp texture
 	shape.setTexture(&getTexture(HP_TEXTURE));
 	shape.setSize(sf::Vector2f(32, 32));
 	shape.setFillColor(sf::Color::White);
 	shape.setPosition(screenWidth / 2 - 200, -screenHeight / 2 + 4);
-	renderTarget.draw(shape, sf::BlendAdd);
+	renderTarget.draw(shape);
 
 	//weapon texture
 	shape.setTexture(&getTexture(weaponUpdate.weaponDef.weaponTexture));
@@ -51,7 +51,7 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	shape.setSize(sf::Vector2f(160 * reloadValue, 16));
 	shape.setPosition(screenWidth / 2 - 164, -screenHeight / 2 + 40);
 	shape.setFillColor(sf::Color(0, 255, 255, 128));
-	renderTarget.draw(shape, sf::BlendAdd);
+	renderTarget.draw(shape);
 
 	//bullets.
 	float bulletSize = 160 - (weaponUpdate.weaponDef.bulletsPerHolder - 1) * 4;
@@ -61,7 +61,7 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	for(int i = 0; i < bullets; i++)
 	{
 		shape.setPosition(screenWidth / 2 - 164 + (bulletSize + 4) * i, -screenHeight / 2 + 60);
-		renderTarget.draw(shape, sf::BlendAdd);
+		renderTarget.draw(shape);
 	}
 
 	//shoot blink
@@ -69,11 +69,11 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	shape.setPosition(-screenWidth / 2, -screenHeight / 2);
 	shape.setTexture(nullptr);
 	shape.setFillColor(sf::Color(192, 255, 255, 32.0f * shootBlink));
-	renderTarget.draw(shape, sf::BlendAdd);
+	renderTarget.draw(shape);
 
 	//damage blink
 	shape.setFillColor(sf::Color(255, 0, 0, 128.0f * damageBlink));
-	renderTarget.draw(shape, sf::BlendAdd);
+	renderTarget.draw(shape);
 }
 
 void GameGuiManager::onTimer()
@@ -83,6 +83,10 @@ void GameGuiManager::onTimer()
 	if(shootBlink > 0)
 	{
 		shootBlink -= 1.0f / 60.0f / weaponUpdate.weaponDef.period;
+	}
+	if(weaponUpdate.weaponDef.period < 0.1f)
+	{
+		shootBlink = 0;
 	}
 	if(damageBlink > 0)
 	{

@@ -20,6 +20,11 @@ Controller::Controller(Console& console, int tileSize, int screenWidth, int scre
 	approvedNumbers["chat"] = 0;
 	currentNumbers["mouse"] = 0;
 	approvedNumbers["move"] = 0;
+
+	currentNumbers["wheel_up"] = 0;
+	approvedNumbers["wheel_up"] = 0;
+	currentNumbers["wheel_down"] = 0;
+	approvedNumbers["wheel_down"] = 0;
 	isMessageSent = false;
 	console.setInputCallback([this](std::string input)
 	{
@@ -81,6 +86,18 @@ void Controller::onEvent(sf::Event event)
 		currentNumbers["mouse"]++;
 		shootingEventName = "shooting_end";
 	}
+	if(event.type == sf::Event::MouseWheelMoved)
+	{
+		int delta = event.mouseWheel.delta;
+		if(delta > 0)
+		{
+			currentNumbers["wheel_up"]++;
+		}
+		else
+		{
+			currentNumbers["wheel_down"]++;
+		}
+	}
 	
 }
 
@@ -129,6 +146,18 @@ std::vector<std::shared_ptr<Event> > Controller::getGameEvents()
 		event->number = currentNumbers["mouse"];
 		result.push_back(event);
 		//result.push_back(std::make_shared<Event>("shoot", false, moveEvent.actorID));
+	}
+	if(approvedNumbers["wheel_up"] < currentNumbers["wheel_up"])
+	{
+		auto event = std::make_shared<Event>("next_weapon", false, moveEvent.actorID);
+		event->number = currentNumbers["wheel_up"];
+		result.push_back(event);
+	}
+	if(approvedNumbers["wheel_down"] < currentNumbers["wheel_down"])
+	{
+		auto event = std::make_shared<Event>("prev_weapon", false, moveEvent.actorID);
+		event->number = currentNumbers["wheel_down"];
+		result.push_back(event);
 	}
 	return result;
 }

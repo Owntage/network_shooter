@@ -9,15 +9,12 @@ void AnimationComponent::onEvent(const Event& event)
 	if(event.name == "animation")
 	{
 		AnimationEvent& animationEvent = (AnimationEvent&) event;
-		if(states.find(animationEvent.layerState.state) != states.end())
+		if(states.find(animationEvent.layerState.state) != states.end() && animationEvent.layerNumber < currentLayerStates.size())
 		{
 			currentLayerStates[animationEvent.layerNumber] = animationEvent.layerState;
 			currentDataNumber++;
 		}
-		else
-		{
-			std::cout << "no such state: " << animationEvent.layerState.state << std::endl;
-		}
+		
 	}
 	if(event.name == "animation_angle")
 	{

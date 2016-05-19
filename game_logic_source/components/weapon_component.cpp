@@ -3,7 +3,9 @@
 #include "coord_event.h"
 #include "create_event.h"
 #include "damage_dealer_component.h"
+#include "animation_event.h"
 
+#define PI 3.141593
 
 std::map<std::string, WeaponDef> WeaponComponent::weaponDefinitions;
 
@@ -25,6 +27,7 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 	weaponDef.weaponTexture = tree.get<std::string>("texture");
 	weaponDef.damage = tree.get("damage", 10.0f);
 	weaponDef.bullets = tree.get("bullets", 1);
+	weaponDef.layerName = tree.get("layer_name", "");
 	
 
 	WeaponComponent::weaponDefinitions[nodeName] = weaponDef;
@@ -119,10 +122,40 @@ void WeaponComponent::onEvent(const Event& event)
 	{
 		isShooting = false;
 	}
+	if(weapons.size() > 0)
+	{
+		if(event.name == "next_weapon")
+		{
+			std::cout << "next weapon" << std::endl;
+			currentWeapon = (currentWeapon + 1) % weapons.size();
+			state = WeaponUpdate::WeaponState::CHANGE;
+			currentDataNumber++;
+		}
+		if(event.name == "prev_weapon")
+		{
+			currentWeapon--;
+			if(currentWeapon < 0)
+			{
+				currentWeapon = weapons.size() - 1;
+			}
+			state = WeaponUpdate::WeaponState::CHANGE;
+			currentDataNumber++;
+		}
+	}
 	if(event.name == "timer")
 	{
 		if(weapons.size() > 0)
 		{
+
+			auto request = std::make_shared<Request>("angle", false, thisActorID, [this](const Event& event)
+			{
+				const AngleEvent& angleEvent = (const AngleEvent&) event;
+				LayerState layerState(weapons[currentWeapon].layerName, true, angleEvent.angle * 180 / PI);
+				auto animationEvent = std::make_shared<AnimationEvent>(2, layerState, thisActorID);
+				localEvents.push_back(animationEvent);
+			});
+			requests.push_back(request);
+
 			weaponData[currentWeapon].timeSinceReload += 1.0f / 60.0f;
 			weaponData[currentWeapon].timeSinceShot += 1.0f / 60.0f;
 			if(weaponData[currentWeapon].timeSinceShot > weapons[currentWeapon].period &&

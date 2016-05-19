@@ -437,9 +437,10 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 					{
 						int deletedActor = deleteUpdate.deletedActors[i];
 						//std::cout << "deleted actor: " << deletedActor << std::endl;
+						deletedActors.insert(deletedActor);
 						if(actors.find(deletedActor) != actors.end())
 						{
-							deletedActors.insert(deletedActor);
+							
 							actors.erase(deletedActor);
 						}
 					}
