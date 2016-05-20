@@ -3,6 +3,9 @@
 
 #include "icomponent.h"
 #include "component_update.h"
+#include <map>
+#include <set>
+#include <utility>
 
 struct NicknameUpdate : ComponentUpdate
 {
@@ -32,6 +35,7 @@ struct NicknameUpdate : ComponentUpdate
 
 struct NicknameComponent : IComponent
 {
+	
 	void onRequest(const Request& request);
 	void onEvent(const Event& event);
 	bool hasUpdate(int systemID);

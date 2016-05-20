@@ -1,16 +1,22 @@
 #include "nickname_component.h"
 #include "string_event.h"
+#include <cstdlib>
+#include <boost/foreach.hpp>
+
+
 
 void NicknameComponent::onRequest(const Request& request)
 {
 	if(request.name == "get_nickname")
 	{
+		
 		request.callback(StringEvent("", 0, nickname));
 	}
 }
 
 void NicknameComponent::onEvent(const Event& event)
 {
+	
 	if(event.name == "set_nickname")
 	{
 		const StringEvent& stringEvent = (const StringEvent&) event;
@@ -30,11 +36,13 @@ std::string NicknameComponent::getName()
 
 std::shared_ptr<ComponentUpdate> NicknameComponent::getUpdate(int syatemID)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	return std::make_shared<NicknameUpdate>(nickname);
 }
 
 std::shared_ptr<IComponent> NicknameComponent::loadFromXml(const boost::property_tree::ptree& tree)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	auto result = std::make_shared<NicknameComponent>();
+	result->nickname = tree.get("default_nickname", "Player");
+	return result;
 }
 

@@ -1,5 +1,6 @@
 #include "chat_component.h"
 #include <iostream>
+#include "string_event.h"
 
 std::vector<std::string> ChatComponent::chatHistory;
 
@@ -8,8 +9,16 @@ void ChatComponent::onEvent(const Event& event)
 	if(event.name == "chat")
 	{
 		const ChatEvent& chatEvent = static_cast<const ChatEvent&>(event);
-		chatHistory.push_back(chatEvent.message);
-		std::cout << "chat component received a message: " << chatEvent.message << std::endl;
+		std::string message = chatEvent.message;
+		//chatHistory.push_back(chatEvent.message);
+		auto request = std::make_shared<Request>("get_nickname", false, event.actorID, [message, this]
+		(const Event& event)
+		{
+			const StringEvent& stringEvent = (const StringEvent&) event;
+			chatHistory.push_back(stringEvent.str + ": " + message);
+		});
+		requests.push_back(request);
+		//std::cout << "chat component received a message: " << chatEvent.message << std::endl;
 	}
 }
 

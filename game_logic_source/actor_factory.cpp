@@ -15,6 +15,7 @@
 #include "components/hp_component.h"
 #include "components/damage_dealer_component.h"
 #include "components/bullet_component.h"
+#include "components/nickname_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -52,6 +53,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "hp") component = std::make_shared<HpComponent>();
 		if(v.first == "damage_dealer") component = std::make_shared<DamageDealerComponent>();
 		if(v.first == "bullet") component = std::make_shared<BulletComponent>();
+		if(v.first == "nickname") component = std::make_shared<NicknameComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;
