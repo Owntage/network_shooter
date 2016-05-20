@@ -66,6 +66,9 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 	}
 	if(shouldDelete)
 	{
+
+		//requests
+
 		for(auto it = actors.begin(); it != actors.end(); it++)
 		{
 			auto requests = it->second->getRequests();
@@ -91,29 +94,32 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 			}
 		}
 
+		//death events
+
+		for(auto it = actorsMarkedToDelete.begin(); it != actorsMarkedToDelete.end(); it++)
+		{
+			onEvent(Event("death", false, *it), false);
+		}
+
+		//creating new actors
 		
 		while(createEvents.size() > 0)
 		{
-			//std::cout << "started creating" << std::endl;
-			//std::cout << "createEvents.size: " << createEvents.size() << std::endl;
-			//std::cout << "creating actor..." << std::endl;
+			
 			CreateEvent& createEvent = (CreateEvent&) *createEvents.back();
 			int createdActor = createActor(createEvent.type);
-			//std::cout << "createEvent.events.size: " << createEvent.events.size() << std::endl;
+			
 			while(createEvent.events.size() > 0)
 			{
-				//std::cout << "createEvent.event.size: " << createEvent.events.size() << std::endl;
 				createEvent.events.back()->global = false;
 				createEvent.events.back()->actorID = createdActor;
 				onEvent(*createEvent.events.back(), false);
 				createEvent.events.pop_back();
 			}
-			
 			createEvents.pop_back();
-			//std::cout << "createEvents size after pop back: " << createEvents.size() << std::endl;
-			//std::cout << "finished creating" << std::endl;
 		}
 		
+		//destroying actors, marked for deletion
 
 		for(auto it = actorsMarkedToDelete.begin(); it != actorsMarkedToDelete.end(); it++)
 		{
