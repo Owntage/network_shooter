@@ -15,6 +15,11 @@ void GuiElement::setX(float x)
 	this->x = x;
 }
 
+void GuiElement::setVisible(bool visible)
+{
+	this->visible = visible;
+}
+
 void GuiElement::setY(float y)
 {
 	this->y = y;
@@ -134,10 +139,23 @@ void GuiManager::drawGuiElement(GuiElement* guiElement)
 		textureRect.height = guiElement->getScaleY();
 		textureRect.left = guiElement->getX() - guiElement->getScaleX() / 2 + guiView.getSize().x / 2;
 		textureRect.top = guiElement->getY() - guiElement->getScaleY() / 2 + guiView.getSize().y / 2;
+
+		if(guiElement->visible)
+		{
+			guiElement->blinkLevel += 1.0f / 60.0f;
+		}
+		else
+		{
+			guiElement->blinkLevel -= 1.0f / 60.0f;
+		}
+		guiElement->blinkLevel = std::min(guiElement->blinkLevel, 1.0f);
+		guiElement->blinkLevel = std::max(guiElement->blinkLevel, 0.0f);
+
 		renderSprite.setTextureRect(textureRect);
 
 		renderSprite.setOrigin(guiElement->getScaleX() / 2, guiElement->getScaleY() / 2);
 		renderSprite.setPosition(guiElement->getX(), guiElement->getY());
+		renderSprite.setColor(sf::Color(255,255,255, 255.0f * guiElement->blinkLevel));
 		
 		RenderWindow::getInstance()->window.draw(renderSprite);
 		
@@ -459,7 +477,7 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 				
 				//RenderWindow::getInstance()->window.draw(shapes[i][j]);
 				
-				renderTarget.draw(shapes[i][j]);
+				renderTarget.draw(shapes[i][j], sf::BlendAdd);
 
 			}
 		}
@@ -472,7 +490,7 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 		shapes[1][1].setPosition(x, y);
 		shapes[1][1].setOrigin(scaleX / 2, scaleY / 2);
 		//RenderWindow::getInstance()->window.draw(shapes[1][1]);
-		renderTarget.draw(shapes[1][1]);
+		renderTarget.draw(shapes[1][1], sf::BlendAdd);
 	}
 }
 
@@ -663,7 +681,7 @@ void TextView::draw(sf::RenderTarget& renderTarget)
 	text.setColor(color);
 	text.setPosition(getX(), getY());
 	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
-	renderTarget.draw(text);
+	renderTarget.draw(text, sf::BlendAdd);
 }
 
 
@@ -786,7 +804,7 @@ void ScrollingTextView::draw(sf::RenderTarget& renderTarget)
 	
 	slider.draw(renderTarget);
 
-	renderTarget.draw(text);
+	renderTarget.draw(text, sf::BlendAdd);
 }
 
 void ScrollingTextView::onMouseMove(float x, float y)
@@ -874,7 +892,7 @@ void InputField::draw(sf::RenderTarget& renderTarget)
 		deltaX = text.getGlobalBounds().width - getScaleX();
 	}
 	text.setPosition(getX() - deltaX, getY());
-	renderTarget.draw(text);
+	renderTarget.draw(text, sf::BlendAdd);
 }
 
 void InputField::onMouseClick(float x, float y, bool isReleased)
@@ -966,7 +984,7 @@ void InputField::onSpecialKey(unsigned int key)
 }
 
 
-Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager)
+OutputConsole::OutputConsole(float x, float y, float scaleX, float scaleY, GuiManager& guiManager)
 {
 	backgroundSprite = std::make_shared<NinePatchSprite>("res/gui/console/background.png", true);
 	background = std::make_shared<WindowPanel>(x, y - 9, scaleX, scaleY - 18, *backgroundSprite);
@@ -976,15 +994,21 @@ Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiMa
 	scrollingTextView->makeChildOf(*background);
 	scrollingTextView->setCharacterSize(24);
 	guiManager.addElement(*scrollingTextView);
+	
+}
+
+void OutputConsole::println(std::string text)
+{
+	scrollingTextView->setText(scrollingTextView->getText() + text + '\n');
+}
+
+Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager) :
+	OutputConsole(x, y, scaleX, scaleY, guiManager)
+{
 	std::shared_ptr<InputField> tempInputPtr(new InputField(0,scaleY / 2, scaleX, 20, "res/gui/console/input_background.png", "res/gui/console/input_hovered_background.png", "res/gui/console/input_active_background.png"));
 	inputField = tempInputPtr;
 	inputField->makeChildOf(*background);
-	guiManager.addElement(*inputField);
-}
-
-void Console::println(std::string text)
-{
-	scrollingTextView->setText(scrollingTextView->getText() + text + '\n');
+	guiManager.addElement(*inputField);	
 }
 
 void Console::setInputCallback(std::function<void(string)> inputCallback)

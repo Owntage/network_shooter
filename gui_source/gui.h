@@ -15,10 +15,32 @@
 struct GuiElement
 {
 	
-	GuiElement(float x, float y, float scaleX, float scaleY): x(x), y(y), scaleX(scaleX), scaleY(scaleY),
-		isRelativeScale(false), relativeX(0.0), relativeY(0.0), parent(nullptr), usesMouse(false) {}
-	GuiElement(): x(0.0f), y(0.0f), scaleX(0.0f), scaleY(0.0f), isRelativeScale(false), relativeX(0.0f), relativeY(0.0f), parent(nullptr),
-		usesMouse(false) {}
+	GuiElement(float x, float y, float scaleX, float scaleY): 
+		x(x), 
+		y(y), 
+		scaleX(scaleX), 
+		scaleY(scaleY),
+		isRelativeScale(false), 
+		relativeX(0.0), 
+		relativeY(0.0), 
+		parent(nullptr), 
+		usesMouse(false),
+		visible(true),
+		blinkLevel(0.0f)
+	{}
+	GuiElement(): 
+		x(0.0f), 
+		y(0.0f), 
+		scaleX(0.0f), 
+		scaleY(0.0f), 
+		isRelativeScale(false), 
+		relativeX(0.0f), 
+		relativeY(0.0f), 
+		parent(nullptr),
+		visible(true),
+		usesMouse(false),
+		blinkLevel(0.0f)
+	{}
 	virtual void draw(sf::RenderTarget& renderTarget) = 0;
 	virtual void onMouseMove(float x, float y) {}
 	virtual void onMouseClick(float x, float y, bool isReleased) {}
@@ -39,6 +61,7 @@ struct GuiElement
 	float getY();
 	float getScaleX();
 	float getScaleY();
+	void setVisible(bool visible);
 	GuiElement* getParent();
 	bool usesMouse;
 protected:
@@ -47,6 +70,7 @@ protected:
 	float getRelativeToParentY() { return y; }
 	
 private:
+	float blinkLevel;
 	float x;
 	float y;
 	float relativeX;
@@ -54,7 +78,9 @@ private:
 	float scaleX;
 	float scaleY;
 	bool isRelativeScale;
+	bool visible;
 	GuiElement* parent;
+	friend class GuiManager;
 };
 
 struct GuiManager
@@ -267,15 +293,27 @@ private:
 	int cursorPos;
 };
 
-struct Console
+
+
+struct OutputConsole
 {
-	Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
+	OutputConsole(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
 	void println(std::string text);
 	void setInputCallback(std::function<void(std::string)> inputCallback);
+protected:
+	std::shared_ptr<WindowPanel> background;
 private:
 	std::shared_ptr<NinePatchSprite> backgroundSprite;
-	std::shared_ptr<WindowPanel> background;
+	
 	std::shared_ptr<ScrollingTextView> scrollingTextView;
+	
+};
+
+struct Console : OutputConsole
+{
+	Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
+	void setInputCallback(std::function<void(std::string)> inputCallback);
+private:
 	std::shared_ptr<InputField> inputField;
 };
 
