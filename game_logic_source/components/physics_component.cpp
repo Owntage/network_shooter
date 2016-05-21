@@ -152,6 +152,7 @@ void PhysicsComponent::onEvent(const Event& event)
 	{
 		const CoordEvent& coordEvent = (const CoordEvent&) event;
 		body->SetTransform(b2Vec2(coordEvent.x, coordEvent.y), body->GetAngle());
+		currentDataNumber++;
 	}
 	if(event.name == "set_speed")
 	{

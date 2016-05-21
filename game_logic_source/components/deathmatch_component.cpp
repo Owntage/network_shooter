@@ -10,7 +10,10 @@ void DeathmatchComponent::onRequest(const Request& request)
 	}
 	if(request.name == "get_spawn")
 	{
-		request.callback(CoordEvent("spawn", 0, -5, -5)); //todo finish
+		int rand_num = rand() % spawns.size();
+		float spawnX = spawns[rand_num].first;
+		float spawnY = spawns[rand_num].second;
+		request.callback(CoordEvent("spawn", 0, spawnX, spawnY)); //todo finish
 	}
 }
 
