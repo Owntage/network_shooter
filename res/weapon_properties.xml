@@ -7,6 +7,35 @@
 	<damage>10</damage>
 	<reload_time>2</reload_time>
 	<bullets>20</bullets>
-	<dispersion>0.7</dispersion>
+	<dispersion>0.3</dispersion>
 	<holders>1000</holders>
+	<layer_name>shotgun</layer_name>
 </shotgun>
+
+<assault_rifle>
+	<bullet_type>default_bullet</bullet_type>
+	<bullet_speed>40</bullet_speed>
+	<texture>res/graphic/m16.png</texture>
+	<period>0.1</period>
+	<bullets_per_holder>30</bullets_per_holder>
+	<damage>5</damage>
+	<reload_time>2</reload_time>
+	<bullets>1</bullets>
+	<dispersion>0.05</dispersion>
+	<holders>1000</holders>
+	<layer_name>m16</layer_name>
+</assault_rifle>
+
+<flame_thrower>
+	<bullet_type>flame_bullet</bullet_type>
+	<bullet_speed>17</bullet_speed>
+	<texture>res/graphic/flame_thrower.png</texture>
+	<period>0.05</period>
+	<bullets_per_holder>100</bullets_per_holder>
+	<damage>1</damage>
+	<reload_time>4</reload_time>
+	<bullets>5</bullets>
+	<dispersion>0.8</dispersion>
+	<holders>1000</holders>
+	<layer_name>flame_thrower</layer_name>
+</flame_thrower>

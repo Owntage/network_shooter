@@ -1,10 +1,17 @@
 <properties>
+	<deathmatch>
+		<deathmatch>.</deathmatch>
+	</deathmatch>
 	<testActor>
+		<nickname>.</nickname>
+		<frag_count>.</frag_count>
 		<hp>
 			<hp>100</hp>
 		</hp>
 		<damage_dealer>.</damage_dealer>
 		<weapon>
+			<default_weapon>flame_thrower</default_weapon>
+			<default_weapon>assault_rifle</default_weapon>
 			<default_weapon>shotgun</default_weapon>
 		</weapon>
 		<render>
@@ -20,7 +27,7 @@
 			<type>circle</type>
 			<id>player</id>
 			<density>10.0</density>
-			<speed>15.0</speed>
+			<speed>5.0</speed>
 		</physics>
 		<chat>.</chat>
 		<animation>
@@ -28,6 +35,21 @@
 				<name>normal_texture</name>
 				<delay>1.0</delay>
 				<image>res/graphic/legs2/5.png</image>
+			</state>
+			<state>
+				<name>shotgun</name>
+				<delay>999</delay>
+				<image>res/graphic/shotgun_top.png</image>
+			</state>
+			<state>
+				<name>m16</name>
+				<delay>999</delay>
+				<image>res/graphic/m16_top.png</image>
+			</state>
+			<state>
+				<name>flame_thrower</name>
+				<delay>999</delay>
+				<image>res/graphic/flame_thrower_top.png</image>
 			</state>
 			<state>
 				<name>running_texture</name>
@@ -48,11 +70,16 @@
 				<delay>1.0</delay>
 				<image>res/graphic/body.png</image>
 			</state>
-			<layer_count>2</layer_count>
+			<layer_count>3</layer_count>
 			<layer>
 				<layer_number>1</layer_number>
 				<is_active>true</is_active>
 				<state>body_texture</state>
+			</layer>
+			<layer>
+				<layer_number>2</layer_number>
+				<is_active>true</is_active>
+				<state>shotgun</state>
 			</layer>
 		</animation>
 		<animation_swapping>
@@ -159,8 +186,16 @@
 			<friction>0</friction>
 			<is_sensor>true</is_sensor>
 		</physics>
+		<animation>
+			<state>
+				<delay>999</delay>
+				<name>bullet</name>
+				<image>res/graphic/bullet.png</image>
+			</state>
+			
+		</animation>
 		<render>
-			<sprite_is_visible>false</sprite_is_visible>
+			<sprite_is_visible>true</sprite_is_visible>
 			<light_is_visible>true</light_is_visible>
 			<light_intensity>1</light_intensity>
 			<light_r>250</light_r>
@@ -168,4 +203,37 @@
 			<light_b>0</light_b>
 		</render>
 	</default_bullet>
+	<flame_bullet>
+		<bullet>.</bullet>
+		<timed_deletion>
+			<time>0.3</time>
+		</timed_deletion>
+		<contact_deletion>
+			<deleter_type>all</deleter_type>
+		</contact_deletion>
+		<physics>
+			<type>circle</type>
+			<density>0.0001</density>
+			<radius>0.1</radius>
+			<id>bullet</id>
+			<friction>0</friction>
+			<is_sensor>true</is_sensor>
+		</physics>
+		<animation>
+			<state>
+				<delay>999</delay>
+				<name>bullet</name>
+				<image>res/graphic/bullet.png</image>
+			</state>
+			
+		</animation>
+		<render>
+			<sprite_is_visible>true</sprite_is_visible>
+			<light_is_visible>true</light_is_visible>
+			<light_intensity>3</light_intensity>
+			<light_r>250</light_r>
+			<light_g>64</light_g>
+			<light_b>0</light_b>
+		</render>
+	</flame_bullet>
 </properties>
