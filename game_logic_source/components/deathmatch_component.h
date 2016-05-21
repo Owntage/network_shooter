@@ -60,6 +60,7 @@ struct DeathmatchComponent : IComponent
 	DeathmatchComponent() :
 		currentTime(0.0f)
 	{}
+	void onRequest(const Request& request);
 	void onEvent(const Event& event);
 	bool hasUpdate(int systemID);
 	std::string getName();
@@ -67,9 +68,11 @@ struct DeathmatchComponent : IComponent
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
 	int totalRequests;
+	int thisActorID;
 	int requestsHandled;
 	std::vector<std::pair<std::string, int> > aliveActors;
 	std::vector<std::pair<std::string, int> > tempAliveActors;
+	std::vector<std::pair<float, float> > spawns;
 	float roundTime;
 	float currentTime;
 };

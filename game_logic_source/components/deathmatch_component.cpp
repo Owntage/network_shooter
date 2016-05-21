@@ -1,9 +1,31 @@
 #include "deathmatch_component.h"
 #include "string_event.h"
+#include "coord_event.h"
+
+void DeathmatchComponent::onRequest(const Request& request)
+{
+	if(request.name == "get_gamemode_id")
+	{
+		request.callback(Event("", false, thisActorID));
+	}
+	if(request.name == "get_spawn")
+	{
+		request.callback(CoordEvent("spawn", 0, -5, -5)); //todo finish
+	}
+}
 
 void DeathmatchComponent::onEvent(const Event& event)
 {
-	
+	if(event.name == "actor_id")
+	{
+		thisActorID = event.actorID;
+	}
+	if(event.name == "set_spawn")
+	{
+		const CoordEvent& coordEvent = (const CoordEvent&) event;
+		spawns.push_back(std::make_pair(coordEvent.x, coordEvent.y));
+		std::cout << "deathmatch added spawn coords: " << coordEvent.x << " " << coordEvent.y << std::endl;
+	}
 	if(event.name == "timer")
 	{
 		currentTime += 1.0f / 60.0f;
