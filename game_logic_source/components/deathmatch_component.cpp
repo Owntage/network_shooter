@@ -8,6 +8,7 @@ void DeathmatchComponent::onEvent(const Event& event)
 		currentTime += 1.0f / 60.0f;
 		totalRequests = FragCountComponent::frags.size();
 		requestsHandled = 0;
+		tempAliveActors.clear();
 		for(auto it = FragCountComponent::frags.begin(); it != FragCountComponent::frags.end(); it++)
 		{
 			int frags = it->second;
@@ -22,6 +23,7 @@ void DeathmatchComponent::onEvent(const Event& event)
 				requestsHandled++;
 				if(requestsHandled == totalRequests)
 				{
+					
 					if(aliveActors != tempAliveActors)
 					{
 						currentDataNumber++;
@@ -50,6 +52,7 @@ std::string DeathmatchComponent::getName()
 
 std::shared_ptr<ComponentUpdate> DeathmatchComponent::getUpdate(int syatemID)
 {
+	std::cout << "alive actors size: " << aliveActors.size() << std::endl;
 	return std::make_shared<DeathmatchUpdate>(aliveActors, DeathmatchUpdate::GameState::RUNNING, currentDataNumber);
 }
 

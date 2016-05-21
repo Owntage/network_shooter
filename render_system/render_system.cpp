@@ -3,6 +3,7 @@
 #include <components/move_update.h>
 #include <components/chat_update.h>
 #include <components/animation_update.h>
+#include <components/deathmatch_component.h>
 #include <components/tile_update.h>
 #include <iostream>
 #include <fstream>
@@ -99,22 +100,6 @@ void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 
 void LightManager::removeLightSource(int lightSourceID)
 {
-	/*
-	int lightSourceIndex = IDToIndex[lightSourceID];
-	//std::cout << "removed light id: " << lightSourceIndex << std::endl;
-	//std::copy(&vertices[vertices.getVertexCount() - 4], &vertices[vertices.getVertexCount() - 4] + 3, &vertices[lightSourceIndex * 4]);
-	int lastID = indexToID[vertices.size() / 4 - 1];
-	IDToIndex[lastID] = lightSourceIndex;
-	indexToID[lightSourceIndex] = lastID;
-	IDToIndex.erase(IDToIndex.find(lightSourceID));
-	indexToID.erase(indexToID.find(vertices.size() / 4 - 1));
-	vertices[lightSourceIndex * 4] = vertices[vertices.size() - 4];
-	vertices[lightSourceIndex * 4 + 1] = vertices[vertices.size() - 3];
-	vertices[lightSourceIndex * 4 + 2] = vertices[vertices.size() - 2];
-	vertices[lightSourceIndex * 4 + 3] = vertices[vertices.size() - 1];
-	vertices.resize(vertices.size() - 4);
-	//std::cout << "number of lights multiplied by 4: " << vertices.size() << std::endl;
-	*/
 	verticesMap.erase(lightSourceID);
 }
 
@@ -187,6 +172,14 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			{
 				renderSystem.gameGuiManager.setWeaponUpdate(weaponUpdate);
 			}
+		}
+		if((*it)->name == "deathmatch")
+		{
+			std::cout << "got deathmatch update" << std::endl;
+
+			DeathmatchUpdate dmUpdate = static_cast<DeathmatchUpdate&>(*(*it));
+
+			std::cout << "actors in update: " << dmUpdate.actors.size() << std::endl;
 		}
 		if((*it)->name == "hp")
 		{

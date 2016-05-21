@@ -44,7 +44,7 @@ struct DeathmatchUpdate : ComponentUpdate
 	{
 		int size;
 		s >> size;
-		u.actors[i].resize(size);
+		u.actors.resize(size);
 		for(int i = 0; i < size; i++)
 		{
 			s >> u.actors[i].first;

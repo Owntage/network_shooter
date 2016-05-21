@@ -11,6 +11,7 @@
 #include <components/render_component.h>
 #include <components/weapon_component.h>
 #include <components/hp_component.h>
+#include <components/deathmatch_component.h>
 #include <delete_update.h>
 #include "level_loader.h"
 
@@ -250,6 +251,7 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "render") packet << (RenderUpdate&) *(*component_it);
 				if((*component_it)->name == "weapon") packet << (WeaponUpdate&) *(*component_it);
 				if((*component_it)->name == "hp") packet << (HpUpdate&) *(*component_it);
+				if((*component_it)->name == "deathmatch") packet << (DeathmatchUpdate&) *(*component_it);
 
 				if(packet.isPacked())
 				{

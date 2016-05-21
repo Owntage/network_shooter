@@ -9,6 +9,7 @@
 #include <components/render_component.h>
 #include <components/weapon_component.h>
 #include <components/hp_component.h>
+#include <components/deathmatch_component.h>
 #include <delete_update.h>
 #include "game_scenes.h"
 
@@ -226,6 +227,8 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<WeaponUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "hp")
 						addUpdate<HpUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					if(componentUpdate.name == "deathmatch")
+						addUpdate<DeathmatchUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					
 
 					
