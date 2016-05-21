@@ -11,6 +11,18 @@
 
 #define UPDATE_RADIUS 10
 
+struct RecreateData
+{
+	RecreateData(std::string type, int actorID, int dataNumber) :
+		type(type),
+		actorID(actorID),
+		dataNumber(dataNumber)
+	{}
+	std::string type;
+	int actorID;
+	int dataNumber;
+};
+
 struct GameLogic
 {
 	GameLogic(ActorFactory& actorFactory): actorFactory(actorFactory), systemCount(0), actorCount(0) {}
@@ -27,7 +39,7 @@ private:
 	void onEvent(const Event& event, bool shouldDelete);
 	std::set<int> actorsMarkedToDelete;
 	std::vector<std::shared_ptr<Event> > createEvents;
-	std::vector<std::pair<int, std::string> > replaceEvents;
+	std::vector<RecreateData> replaceEvents;
 
 	ActorFactory& actorFactory;
 	int systemCount;

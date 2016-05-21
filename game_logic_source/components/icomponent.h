@@ -32,6 +32,10 @@ struct IComponent
 	{
 		this->currentDataNumber = currentDataNumber;
 	}
+	int getCurrentNumber()
+	{
+		return currentDataNumber; 
+	}
 protected:
 	std::map<int, int> lastSystemApproved;
 	//std::map<int, int> currentSystemNumber;

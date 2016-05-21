@@ -29,6 +29,18 @@ struct Actor
 			components[i]->setCurrentNumber(currentDataNumber);
 		}
 	}
+	int getCurrentNumber()
+	{
+		int result;
+		for(int i = 0; i < components.size(); i++)
+		{
+			if(i == 0 || components[i]->getCurrentNumber() > result)
+			{
+				result = components[i]->getCurrentNumber();
+			}
+		}
+		return result;
+	}
 
 	friend class ActorFactory;
 	
