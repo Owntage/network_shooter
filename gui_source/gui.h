@@ -12,6 +12,8 @@
 
 #define FONT_NAME "res/gui/UbuntuMono-R.ttf"
 
+#define BLINK_TIME 0.2
+
 struct GuiElement
 {
 	
@@ -299,12 +301,11 @@ struct OutputConsole
 {
 	OutputConsole(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
 	void println(std::string text);
-	void setInputCallback(std::function<void(std::string)> inputCallback);
+	void setVisible(bool visible);
 protected:
 	std::shared_ptr<WindowPanel> background;
 private:
 	std::shared_ptr<NinePatchSprite> backgroundSprite;
-	
 	std::shared_ptr<ScrollingTextView> scrollingTextView;
 	
 };
@@ -313,6 +314,7 @@ struct Console : OutputConsole
 {
 	Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
 	void setInputCallback(std::function<void(std::string)> inputCallback);
+	void setVisible(bool visible);
 private:
 	std::shared_ptr<InputField> inputField;
 };

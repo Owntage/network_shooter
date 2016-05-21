@@ -17,6 +17,7 @@
 #include "components/bullet_component.h"
 #include "components/nickname_component.h"
 #include "components/frag_count_component.h"
+#include "components/deathmatch_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -56,6 +57,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "bullet") component = std::make_shared<BulletComponent>();
 		if(v.first == "nickname") component = std::make_shared<NicknameComponent>();
 		if(v.first == "frag_count") component = std::make_shared<FragCountComponent>();
+		if(v.first == "deathmatch") component = std::make_shared<DeathmatchComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;

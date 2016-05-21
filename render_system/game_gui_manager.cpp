@@ -106,3 +106,11 @@ sf::Texture& GameGuiManager::getTexture(std::string name)
 	}
 	return textures[name];
 }
+
+void GameGuiManager::onKey(int key, bool isReleased)
+{
+	if(key == sf::Keyboard::Tab)
+	{
+		outputConsole.setVisible(!isReleased);
+	}
+}

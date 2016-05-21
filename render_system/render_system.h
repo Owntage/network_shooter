@@ -23,20 +23,24 @@
 
 struct GameGuiManager
 {
-	GameGuiManager(float screenWidth, float screenHeight) :
+	GameGuiManager(float screenWidth, float screenHeight, GuiManager& guiManager) :
 		screenWidth(screenWidth),
 		screenHeight(screenHeight),
 		view(sf::Vector2f(0, 0), sf::Vector2f(screenWidth, screenHeight)),
 		shootBlink(0.0f),
-		damageBlink(0.0f)
+		damageBlink(0.0f),
+		outputConsole(0, -100, 200, 300, guiManager)
 	{
 		hpUpdate.currentHp = 1;
 		hpUpdate.maxHp = 1;
+		outputConsole.setVisible(false);
+		outputConsole.println("Player 0");
 	}
 	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
 	void setHpUpdate(HpUpdate& hpUpdate);
 	void draw(sf::RenderTarget& renderTarget);
 	void onTimer();
+	void onKey(int key, bool isReleased);
 
 private:
 
@@ -50,6 +54,7 @@ private:
 	WeaponUpdate weaponUpdate;
 	HpUpdate hpUpdate;
 	sf::Texture& getTexture(std::string name);
+	OutputConsole outputConsole;
 };
 
 struct LightManager
@@ -128,7 +133,7 @@ private:
 
 struct RenderSystem
 {
-	RenderSystem(Console& console, float screenWidth, float screenHeight);
+	RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight);
 	void onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates);
 	void draw();
 	void setMainActor(int mainActor);
@@ -137,6 +142,7 @@ struct RenderSystem
 	float getCameraY();
 	float getPlayerX();
 	float getPlayerY();
+	void onKey(int key, bool isReleased);
 	std::vector<std::string> imagesToLoad;
 private:
 	

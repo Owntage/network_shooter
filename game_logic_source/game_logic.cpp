@@ -87,6 +87,10 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 					{
 						actors[requests.back()->actorID]->onRequest(*requests.back());
 					}
+					else
+					{
+						(*requests.back()).callback(Event("not_exists"));
+					}
 				}
 				
 				requests.pop_back();

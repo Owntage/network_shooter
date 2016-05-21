@@ -23,7 +23,7 @@ using namespace std;
 int main()
 {
 	
-	GameGuiManager gameGuiManager(800, 600);
+	//GameGuiManager gameGuiManager(800, 600);
 
 	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(100.0, 0.0), sf::Vector2f(800, 600)));
 	RenderWindow::getInstance()->window.setFramerateLimit(60);
@@ -39,14 +39,14 @@ int main()
 	weaponDef.period = 1.0f;
 	
 	WeaponUpdate weaponUpdate(weaponDef, weaponData, WeaponUpdate::WeaponState::CHANGE);
-	gameGuiManager.setWeaponUpdate(weaponUpdate);
+	//gameGuiManager.setWeaponUpdate(weaponUpdate);
 	
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
 		RenderWindow::getInstance()->window.clear();
 
-		gameGuiManager.onTimer();
-		gameGuiManager.draw(RenderWindow::getInstance()->window);
+		//gameGuiManager.onTimer();
+		//gameGuiManager.draw(RenderWindow::getInstance()->window);
 
 		RenderWindow::getInstance()->window.display();
 		sf::Event event;

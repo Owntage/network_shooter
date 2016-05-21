@@ -5,14 +5,15 @@
 
 #define PI 3.1415926536
 
-Controller::Controller(Console& console, int tileSize, int screenWidth, int screenHeight) : 
+Controller::Controller(Console& console, RenderSystem& renderSystem, int tileSize, int screenWidth, int screenHeight) : 
 	moveEvent(false, false, false, false, 0.0f, -1),
 	console(console),
 	tileSize(tileSize),
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
 	mouseX(0),
-	mouseY(0)
+	mouseY(0),
+	renderSystem(renderSystem)
 {
 	currentNumbers["move"] = 0;
 	currentNumbers["chat"] = 0;
@@ -39,8 +40,11 @@ void Controller::onEvent(sf::Event event)
 	if(event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
 	{
 		
+
 		bool isPressed = event.type == sf::Event::KeyPressed;
-		//std::cout << "button state: " << (bool) isPressed << std::endl;
+		
+		renderSystem.onKey(event.key.code, !isPressed);
+
 		MoveEvent lastEvent = moveEvent;
 		switch(event.key.code)
 		{

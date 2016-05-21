@@ -24,7 +24,7 @@ struct WindowEvent
 
 struct Controller
 {
-	Controller(Console& console, int tileSize, int screenWidth, int screenHeight);
+	Controller(Console& console, RenderSystem& renderSystem, int tileSize, int screenWidth, int screenHeight);
 	void onEvent(sf::Event event);
 	void onEvent(WindowEvent& event);
 	void setActorID(int actorID);
@@ -53,6 +53,7 @@ private:
 	std::map<std::string, int> approvedNumbers;
 	std::map<std::string, int> currentNumbers;
 	Console& console;
+	RenderSystem& renderSystem;
 };
 
 #endif

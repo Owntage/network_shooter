@@ -142,11 +142,11 @@ void GuiManager::drawGuiElement(GuiElement* guiElement)
 
 		if(guiElement->visible)
 		{
-			guiElement->blinkLevel += 1.0f / 60.0f;
+			guiElement->blinkLevel += 1.0f / 60.0f / BLINK_TIME;
 		}
 		else
 		{
-			guiElement->blinkLevel -= 1.0f / 60.0f;
+			guiElement->blinkLevel -= 1.0f / 60.0f / BLINK_TIME;
 		}
 		guiElement->blinkLevel = std::min(guiElement->blinkLevel, 1.0f);
 		guiElement->blinkLevel = std::max(guiElement->blinkLevel, 0.0f);
@@ -1002,6 +1002,12 @@ void OutputConsole::println(std::string text)
 	scrollingTextView->setText(scrollingTextView->getText() + text + '\n');
 }
 
+void OutputConsole::setVisible(bool visible)
+{
+	background->setVisible(visible);
+	scrollingTextView->setVisible(visible);
+}
+
 Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiManager) :
 	OutputConsole(x, y, scaleX, scaleY, guiManager)
 {
@@ -1014,4 +1020,10 @@ Console::Console(float x, float y, float scaleX, float scaleY, GuiManager& guiMa
 void Console::setInputCallback(std::function<void(string)> inputCallback)
 {
 	inputField->setInputCallback(inputCallback);
+}
+
+void Console::setVisible(bool visible)
+{
+	OutputConsole::setVisible(visible);
+	inputField->setVisible(visible);
 }

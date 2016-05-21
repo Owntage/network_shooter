@@ -396,10 +396,10 @@ void DrawableActor::draw()
 	
 }
 
-RenderSystem::RenderSystem(Console& console, float screenWidth, float screenHeight) : 
+RenderSystem::RenderSystem(Console& console, GuiManager& guiManager, float screenWidth, float screenHeight) : 
 	gameView(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(screenWidth / TILE_SIZE, screenHeight / TILE_SIZE)), 
 	mainActor(-1), console(console), 
-	gameGuiManager(screenWidth, screenHeight)
+	gameGuiManager(screenWidth, screenHeight, guiManager)
 {
 	tileset.create(TILESET_WIDTH * TILE_SIZE, TILESET_HEIGHT * TILE_SIZE);
 	tileVertices.setPrimitiveType(sf::PrimitiveType::Quads);
@@ -491,6 +491,11 @@ void RenderSystem::draw()
 void RenderSystem::setMainActor(int mainActor)
 {
 	this->mainActor = mainActor;
+}
+
+void RenderSystem::onKey(int key, bool isReleased)
+{
+	gameGuiManager.onKey(key, isReleased);
 }
 
 void RenderSystem::onImageLoaded(std::string image)
