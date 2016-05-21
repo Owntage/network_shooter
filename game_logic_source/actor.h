@@ -21,6 +21,15 @@ struct Actor
 	void onEvent(const Event& event);
 	void onRequest(const Request& request);
 	void approve(std::string component, int systemID, int number);
+
+	void setCurrentNumber(int currentDataNumber)
+	{
+		for(int i = 0; i < components.size(); i++)
+		{
+			components[i]->setCurrentNumber(currentDataNumber);
+		}
+	}
+
 	friend class ActorFactory;
 	
 	bool hasCoords;

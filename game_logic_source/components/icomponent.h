@@ -28,6 +28,10 @@ struct IComponent
 	std::vector<std::shared_ptr<Event> > globalEvents;
 	std::vector<std::shared_ptr<Event> > localEvents;
 	std::vector<std::shared_ptr<Request> > requests;
+	void setCurrentNumber(int currentDataNumber)
+	{
+		this->currentDataNumber = currentDataNumber;
+	}
 protected:
 	std::map<int, int> lastSystemApproved;
 	//std::map<int, int> currentSystemNumber;

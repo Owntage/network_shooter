@@ -1,6 +1,7 @@
 #include "game_logic.h"
 #include "delete_update.h"
 #include "components/create_event.h"
+#include "components/string_event.h"
 #include <iostream>
 
 void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events, bool global, int actorID)
@@ -25,8 +26,18 @@ void GameLogic::thrownEventHandler(std::vector<std::shared_ptr<Event> >& events,
 			}
 			else
 			{
-				onEvent(*event, false);
-				events.pop_back();
+				if(event->name == "replace")
+				{
+					const StringEvent& stringEvent = (const StringEvent&) *event;
+					replaceEvents.push_back(std::make_pair(actorID, stringEvent.str));
+					events.pop_back();
+				}
+				else
+				{
+					onEvent(*event, false);
+					events.pop_back();
+				}
+				
 			}
 			
 		}
@@ -130,6 +141,15 @@ void GameLogic::onEvent(const Event& event, bool shouldDelete)
 			destroyActor(*it);
 		}
 		actorsMarkedToDelete.clear();
+
+		//replacing actors:
+		while(replaceEvents.size() > 0)
+		{
+			actors[replaceEvents.back().first] = actorFactory.createActor(replaceEvents.back().second);
+			actors[replaceEvents.back().first]->setCurrentNumber(1000000);
+			onEvent(Event("actor_id", false, replaceEvents.back().first), false);
+			replaceEvents.pop_back();
+		}
 	}
 }
 
@@ -239,7 +259,19 @@ void GameLogic::destroyActor(int actorID)
 {
 	if(actors.find(actorID) != actors.end())
 	{
-		deletedActors.push_back(actorID);
+		bool isReplaced = false;
+		for(int i = 0; i < replaceEvents.size(); i++)
+		{
+			if(replaceEvents[i].first == actorID)
+			{
+				isReplaced = true;
+				break;
+			}
+		}
+		if(!isReplaced)
+		{
+			deletedActors.push_back(actorID);
+		}
 		actors.erase(actors.find(actorID));
 	}
 }

@@ -1,8 +1,16 @@
 <properties>
+	<spawn>
+		<spawn>.</spawn>
+		<move>.</move>
+	</spawn>
 	<deathmatch>
 		<deathmatch>.</deathmatch>
 	</deathmatch>
 	<testActor>
+		<actor_replace>
+			<replace_with>testActor</replace_with>
+		</actor_replace>
+		<spawn_teleporter>.</spawn_teleporter>
 		<nickname>.</nickname>
 		<frag_count>.</frag_count>
 		<hp>
