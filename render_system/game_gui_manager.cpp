@@ -17,7 +17,19 @@ void GameGuiManager::setHpUpdate(HpUpdate& hpUpdate)
 	{
 		damageBlink = 1.0f;
 	}
-	
+}
+
+void GameGuiManager::setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate)
+{
+	outputConsole.clear();
+	for(int i = 0; i < deathmatchUpdate.actors.size(); i++)
+	{
+		std::string line;
+		line += deathmatchUpdate.actors[i].first;
+		line += " " + std::to_string(deathmatchUpdate.actors[i].second);
+		std::cout << "line: " << line << std::endl;
+		outputConsole.println(line);
+	}
 }
 
 void GameGuiManager::draw(sf::RenderTarget& renderTarget)

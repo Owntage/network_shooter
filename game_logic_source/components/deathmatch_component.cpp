@@ -3,6 +3,7 @@
 
 void DeathmatchComponent::onEvent(const Event& event)
 {
+	
 	if(event.name == "timer")
 	{
 		currentTime += 1.0f / 60.0f;
@@ -15,7 +16,7 @@ void DeathmatchComponent::onEvent(const Event& event)
 			auto request = std::make_shared<Request>("get_nickname", false, it->first, [this, frags]
 			(const Event& event)
 			{
-				if(event.name != "get_nickname")
+				if(event.name == "get_nickname")
 				{
 					const StringEvent& stringEvent = (const StringEvent&) event;
 					tempAliveActors.push_back(std::make_pair(stringEvent.str, frags));

@@ -175,11 +175,10 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		}
 		if((*it)->name == "deathmatch")
 		{
-			std::cout << "got deathmatch update" << std::endl;
-
+			
 			DeathmatchUpdate dmUpdate = static_cast<DeathmatchUpdate&>(*(*it));
-
-			std::cout << "actors in update: " << dmUpdate.actors.size() << std::endl;
+			renderSystem.gameGuiManager.setDeathmatchUpdate(dmUpdate);
+			
 		}
 		if((*it)->name == "hp")
 		{

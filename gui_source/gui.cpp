@@ -477,7 +477,7 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 				
 				//RenderWindow::getInstance()->window.draw(shapes[i][j]);
 				
-				renderTarget.draw(shapes[i][j], sf::BlendAdd);
+				renderTarget.draw(shapes[i][j]);
 
 			}
 		}
@@ -490,7 +490,7 @@ void NinePatchSprite::draw(sf::RenderTarget& renderTarget)
 		shapes[1][1].setPosition(x, y);
 		shapes[1][1].setOrigin(scaleX / 2, scaleY / 2);
 		//RenderWindow::getInstance()->window.draw(shapes[1][1]);
-		renderTarget.draw(shapes[1][1], sf::BlendAdd);
+		renderTarget.draw(shapes[1][1]);
 	}
 }
 
@@ -681,7 +681,7 @@ void TextView::draw(sf::RenderTarget& renderTarget)
 	text.setColor(color);
 	text.setPosition(getX(), getY());
 	text.setOrigin(getScaleX() / 2, getScaleY() / 2);
-	renderTarget.draw(text, sf::BlendAdd);
+	renderTarget.draw(text);
 }
 
 
@@ -804,7 +804,7 @@ void ScrollingTextView::draw(sf::RenderTarget& renderTarget)
 	
 	slider.draw(renderTarget);
 
-	renderTarget.draw(text, sf::BlendAdd);
+	renderTarget.draw(text);
 }
 
 void ScrollingTextView::onMouseMove(float x, float y)
@@ -892,7 +892,7 @@ void InputField::draw(sf::RenderTarget& renderTarget)
 		deltaX = text.getGlobalBounds().width - getScaleX();
 	}
 	text.setPosition(getX() - deltaX, getY());
-	renderTarget.draw(text, sf::BlendAdd);
+	renderTarget.draw(text);
 }
 
 void InputField::onMouseClick(float x, float y, bool isReleased)
@@ -1000,6 +1000,11 @@ OutputConsole::OutputConsole(float x, float y, float scaleX, float scaleY, GuiMa
 void OutputConsole::println(std::string text)
 {
 	scrollingTextView->setText(scrollingTextView->getText() + text + '\n');
+}
+
+void OutputConsole::clear()
+{
+	scrollingTextView->setText("");
 }
 
 void OutputConsole::setVisible(bool visible)

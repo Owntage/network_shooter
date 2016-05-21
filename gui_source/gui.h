@@ -301,6 +301,7 @@ struct OutputConsole
 {
 	OutputConsole(float x, float y, float scaleX, float scaleY, GuiManager& guiManager);
 	void println(std::string text);
+	void clear();
 	void setVisible(bool visible);
 protected:
 	std::shared_ptr<WindowPanel> background;

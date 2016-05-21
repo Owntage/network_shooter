@@ -5,6 +5,10 @@ std::map<int, int> FragCountComponent::frags;
 
 void FragCountComponent::onEvent(const Event& event)
 {
+	if(event.name == "actor_id")
+	{
+		frags[event.actorID] = 0;
+	}
 	if(event.name == "damage")
 	{
 		const DamageEvent& damageEvent = (const DamageEvent&) event;

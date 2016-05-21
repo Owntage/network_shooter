@@ -12,6 +12,7 @@
 #include <components/render_component.h>
 #include <components/weapon_component.h>
 #include <components/hp_component.h>
+#include <components/deathmatch_component.h>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
@@ -34,10 +35,10 @@ struct GameGuiManager
 		hpUpdate.currentHp = 1;
 		hpUpdate.maxHp = 1;
 		outputConsole.setVisible(false);
-		outputConsole.println("Player 0");
 	}
 	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
 	void setHpUpdate(HpUpdate& hpUpdate);
+	void setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate);
 	void draw(sf::RenderTarget& renderTarget);
 	void onTimer();
 	void onKey(int key, bool isReleased);

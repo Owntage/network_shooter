@@ -10,7 +10,7 @@ void NicknameComponent::onRequest(const Request& request)
 	if(request.name == "get_nickname")
 	{
 		
-		request.callback(StringEvent("", 0, nickname));
+		request.callback(StringEvent("get_nickname", 0, nickname));
 	}
 }
 
