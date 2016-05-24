@@ -4,8 +4,8 @@
 #include "singleton.h"
 #include <SFML/Graphics.hpp>
 
-#define WINDOW_WIDTH 800 
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 800  * 3 / 2
+#define WINDOW_HEIGHT 600 * 3 / 2
 
 struct RenderWindow: Singleton<RenderWindow>
 {

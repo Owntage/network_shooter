@@ -92,23 +92,25 @@ void PhysicsComponent::onEvent(const Event& event)
 	}
 	if(event.name == "timer")
 	{
-
-		if(abs(mouseAngle - bodyAngle) > angularSpeed / 60.0f)
+		for(int i = 0; i < 10; i++)
 		{
-			int direction = 1;
-			//std::cout << "relatinveAngle: " << getRelativeAngle(mouseAngle, bodyAngle) << std::endl;
-			if(getRelativeAngle(mouseAngle, bodyAngle) > PI)
+			if(abs(mouseAngle - bodyAngle) > angularSpeed * 0.1 / 60.0f)
 			{
-				direction = -1;
-			}
-			bodyAngle += direction * angularSpeed / 60.0f;
-			if(direction == 1 && bodyAngle > 2 * PI)
-			{
-				bodyAngle -= 2 * PI;
-			}
-			else if(direction == -1 && bodyAngle < 0)
-			{
-				bodyAngle += 2 * PI;
+				int direction = 1;
+				
+				if(getRelativeAngle(mouseAngle, bodyAngle) > PI)
+				{
+					direction = -1;
+				}
+				bodyAngle += direction * 0.1 * angularSpeed / 60.0f;
+				if(direction == 1 && bodyAngle > 2 * PI)
+				{
+					bodyAngle -= 2 * PI;
+				}
+				else if(direction == -1 && bodyAngle < 0)
+				{
+					bodyAngle += 2 * PI;
+				}
 			}
 		}
 
