@@ -4,10 +4,10 @@
 	<texture>res/graphic/shotgun.png</texture>
 	<period>0.5</period>
 	<bullets_per_holder>7</bullets_per_holder>
-	<damage>10</damage>
-	<reload_time>2</reload_time>
-	<bullets>20</bullets>
-	<dispersion>0.3</dispersion>
+	<damage>20</damage>
+	<reload_time>3.5</reload_time>
+	<bullets>12</bullets>
+	<dispersion>0.7</dispersion>
 	<holders>1000</holders>
 	<layer_name>shotgun</layer_name>
 </shotgun>
@@ -32,7 +32,7 @@
 	<texture>res/graphic/flame_thrower.png</texture>
 	<period>0.05</period>
 	<bullets_per_holder>100</bullets_per_holder>
-	<damage>1</damage>
+	<damage>5</damage>
 	<reload_time>4</reload_time>
 	<bullets>5</bullets>
 	<dispersion>0.8</dispersion>

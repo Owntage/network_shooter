@@ -34,8 +34,9 @@
 		<physics>
 			<type>circle</type>
 			<id>player</id>
+			<angular_speed>15</angular_speed>
 			<density>10.0</density>
-			<speed>5.0</speed>
+			<speed>10.0</speed>
 		</physics>
 		<chat>.</chat>
 		<animation>
