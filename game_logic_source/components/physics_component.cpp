@@ -92,9 +92,9 @@ void PhysicsComponent::onEvent(const Event& event)
 	}
 	if(event.name == "timer")
 	{
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 5; i++)
 		{
-			if(abs(mouseAngle - bodyAngle) > angularSpeed * 0.1 / 60.0f)
+			if(abs(mouseAngle - bodyAngle) > angularSpeed / 300.0f)
 			{
 				int direction = 1;
 				
@@ -102,7 +102,7 @@ void PhysicsComponent::onEvent(const Event& event)
 				{
 					direction = -1;
 				}
-				bodyAngle += direction * 0.1 * angularSpeed / 60.0f;
+				bodyAngle += direction * angularSpeed / 300.0f;
 				if(direction == 1 && bodyAngle > 2 * PI)
 				{
 					bodyAngle -= 2 * PI;
