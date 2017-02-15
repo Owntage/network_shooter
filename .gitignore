@@ -1,4 +1,5 @@
 /bin
+/cmake_build_debug
 /build
 /build_visual_studio
 /build_linux
