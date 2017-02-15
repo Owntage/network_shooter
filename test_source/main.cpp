@@ -21,8 +21,8 @@ using namespace std;
 #define CONSOLE_WIDTH 400
 #define CONSOLE_HEIGHT 100
 
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 300
+#define LOCAL_WINDOW_WIDTH 400
+#define LOCAL_WINDOW_HEIGHT 300
 
 #define PI 3.141593
 
@@ -151,97 +151,14 @@ float getAngularIntersection(float startAngleA, float endAngleA, float startAngl
 
 int main()
 {
-	srand(time(nullptr));
-	//GameGuiManager gameGuiManager(800, 600);
 
-	RenderWindow::getInstance()->window.setView(sf::View(sf::Vector2f(0.0, 0.0), sf::Vector2f(800, 600)));
-	RenderWindow::getInstance()->window.setFramerateLimit(60);
 
-	//glPointSize(5);
-
-	vector<sf::Vector2f> points;
-	for(int i = 0; i < POINTS_COUNT; i++) {
-		int x = rand() % 100;
-		int y = rand() % 100;
-		points.push_back(sf::Vector2f(x, y));
-	}
-
-	sort(points.begin(), points.end(), [](sf::Vector2f p1, sf::Vector2f p2){
-		if(p1.x != p2.x) return p1.x < p2.x;
-		return p1.x < p2.y;
-	});
-
-	vector<bool> pointsInHull;
-	pointsInHull.resize(POINTS_COUNT);
-	for(int i = 0; i < POINTS_COUNT; i++)
-	{
-		pointsInHull[i] = true;
-	}
-
-	
-	bool first = true;
-
-	//render
-	while(RenderWindow::getInstance()->window.isOpen())
-	{
-		RenderWindow::getInstance()->window.clear();
-		sf::RectangleShape rect;
-		//vertex.color = sf::Color::White;
-		rect.setSize(sf::Vector2f(5, 5));
-		rect.setOrigin(2.5, 2.5);
-		int prevVertex = -1;
-		int prevPrevVertex = -1;
-		for(int i = 0; i < 10; i++)
-		{
-			rect.setPosition(points[i]);
-			RenderWindow::getInstance()->window.draw(rect);
-			if(points[0].y < points[i].y) continue;
-			if(prevVertex == -1)
-			{
-				prevVertex = i;
-				continue;
-			}
-			
-			sf::Vertex line[2];
-			line[0] = points[prevVertex];
-			line[1] = points[i];
-			
-			float cp = crossProduct(points[prevVertex] - points[prevPrevVertex], points[i] - points[prevVertex]);
-
-			if(cp < 0 && prevPrevVertex != -1)
-			{
-				line[0] = points[prevPrevVertex];
-			}
-
-			if(prevPrevVertex != -1 && first)
-			{
-				cout << "crossProduct: " << cp << endl;
-			}
-			prevPrevVertex = prevVertex;
-			prevVertex = i;
-			RenderWindow::getInstance()->window.draw(line, 2, sf::PrimitiveType::Lines);
-
-		}
-		first = false;
-		RenderWindow::getInstance()->window.display();
-
-		sf::Event event;
-		while(RenderWindow::getInstance()->window.pollEvent(event))
-		{
-			if(event.type == sf::Event::Closed)
-			{
-				RenderWindow::getInstance()->window.close();
-			}
-		}
-	}
-
-	/*
 	sf::Vertex verticle;
 	verticle.color = sf::Color::White;
-	verticle.position = sf::Vector2f(0.0, 0.0);
+	verticle.position = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
 	sf::Vector2f lightSource(0, 100);
-	sf::Vector2f sphere(0, 0);
+	sf::Vector2f sphere(WINDOW_WIDTH / 2, WINDOW_HEIGHT  /2);
 	float sphereRadius = 20;
 	float lightRadius = 40;
 	float lightSourceAngle = 0;
@@ -250,17 +167,18 @@ int main()
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
 		lightSourceAngle += 2.0 / 60.0;
-		lightSource.x = cos(lightSourceAngle) * lightSourceRadius;
-		lightSource.y = sin(lightSourceAngle) * lightSourceRadius;
+		lightSource.x = cos(lightSourceAngle) * lightSourceRadius + WINDOW_WIDTH / 2;
+		lightSource.y = sin(lightSourceAngle) * lightSourceRadius + WINDOW_HEIGHT / 2;
 		lightSourceRadius = sin(lightSourceAngle * PI) * 66 + 100;
 		RenderWindow::getInstance()->window.clear();
 
-		for(int i = 0; i < WINDOW_WIDTH; i++)
+			for(int i = 0; i < WINDOW_WIDTH; i++)
 		{
 			for(int j = 0; j < WINDOW_HEIGHT; j++)
 			{
-				verticle.position = sf::Vector2f(i - WINDOW_WIDTH / 2, j - WINDOW_HEIGHT / 2);
-				
+				//verticle.position = sf::Vector2f(i - LOCAL_WINDOW_WIDTH / 2, j - LOCAL_WINDOW_HEIGHT / 2);
+				verticle.position = sf::Vector2f(i, j);
+
 				float distance = vectorDistance(verticle.position, lightSource);
 				//float distance = pointToSegmentDistance(s1, s2, sf::Vector2f(i - WINDOW_WIDTH / 2, j - WINDOW_HEIGHT / 2));
 				
@@ -314,6 +232,6 @@ int main()
 		}
 	}
 	
-	*/
+
 	return 0;
 }
