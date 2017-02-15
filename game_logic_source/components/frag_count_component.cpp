@@ -5,7 +5,7 @@ std::map<int, int> FragCountComponent::frags;
 
 void FragCountComponent::onEvent(const Event& event)
 {
-	if(event.name == "actor_id")
+	if(event.name == "actor_id" && frags.find(event.actorID) == frags.end())
 	{
 		frags[event.actorID] = 0;
 	}
