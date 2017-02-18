@@ -74,6 +74,14 @@ static float getRelativeAngle(float destAngle, float currentAngle)
 	return deltaAngle;
 }
 
+static float myAbs(float a)
+{
+	if(a < 0) {
+		return -a;
+	}
+	return a;
+}
+
 void PhysicsComponent::onEvent(const Event& event)
 {
 	if(event.name == "actor_id")
@@ -94,7 +102,7 @@ void PhysicsComponent::onEvent(const Event& event)
 	{
 		for(int i = 0; i < 5; i++)
 		{
-			if(abs(mouseAngle - bodyAngle) > angularSpeed / 300.0f)
+			if(myAbs(mouseAngle - bodyAngle) > angularSpeed / 300.0f)
 			{
 				int direction = 1;
 				

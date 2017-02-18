@@ -195,11 +195,12 @@ void Controller::updateFromRenderSystem(RenderSystem& renderSystem)
 			newAngle = atan(mouseY / mouseX);
 		}
 	}
+
+	newAngle /= PI;
+	newAngle *= 180.0f;
 	if(moveEvent.angle != newAngle)
 	{
 		currentNumbers["move"]++;
-		newAngle /= PI;
-		newAngle *= 180.0f;
 		moveEvent.angle = newAngle;
 	}
 	
