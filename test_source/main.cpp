@@ -29,7 +29,7 @@ struct Foo : FooBase<Types>...
 		return checkTypeInternal<CheckingType, Types...>();
 	}
 private:
-	
+
 	template<typename CheckingType, typename T, typename... OtherTypes>
 	bool checkTypeInternal()
 	{
