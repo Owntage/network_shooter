@@ -1,9 +1,10 @@
 #ifndef VARIANT_MAP_H
 #define VARIANT_MAP_H
 
-#include <unordered_map>
+#include <map>
 #include <typeinfo>
 #include <typeindex>
+#include <string>
 
 namespace
 {
@@ -11,7 +12,7 @@ namespace
     struct VariantMapPart
     {
     protected:
-        std::unordered_map<Type> m;
+        std::map<std::string, Type> m;
     };
 
     template<typename... Types>
@@ -22,7 +23,7 @@ namespace
         template<typename T, typename... OtherTypes>
         int getTypesCount()
         {
-            return getTypesCount(OtherTypes...) + 1;
+            return getTypesCount<OtherTypes...>() + 1;
         }
         template<>
         int getTypesCount()
@@ -39,7 +40,7 @@ namespace
         template<typename CheckingType, typename T, typename... OtherTypes>
         int getTypeIndexInternal()
         {
-            if(std::type_index(typeid(CheckingType)) == std::type_index(typeid(T))) return getTypesCount(OtherTypes...);
+            if(std::type_index(typeid(CheckingType)) == std::type_index(typeid(T))) return getTypesCount<OtherTypes...>();
             return getTypeIndexInternal<CheckingType, OtherTypes...>();
         };
 
