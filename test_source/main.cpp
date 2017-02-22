@@ -61,5 +61,8 @@ int main()
     std::cout << "float index: " << m.getTypeIndex<float>() << std::endl;
     std::cout << "double index: " << m.getTypeIndex<double>() << std::endl;
     std::cout << "string index: " << m.getTypeIndex<std::string>() << std::endl;
+
+    m.set<string>("key1", "kekeke1");
+    m.set("key2", 1);
 	return 0;
 }

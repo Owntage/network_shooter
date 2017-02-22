@@ -15,6 +15,7 @@ namespace
         std::map<std::string, Type> m;
     };
 
+
     template<typename... Types>
     struct _VariantMap : VariantMapPart<Types>...
     {
@@ -25,9 +26,19 @@ namespace
             return getTypeIndexInternal<CheckingType, Types...>();
         }
 
+        template<typename T>
+        void set(const std::string& key, const T& value)
+        {
+            VariantMapPart<T>::m[key] = value;
+        }
+
+        template<typename T>
+        T& get(const std::string& key)
+        {
+            return VariantMapPart<T>::m[key];
+        }
+
     private:
-
-
         template<typename UselessType, typename T, typename... OtherTypes>
         int getTypesCount()
         {
@@ -58,6 +69,6 @@ namespace
 
 }
 
-struct VariantMap : _VariantMap<int, float, double> {};
+struct VariantMap : _VariantMap<int, std::string> {};
 
 #endif
