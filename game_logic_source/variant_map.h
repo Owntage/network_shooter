@@ -6,8 +6,8 @@
 #include <typeindex>
 #include <string>
 
-//namespace
-//{
+namespace
+{
     template<typename Type>
     struct VariantMapPart
     {
@@ -56,7 +56,7 @@
     };
 
 
-//}
+}
 
 struct VariantMap : _VariantMap<int, float, double> {};
 
