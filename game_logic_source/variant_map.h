@@ -6,6 +6,8 @@
 #include <typeindex>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <type_traits>
 
 namespace
 {
@@ -35,15 +37,6 @@ namespace
     template<typename... Types>
     struct _VariantMap : VariantMapPart<Types>...
     {
-        _VariantMap()
-        {
-            std::cout << "string: " << getTypeEquivalenceClass<std::string>() << std::endl;
-            std::cout << "int: " << getTypeEquivalenceClass<int>() << std::endl;
-            std::cout << "const char*: " << getTypeEquivalenceClass<const char*>() << std::endl;
-            auto str = "hello";
-            std::cout << "char[]: " << getTypeEquivalenceClass<decltype(str)>() << std::endl;
-        }
-
         template<typename CheckingType>
         int getTypeIndex()
         {
@@ -90,29 +83,10 @@ namespace
             template<typename SetType>
             void operator()(const std::string& key, const SetType& value)
             {
-                //parent.VariantMapPart<T>::m[key] = *((T*) &value); //yolo
-                AssignHelper<decltype(parent.VariantMapPart<T>::m[key]), decltype(value), std::is_assignable<T, SetType>::value>::assign(parent.VariantMapPart<T>::m[key], value);
+                AssignHelper<decltype(parent.VariantMapPart<T>::m[key]), decltype(value),
+                        std::is_assignable<T, SetType>::value || std::is_convertible<T, SetType>::value >::assign(parent.VariantMapPart<T>::m[key], value);
 
             }
-
-            /*
-            template<bool assignable>
-            struct AssignHelper
-            {
-                template<typename SetType>
-                static void doAssign(_VariantMap& parent, const std::string& key, const SetType& value)
-                {
-                    parent.VariantMapPart<T>::m[key] = value;
-                }
-            };
-
-            template<>
-            struct AssignHelper<false>
-            {
-                template<typename SetType>
-                static void doAssign(_VariantMap& parent, const std::string& key, const SetType& value) {}
-            };
-             */
         };
 
         template<typename FunctorInvoker, template< class > class Functor>
