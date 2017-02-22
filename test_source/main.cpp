@@ -3,6 +3,7 @@
 #include <typeinfo>
 #include <typeindex>
 #include <string>
+#include <variant_map.h>
 using namespace std;
 
 template<typename Type>
@@ -48,10 +49,17 @@ private:
 
 int main()
 {
+    /*
 	Foo<int, float, double> foo;
 	std::cout << "int: " << foo.checkType<int>() << std::endl;
 	std::cout << "float: " << foo.checkType<float>() << std::endl;
 	std::cout << "double: " << foo.checkType<double>() << std::endl;
 	std::cout << "string: " << foo.checkType<std::string>() << std::endl;
+     */
+    VariantMap m;
+    std::cout << "int index: " << m.getTypeIndex<int>() << std::endl;
+    std::cout << "float index: " << m.getTypeIndex<float>() << std::endl;
+    std::cout << "double index: " << m.getTypeIndex<double>() << std::endl;
+    std::cout << "string index: " << m.getTypeIndex<std::string>() << std::endl;
 	return 0;
 }
