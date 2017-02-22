@@ -62,7 +62,13 @@ int main()
     std::cout << "double index: " << m.getTypeIndex<double>() << std::endl;
     std::cout << "string index: " << m.getTypeIndex<std::string>() << std::endl;
 
-    m.set<string>("key1", "kekeke1");
-    m.set("key2", 1);
+    if(std::type_index(typeid(int)) == std::type_index(typeid(const char*)))
+    {
+        std::cout << "holy mother of god!" << std::endl;
+
+    }
+
+    m.set("key1", "kekeke1");
+    //m.set("key2", 1);
 	return 0;
 }

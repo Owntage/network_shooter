@@ -5,9 +5,25 @@
 #include <typeinfo>
 #include <typeindex>
 #include <string>
+#include <vector>
 
 namespace
 {
+    template<typename Left, typename Right, bool assignable>
+    struct AssignHelper
+    {
+        static void assign(Left& left, Right& right)
+        {
+            left = right;
+        }
+    };
+
+    template<typename Left, typename Right>
+    struct AssignHelper<Left, Right, false>
+    {
+        static void assign(Left& left, Right& right) {} //do nothing
+    };
+
     template<typename Type>
     struct VariantMapPart
     {
@@ -19,6 +35,14 @@ namespace
     template<typename... Types>
     struct _VariantMap : VariantMapPart<Types>...
     {
+        _VariantMap()
+        {
+            std::cout << "string: " << getTypeEquivalenceClass<std::string>() << std::endl;
+            std::cout << "int: " << getTypeEquivalenceClass<int>() << std::endl;
+            std::cout << "const char*: " << getTypeEquivalenceClass<const char*>() << std::endl;
+            auto str = "hello";
+            std::cout << "char[]: " << getTypeEquivalenceClass<decltype(str)>() << std::endl;
+        }
 
         template<typename CheckingType>
         int getTypeIndex()
@@ -27,9 +51,11 @@ namespace
         }
 
         template<typename T>
-        void set(const std::string& key, const T& value)
+        void set(const std::string& key, T value)
         {
-            VariantMapPart<T>::m[key] = value;
+            //VariantMapPart<T>::m[key] = value;
+            SetFunctorInvoker<T> setFunctorInvoker(key, value);
+            callByTypeIndex<decltype(setFunctorInvoker), SetFunctor>(setFunctorInvoker, getTypeEquivalenceClass<T>());
         }
 
         template<typename T>
@@ -39,6 +65,86 @@ namespace
         }
 
     private:
+
+
+        template<typename T>
+        struct SetFunctorInvoker
+        {
+            SetFunctorInvoker(const std::string& key, const T& value) : key(key), value(value) {}
+            const T& value;
+            std::string key;
+
+            template<typename Functor>
+            void operator()(Functor& functor)
+            {
+                functor(key, value);
+            }
+        };
+
+        template<typename T>
+        struct SetFunctor
+        {
+            SetFunctor(_VariantMap& parent) : parent(parent) {}
+            _VariantMap& parent;
+
+            template<typename SetType>
+            void operator()(const std::string& key, const SetType& value)
+            {
+                //parent.VariantMapPart<T>::m[key] = *((T*) &value); //yolo
+                AssignHelper<decltype(parent.VariantMapPart<T>::m[key]), decltype(value), std::is_assignable<T, SetType>::value>::assign(parent.VariantMapPart<T>::m[key], value);
+
+            }
+
+            /*
+            template<bool assignable>
+            struct AssignHelper
+            {
+                template<typename SetType>
+                static void doAssign(_VariantMap& parent, const std::string& key, const SetType& value)
+                {
+                    parent.VariantMapPart<T>::m[key] = value;
+                }
+            };
+
+            template<>
+            struct AssignHelper<false>
+            {
+                template<typename SetType>
+                static void doAssign(_VariantMap& parent, const std::string& key, const SetType& value) {}
+            };
+             */
+        };
+
+        template<typename FunctorInvoker, template< class > class Functor>
+        void callByTypeIndex(FunctorInvoker& invoker, int typeIndex)
+        {
+            callByTypeIndexInternal<FunctorInvoker, Functor, Types...>(invoker, typeIndex);
+        }
+        template<typename FunctorInvoker, template< class > class Functor, typename T, typename... OtherTypes>
+        void callByTypeIndexInternal(FunctorInvoker& invoker, int typeIndex)
+        {
+            if(getTypeIndex<T>() == typeIndex)
+            {
+                Functor<T> functor(*this);
+                invoker(functor);
+            }
+            else
+            {
+                callByTypeIndexInternal<FunctorInvoker, Functor, OtherTypes...>(invoker, typeIndex);
+            }
+        };
+        template<typename FunctorInvoker, template< class > class Functor>
+        void callByTypeIndexInternal(FunctorInvoker& invoker, int typeIndex) {} //do nothing, because we don't have type with such index
+
+        template<typename T>
+        int getTypeEquivalenceClass()
+        {
+            if(std::type_index(typeid(T)) == std::type_index(typeid(const char*))) return getTypeIndex<std::string>();
+
+            return getTypeIndex<T>();
+        }
+
+
         template<typename UselessType, typename T, typename... OtherTypes>
         int getTypesCount()
         {
@@ -69,6 +175,6 @@ namespace
 
 }
 
-struct VariantMap : _VariantMap<int, std::string> {};
+struct VariantMap : _VariantMap<std::string, int, std::vector<int>, std::vector<std::string> > {};
 
 #endif
