@@ -3,6 +3,7 @@
 #include <typeinfo>
 #include <typeindex>
 #include <string>
+#include <network.h>
 #include <variant_map.h>
 using namespace std;
 
@@ -21,20 +22,20 @@ int main()
     m.set("string_key", "kekeke1");
     m.set("int_key", 10);
 
-    std::vector<int> vec = {1, 2, 3, 4, 5};
+    Packet packet;
+    packet << m;
 
-    m.set("int_vec_key", vec);
+    VariantMap extracted_m;
 
-    std::cout << "extracted string: " << m.get<std::string>("string_key") << std::endl;
-    std::cout << "extracted int: " << m.get<int>("int_key") << std::endl;
+    packet >> extracted_m;
 
-    auto& extracted_vec = m.get<std::vector<int> >("int_vec_key");
 
-    std::cout << "vec: ";
-    for(int i = 0; i < extracted_vec.size(); i++)
-    {
-        std::cout << extracted_vec[i] << " ";
-    }
-    std::cout << endl;
+    std::cout << "extracted string: " << extracted_m.get<std::string>("string_key") << std::endl;
+    std::cout << "extracted int: " << extracted_m.get<int>("int_key") << std::endl;
+
+
+
+    std::cout << m;
+
 	return 0;
 }

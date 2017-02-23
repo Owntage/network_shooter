@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <type_traits>
+#include <set>
 
 namespace
 {
@@ -37,16 +38,13 @@ namespace
     template<typename... Types>
     struct _VariantMap : VariantMapPart<Types>...
     {
-        template<typename CheckingType>
-        int getTypeIndex()
-        {
-            return getTypeIndexInternal<CheckingType, Types...>();
-        }
-
         template<typename T>
         void set(const std::string& key, T value)
         {
             //VariantMapPart<T>::m[key] = value;
+
+            keyToType[key] = getTypeIndex<T>();
+            typeToKeys[getTypeEquivalenceClass<T>()].insert(key);
             SetFunctorInvoker<T> setFunctorInvoker(key, value);
             callByTypeIndex<decltype(setFunctorInvoker), SetFunctor>(setFunctorInvoker, getTypeEquivalenceClass<T>());
         }
@@ -57,8 +55,89 @@ namespace
             return VariantMapPart<T>::m[key];
         }
 
-    private:
+        template<typename StreamType>
+        friend StreamType& operator<<(StreamType& s, _VariantMap& m)
+        {
 
+            int numberOfTypes = sizeof... (Types);
+            for(int i = 0; i < numberOfTypes; i++)
+            {
+                s << (int32_t) m.typeToKeys[i].size();
+                for(auto it = m.typeToKeys[i].begin(); it != m.typeToKeys[i].end(); it++)
+                {
+                    StreamFunctorInvoker<StreamType> invoker(*it, s);
+                    m.callByTypeIndex<decltype(invoker), ToStreamFunctor>(invoker, i);
+                }
+            }
+            return s;
+        }
+
+        template<typename StreamType>
+        friend StreamType& operator>>(StreamType& s, _VariantMap& m)
+        {
+            int numberOfTypes = sizeof... (Types);
+            for(int i = 0; i < numberOfTypes; i++)
+            {
+                int numberOfKeys = 0;
+                s >> numberOfKeys;
+                for(int j = 0; j < numberOfKeys; j++)
+                {
+                    std::string key;
+                    s >> key;
+                    StreamFunctorInvoker<StreamType> invoker(key, s);
+                    m.callByTypeIndex<decltype(invoker), FromStreamFunctor>(invoker, i);
+                }
+            }
+            return s;
+        }
+
+    private:
+        std::map<std::string, int> keyToType;
+        std::map<int, std::set<std::string> > typeToKeys;
+
+        template<typename StreamType>
+        struct StreamFunctorInvoker
+        {
+            StreamFunctorInvoker(const std::string& key, StreamType& stream) : stream(stream), key(key) {}
+            StreamType& stream;
+            const std::string& key;
+
+            template<typename Functor>
+            void operator()(Functor& functor)
+            {
+                functor(key, stream);
+            }
+        };
+
+
+        template<typename T>
+        struct ToStreamFunctor
+        {
+            ToStreamFunctor(_VariantMap& parent) : parent(parent) {}
+            _VariantMap& parent;
+
+            template<typename StreamType>
+            void operator()(const std::string& key, StreamType& s)
+            {
+               s << key << parent.VariantMapPart<T>::m[key];
+            }
+        };
+
+        template<typename T>
+        struct FromStreamFunctor
+        {
+            FromStreamFunctor(_VariantMap& parent) : parent(parent) {}
+            _VariantMap& parent;
+
+            template<typename StreamType>
+            void operator()(const std::string& key, StreamType& s)
+            {
+                T t;
+                s >> t;
+                //parent.VariantMapPart<T>::m[key] = t;
+                parent.set(key, t);
+            }
+        };
 
         template<typename T>
         struct SetFunctorInvoker
@@ -88,6 +167,12 @@ namespace
 
             }
         };
+
+        template<typename CheckingType>
+        int getTypeIndex()
+        {
+            return getTypeIndexInternal<CheckingType, Types...>();
+        }
 
         template<typename FunctorInvoker, template< class > class Functor>
         void callByTypeIndex(FunctorInvoker& invoker, int typeIndex)
@@ -149,6 +234,6 @@ namespace
 
 }
 
-struct VariantMap : _VariantMap<std::string, int, std::vector<int>, std::vector<std::string> > {};
+struct VariantMap : _VariantMap<std::string, int> {};
 
 #endif
