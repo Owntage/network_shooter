@@ -274,6 +274,7 @@ struct InputField : GuiElement
 	void onSpecialKey(unsigned int key);
 	void setCharacterSize(int characterSize);
 	void setTextColor(sf::Color textColor);
+	std::string getText() { return input; }
 
 private:
 	std::string input;
