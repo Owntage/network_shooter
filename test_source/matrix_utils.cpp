@@ -89,6 +89,20 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 			subtractRows(matrix, j, i);
 		}
 	}
+
+	int offset = 0;
+	for(int i = matrix.size() - 1; i >= 0; i--)
+	{
+		for(int j = 0; j < i; j++)
+		{
+			if (matrix[j][matrix.size() - 1 - offset] == 0.0f) continue;
+			multiplyRow(matrix, j, matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset]);
+			subtractRows(matrix, j, i);
+		}
+		multiplyRow(matrix, i, 1.0 / matrix[i][matrix.size() - 1 - offset]);
+		offset++;
+	}
+
 	matrix_t result_m;
 	vector_t result_v;
 	printMatrix(matrix);
