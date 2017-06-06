@@ -14,7 +14,7 @@ GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
 #define MATRIX_WIDTH 10
 #define MATRIX_HEIGHT 11
 
-#define CELL_SIZE 35
+#define CELL_SIZE 35 * 2
 #define CELL_SPACING 5
 
 
@@ -64,14 +64,14 @@ shared_ptr<InputField> createInputField(float x, float y)
 {
 	auto res = make_shared<InputField>(x, y, CELL_SIZE, CELL_SIZE, NORMAL, HOVERED, PRESSED);
 	guiManager.addElement(*res);
-	res->setCharacterSize(8);
+	res->setCharacterSize(16);
 	return res;
 }
 
 pair<float, float> createMatrix(float x, float y)
 {
-	float width = CELL_SIZE * MATRIX_WIDTH + CELL_SPACING * (MATRIX_WIDTH - 1);
-	float height = CELL_SIZE * MATRIX_HEIGHT + CELL_SPACING * (MATRIX_WIDTH - 1);
+	float height = CELL_SIZE * MATRIX_WIDTH + CELL_SPACING * (MATRIX_WIDTH - 1);
+	float width = CELL_SIZE * MATRIX_HEIGHT + CELL_SPACING * (MATRIX_HEIGHT - 1);
 	matrixCells.resize(MATRIX_WIDTH);
 	for (int i = 0; i < MATRIX_WIDTH; i++)
 	{
@@ -117,7 +117,10 @@ void copyToGui()
 	{
 		for(int j = 0; j < MATRIX_HEIGHT; j++)
 		{
-			matrixCells[i][j]->setText(to_string(matrixValues[i][j]));
+			string temp = to_string(matrixValues[i][j]);
+			if (temp[0] == '-') temp = temp.substr(1);
+			while ((temp.back() == '0' || temp.back() == '.') && temp.size() > 1) temp.pop_back();
+			matrixCells[i][j]->setText(temp);
 		}
 	}
 }
@@ -134,8 +137,9 @@ int main()
 	//auto button1 = createButton(50, 50, 200, 50, "test label");
 
 	//auto input1 = createInputField(-100, -100);
-	auto matrixSize = createMatrix(-190, 0);
-	float remainingWidth = WINDOW_WIDTH / 2 - max((int)matrixSize.first / 2 - 200, 0) - 50;
+	float width = CELL_SIZE * MATRIX_HEIGHT + CELL_SPACING * (MATRIX_HEIGHT - 1);
+	auto matrixSize = createMatrix(-width / 2, 0);
+	float remainingWidth = WINDOW_WIDTH - matrixSize.first - 50;
 	float elemX = WINDOW_WIDTH / 2 - remainingWidth / 2;
 	TextView result(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE);
 	result.setColor(sf::Color::White);
@@ -168,7 +172,7 @@ int main()
 		
 	});
 
-	auto randomButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
+	auto randomButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen random");
 	randomButton->setOnReleaseCallback([]()
 	{
 		generateRandom(matrixValues);
