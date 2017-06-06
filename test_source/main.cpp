@@ -11,8 +11,8 @@ GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
 #define HOVERED "res/gui/console/input_hovered_background.png"
 #define PRESSED "res/gui/console/input_background.png"
 
-#define MATRIX_WIDTH 11
-#define MATRIX_HEIGHT 10
+#define MATRIX_WIDTH 10
+#define MATRIX_HEIGHT 11
 
 #define CELL_SIZE 35
 #define CELL_SPACING 5
@@ -64,7 +64,7 @@ shared_ptr<InputField> createInputField(float x, float y)
 {
 	auto res = make_shared<InputField>(x, y, CELL_SIZE, CELL_SIZE, NORMAL, HOVERED, PRESSED);
 	guiManager.addElement(*res);
-	res->setCharacterSize(16);
+	res->setCharacterSize(8);
 	return res;
 }
 
@@ -83,8 +83,8 @@ pair<float, float> createMatrix(float x, float y)
 		for(int j = 0; j < MATRIX_HEIGHT; j++)
 		{
 			matrixCells[i][j] = createInputField(
-				CELL_SIZE * i + CELL_SPACING * (i - 1) - width / 2 + CELL_SIZE + x, 
-				CELL_SIZE * j + CELL_SPACING * (j - 1) - height / 2 + CELL_SIZE + y);
+				CELL_SIZE * j + CELL_SPACING * (j - 1) - width / 2 + CELL_SIZE + x, 
+				CELL_SIZE * i + CELL_SPACING * (i - 1) - height / 2 + CELL_SIZE + y);
 		}
 	}
 	return make_pair(width, height);
@@ -107,6 +107,17 @@ void copyFromGui()
 				copyErrorFlag = true;
 				return;
 			} //failed to parse
+		}
+	}
+}
+
+void copyToGui()
+{
+	for(int i = 0; i < MATRIX_WIDTH; i++)
+	{
+		for(int j = 0; j < MATRIX_HEIGHT; j++)
+		{
+			matrixCells[i][j]->setText(to_string(matrixValues[i][j]));
 		}
 	}
 }
@@ -144,6 +155,26 @@ int main()
 			result.setText("result: " + to_string(matrixSum(matrixValues, MATRIX_WIDTH, MATRIX_HEIGHT)));
 		}
 	});
+
+	auto gaussButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
+	gaussButton->setOnReleaseCallback([]()
+	{
+		copyFromGui();
+		if(!copyErrorFlag)
+		{
+			gauss(matrixValues);
+			copyToGui();
+		}
+		
+	});
+
+	auto randomButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
+	randomButton->setOnReleaseCallback([]()
+	{
+		generateRandom(matrixValues);
+		copyToGui();
+	});
+
 
 	while(RenderWindow::getInstance()->window.isOpen())
 	{

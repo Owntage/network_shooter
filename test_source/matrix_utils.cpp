@@ -1,4 +1,6 @@
 #include "matrix_utils.h"
+#include <iostream>
+#include <string>
 
 double matrixSum(std::vector<std::vector<double> >& matrix, int width, int height)
 {
@@ -35,6 +37,33 @@ void subtractRows(matrix_t& m, int first, int second)
 	}
 }
 
+void printMatrix(matrix_t& m)
+{
+	std::cout << "matrix: " << std::endl;
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m[i].size(); j++)
+		{
+			std::string output = std::to_string(m[i][j]);
+			std::cout << output;
+			for (int k = output.size(); k < 10; k++) std::cout << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+void generateRandom(matrix_t& m)
+{
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m[i].size(); j++)
+		{
+			m[i][j] = ((double)(rand() % 100000)) / 1000.0;
+		}
+	}
+	printMatrix(m);
+}
+
 std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 {
 	for(int i = 0; i < matrix.size(); i++)
@@ -62,5 +91,6 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 	}
 	matrix_t result_m;
 	vector_t result_v;
+	printMatrix(matrix);
 	return std::make_pair(result_v, result_m);
 }

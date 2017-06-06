@@ -275,6 +275,11 @@ struct InputField : GuiElement
 	void setCharacterSize(int characterSize);
 	void setTextColor(sf::Color textColor);
 	std::string getText() { return input; }
+	void setText(std::string text)
+	{
+		input = text;
+		cursorPos = 0;
+	}
 
 private:
 	std::string input;
