@@ -11,13 +11,23 @@ GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
 #define HOVERED "res/gui/console/input_hovered_background.png"
 #define PRESSED "res/gui/console/input_background.png"
 
-#define MATRIX_WIDTH 10
+#define MATRIX_WIDTH 11
 #define MATRIX_HEIGHT 10
 
 #define CELL_SIZE 35
 #define CELL_SPACING 5
 
-double matrixValues[MATRIX_WIDTH][MATRIX_HEIGHT];
+
+vector<vector<double> > matrixValues = []()
+{
+	vector<vector<double> > res;
+	res.resize(MATRIX_WIDTH);
+	for(int i = 0; i < MATRIX_WIDTH; i++)
+	{
+		res[i].resize(MATRIX_HEIGHT);
+	}
+	return res;
+}();
 
 NinePatchSprite normalSprite(NORMAL, true);
 NinePatchSprite hoveredSprite(HOVERED, true);
@@ -113,7 +123,7 @@ int main()
 	//auto button1 = createButton(50, 50, 200, 50, "test label");
 
 	//auto input1 = createInputField(-100, -100);
-	auto matrixSize = createMatrix(-200, 0);
+	auto matrixSize = createMatrix(-190, 0);
 	float remainingWidth = WINDOW_WIDTH / 2 - max((int)matrixSize.first / 2 - 200, 0) - 50;
 	float elemX = WINDOW_WIDTH / 2 - remainingWidth / 2;
 	TextView result(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE);
