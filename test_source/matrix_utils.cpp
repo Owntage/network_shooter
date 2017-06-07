@@ -334,9 +334,10 @@ vector_t zeidel(matrix_t& matrix)
 				}
 				else
 				{
-					sum += count_c(matrix, i, j) * x0[j] + count_d(matrix, i);
+					sum += count_c(matrix, i, j) * x0[j];
 				}
 			}
+			sum += count_d(matrix, i);
 			x1[i] = sum;
 		}
 		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps ||  it_count > 100000)

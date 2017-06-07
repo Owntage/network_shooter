@@ -137,7 +137,7 @@ matrix_t buffer;
 
 void print_b(matrix_t& m)
 {
-	std::cout << "b: ";
+	std::cout << "x: ";
 	for(int i = 0; i < m.size(); i++)
 	{
 		std::cout << m[i].back() << " ";
