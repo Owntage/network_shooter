@@ -12,6 +12,7 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix);
 void generateRandom(matrix_t& matrix);
 void generateHilbert(matrix_t& matrix);
 void generateDiag(matrix_t& matrix);
+void generateSymetric(matrix_t& matrix);
 double norm(matrix_t matrix);
 vector_t yakobi(matrix_t& matrix);
 vector_t zeidel(matrix_t& matrix);

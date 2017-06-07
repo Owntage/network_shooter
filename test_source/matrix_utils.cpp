@@ -70,7 +70,27 @@ void generateDiag(matrix_t& m)
 	generateRandom(m);
 	for(int i = 0; i < m.size(); i++)
 	{
-		m[i][i] += 500.0 + ((double)(rand() % 100));
+		m[i][i] += 5000.0 + ((double)(rand() % 100));
+	}
+}
+
+void generateSymetric(matrix_t& m)
+{
+	generateRandom(m);
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m.size(); j++)
+		{
+			m[i][j] /= 1000.0;
+		}
+	}
+	
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m.size(); j++)
+		{
+			m[i][j] = m[j][i];
+		}
 	}
 }
 
@@ -203,7 +223,7 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 double vec_norm(vector_t vector)
 {
 	double res = 0;
-	for (int i = 0; i < vector.size() - 1; i++) res += vector[i];
+	for (int i = 0; i < vector.size() - 1; i++) res += myAbs(vector[i]);
 	return res;
 }
 
@@ -249,7 +269,7 @@ vector_t vec_add(vector_t first, vector_t second)
 vector_t yakobi(matrix_t& matrix)
 {
 	std::cout << "norm: " << norm(matrix) << std::endl;
-	float eps = 0.000001;
+	float eps = 0.000000001;
 	vector_t x0;
 	x0.resize(matrix.size());
 	for(int i = 0; i < matrix.size(); i++)
@@ -262,7 +282,12 @@ vector_t yakobi(matrix_t& matrix)
 	{
 		it_count++;
 		vector_t x1 = get_next_x(matrix, x0);
-		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		if ( /*myAbs(vec_norm(vec_substract(x0, x1))) < eps || */ it_count > 100000)
+		{
+			std::cout << "yakobi iterations: " << it_count << std::endl;
+			return x1;
+		}
+			
 		x0 = x1;
 	}
 }
@@ -282,7 +307,7 @@ double count_d(matrix_t& m, int i)
 
 vector_t zeidel(matrix_t& matrix)
 {
-	float eps = 0.000001;
+	float eps = 0.00000001;
 	vector_t x0;
 	x0.resize(matrix.size());
 	for (int i = 0; i < matrix.size(); i++)
@@ -314,7 +339,12 @@ vector_t zeidel(matrix_t& matrix)
 			}
 			x1[i] = sum;
 		}
-		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps ||  it_count > 100000)
+		{
+			std::cout << "zeidel iterations: " << it_count << std::endl;
+			return x1;
+		}
+			
 		x0 = x1;
 
 	}
@@ -387,10 +417,19 @@ vector_t descent(matrix_t& matrix)
 		r0 = r1;
 		z0 = z1;
 
-		if (it_count > 1000000) return x0;
+		if (it_count > 100000)
+		{
+			std::cout << "descent iterations: " << it_count << std::endl;
+			return x0;
+		}
+			
 		
 		double k = vec_norm(r0) / vec_norm(initial_b);
-		if (k < 0.0001) return x0;
+		if (k < 0.0001)
+		{
+			std::cout << "descent iterations: " << it_count << std::endl;
+			return x0;
+		}
 	}
 
 }

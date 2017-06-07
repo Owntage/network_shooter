@@ -251,6 +251,8 @@ int main()
 	});
 
 	getOffset();
+	
+	offset -= 25;
 
 	auto hilbertButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen hilbert");
 	hilbertButton->setOnReleaseCallback([&result]()
@@ -263,6 +265,13 @@ int main()
 	randomButton->setOnReleaseCallback([]()
 	{
 		generateRandom(matrixValues);
+		copyToGui();
+	});
+	
+	auto randomSymetricButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen random symetric");
+	randomSymetricButton->setOnReleaseCallback([]()
+	{
+		generateSymetric(matrixValues);
 		copyToGui();
 	});
 	
