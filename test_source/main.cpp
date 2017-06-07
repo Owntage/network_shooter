@@ -3,6 +3,7 @@
 #include "gui.h"
 #include "matrix_utils.h"
 #include <memory>
+#include <iostream>
 using namespace std;
 
 GuiManager guiManager(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -134,6 +135,15 @@ int getOffset()
 
 matrix_t buffer;
 
+void print_b(matrix_t& m)
+{
+	std::cout << "b: ";
+	for(int i = 0; i < m.size(); i++)
+	{
+		std::cout << m[i].back() << " ";
+	}
+	std::cout << std::endl;
+}
 
 int main()
 {
@@ -154,6 +164,7 @@ int main()
 	auto gaussButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
 	gaussButton->setOnReleaseCallback([&]()
 	{
+		std::cout << "gauss applied" << std::endl;
 		copyFromGui();
 		if(!copyErrorFlag)
 		{
@@ -163,6 +174,7 @@ int main()
 			//double cond = norm(generateIdentity(10)) * norm(generateIdentity(10));
 			copyToGui();
 			result.setText("cond: " + to_string(cond));
+			print_b(matrixValues);
 		}
 		
 	});
@@ -170,11 +182,12 @@ int main()
 	auto yakobiButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "yakobi");
 	yakobiButton->setOnReleaseCallback([&result]()
 	{
+		std::cout << "yakobi applied" << std::endl;
 		copyFromGui();
 		if(!copyErrorFlag)
 		{
 			auto res = yakobi(matrixValues);
-			result.setText("yakobi applied");
+			//result.setText("yakobi applied");
 			auto identity = generateIdentity(10);
 			for(int i = 0; i < 10; i++)
 			{
@@ -185,6 +198,7 @@ int main()
 				matrixValues[i][10] = res[i];
 			}
 			copyToGui();
+			print_b(matrixValues);
 			
 		}
 	});
@@ -192,11 +206,12 @@ int main()
 	auto zeidelButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "zeidel");
 	zeidelButton->setOnReleaseCallback([&result]()
 	{
+		std::cout << "zeidel applied" << std::endl;
 		copyFromGui();
 		if (!copyErrorFlag)
 		{
 			auto res = zeidel(matrixValues);
-			result.setText("zeidel applied");
+			//result.setText("zeidel applied");
 			auto identity = generateIdentity(10);
 			for (int i = 0; i < 10; i++)
 			{
@@ -207,18 +222,19 @@ int main()
 				matrixValues[i][10] = res[i];
 			}
 			copyToGui();
-
+			print_b(matrixValues);
 		}
 	});
 
 	auto descentButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "descent");
 	descentButton->setOnReleaseCallback([&result]()
 	{
+		std::cout << "descent applied" << std::endl;
 		copyFromGui();
 		if (!copyErrorFlag)
 		{
 			auto res = descent(matrixValues);
-			result.setText("descent applied");
+			//result.setText("descent applied");
 			auto identity = generateIdentity(10);
 			for (int i = 0; i < 10; i++)
 			{
@@ -229,6 +245,7 @@ int main()
 				matrixValues[i][10] = res[i];
 			}
 			copyToGui();
+			print_b(matrixValues);
 
 		}
 	});

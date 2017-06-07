@@ -10,6 +10,11 @@ double myMax(double first, double second)
 	return first > second ? first : second;
 }
 
+double myAbs(double a)
+{
+	return a > 0 ? a : -a;
+}
+
 double matrixSum(std::vector<std::vector<double> >& matrix, int width, int height)
 {
 	double result = 0.0;
@@ -120,7 +125,7 @@ double columnSum(matrix_t& m, int column)
 	double res = 0;
 	for(int i = 0; i < m.size(); i++)
 	{
-		res += abs(m[i][column]);
+		res += myAbs(m[i][column]);
 	}
 	return res;
 }
@@ -160,8 +165,6 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 			multiplyRow(matrix, j, temp);
 			multiplyRow(reverted, j, temp);
 		}
-		std::cout << "reverted " << i << " : " << std::endl;
-		printMatrix(reverted);
 		for(int j = i + 1; j < matrix.size(); j++)
 		{
 			if (matrix[j][i] == 0.0) continue;
@@ -192,8 +195,6 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 
 	vector_t result_v;
 	printMatrix(matrix);
-	std::cout << "reverted: " << std::endl;
-	printMatrix(reverted);
 	return std::make_pair(result_v, reverted);
 }
 
@@ -261,7 +262,7 @@ vector_t yakobi(matrix_t& matrix)
 	{
 		it_count++;
 		vector_t x1 = get_next_x(matrix, x0);
-		if (abs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
 		x0 = x1;
 	}
 }
@@ -313,7 +314,7 @@ vector_t zeidel(matrix_t& matrix)
 			}
 			x1[i] = sum;
 		}
-		if (abs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
 		x0 = x1;
 
 	}
