@@ -125,12 +125,15 @@ void copyToGui()
 	}
 }
 
-int offset = 0;
+int offset = -100;
 int getOffset()
 {
 	offset += CELL_SIZE + CELL_SPACING;
 	return offset;
 }
+
+matrix_t buffer;
+
 
 int main()
 {
@@ -243,6 +246,29 @@ int main()
 	randomButton->setOnReleaseCallback([]()
 	{
 		generateRandom(matrixValues);
+		copyToGui();
+	});
+	
+	auto diagButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen diag");
+	diagButton->setOnReleaseCallback([]()
+	{
+		generateDiag(matrixValues);
+		copyToGui();
+	});
+	
+	auto saveButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "save matrix");
+	saveButton->setOnReleaseCallback([]()
+	{
+		//generateRandom(matrixValues);
+		buffer = matrixValues;
+		copyToGui();
+	});
+	
+	auto restoreButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "restore matrix");
+	restoreButton->setOnReleaseCallback([]()
+	{
+		//generateRandom(matrixValues);
+		matrixValues = buffer;
 		copyToGui();
 	});
 

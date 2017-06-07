@@ -60,6 +60,15 @@ void printMatrix(matrix_t& m)
 	}
 }
 
+void generateDiag(matrix_t& m)
+{
+	generateRandom(m);
+	for(int i = 0; i < m.size(); i++)
+	{
+		m[i][i] += 500.0 + ((double)(rand() % 100));
+	}
+}
+
 void generateRandom(matrix_t& m)
 {
 	for(int i = 0; i < m.size(); i++)
