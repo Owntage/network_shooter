@@ -14,6 +14,7 @@ void generateHilbert(matrix_t& matrix);
 double norm(matrix_t matrix);
 vector_t yakobi(matrix_t& matrix);
 vector_t zeidel(matrix_t& matrix);
+vector_t descent(matrix_t& matrix);
 matrix_t generateIdentity(int size);
 
 

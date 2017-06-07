@@ -220,6 +220,17 @@ vector_t vec_substract(vector_t first, vector_t second)
 	return res;
 }
 
+vector_t vec_add(vector_t first, vector_t second)
+{
+	vector_t res;
+	res.resize(first.size());
+	for (int i = 0; i < res.size(); i++)
+	{
+		res[i] = first[i] + second[i];
+	}
+	return res;
+}
+
 vector_t yakobi(matrix_t& matrix)
 {
 	std::cout << "norm: " << norm(matrix) << std::endl;
@@ -292,4 +303,79 @@ vector_t zeidel(matrix_t& matrix)
 		x0 = x1;
 
 	}
+}
+
+//descent
+
+vector_t matToVec(matrix_t m, vector_t vec)
+{
+	vector_t result;
+	result.resize(m.size(), 0);
+	for(int i = 0; i < result.size(); i++)
+	{
+		for(int j = 0; j < result.size(); j++)
+		{
+			result[i] = m[i][j] * vec[i];
+		}
+	}
+	return result;
+}
+
+double dotProduct(vector_t first, vector_t second)
+{
+	double res = 0;
+	for(int i = 0; i < first.size(); i++)
+	{
+		res += first[i] * second[i];
+	}
+	return res;
+}
+
+vector_t vec_multiply(vector_t first, double second)
+{
+	vector_t res;
+	res.resize(first.size());
+	for (int i = 0; i < res.size(); i++)
+	{
+		res[i] = first[i] * second;
+	}
+	return res;
+}
+
+vector_t descent(matrix_t& matrix)
+{
+	vector_t x0;
+	x0.resize(matrix.size(), 0);
+
+	vector_t r0;
+	vector_t initial_b;
+	r0.resize(x0.size());
+	for(int i = 0; i < r0.size(); i++)
+	{
+		r0[i] = matrix[i].back();
+	}
+	initial_b = r0;
+
+	vector_t z0 = r0;
+
+	int it_count = 0;
+	while (true)
+	{
+		it_count++;
+		double ak = dotProduct(r0, r0) / dotProduct(matToVec(matrix, z0), z0);
+		vector_t x1 = vec_add(x0, vec_multiply(z0, ak));
+		vector_t r1 = vec_substract(r0, vec_multiply(matToVec(matrix, z0), ak));
+		double bk = dotProduct(r1, r1) / dotProduct(r0, r0);
+		vector_t z1 = vec_add(r1, vec_multiply(z0, bk));
+
+		x0 = x1;
+		r0 = r1;
+		z0 = z1;
+
+		if (it_count > 1000000) return x0;
+		
+		double k = vec_norm(r0) / vec_norm(initial_b);
+		if (k < 0.0001) return x0;
+	}
+
 }

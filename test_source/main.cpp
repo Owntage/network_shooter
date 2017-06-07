@@ -197,8 +197,30 @@ int main()
 		copyFromGui();
 		if (!copyErrorFlag)
 		{
-			auto res = yakobi(matrixValues);
+			auto res = zeidel(matrixValues);
 			result.setText("zeidel applied");
+			auto identity = generateIdentity(10);
+			for (int i = 0; i < 10; i++)
+			{
+				for (int j = 0; j < 10; j++)
+				{
+					matrixValues[i][j] = identity[i][j];
+				}
+				matrixValues[i][10] = res[i];
+			}
+			copyToGui();
+
+		}
+	});
+
+	auto descentButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "descent");
+	descentButton->setOnReleaseCallback([&result]()
+	{
+		copyFromGui();
+		if (!copyErrorFlag)
+		{
+			auto res = descent(matrixValues);
+			result.setText("descent applied");
 			auto identity = generateIdentity(10);
 			for (int i = 0; i < 10; i++)
 			{
