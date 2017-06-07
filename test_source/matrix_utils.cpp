@@ -282,7 +282,7 @@ vector_t yakobi(matrix_t& matrix)
 	{
 		it_count++;
 		vector_t x1 = get_next_x(matrix, x0);
-		if ( /*myAbs(vec_norm(vec_substract(x0, x1))) < eps || */ it_count > 100000)
+		if (myAbs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000)
 		{
 			std::cout << "yakobi iterations: " << it_count << std::endl;
 			return x1;
