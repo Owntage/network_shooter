@@ -5,6 +5,11 @@
 
 //gauss
 
+double myMax(double first, double second)
+{
+	return first > second ? first : second;
+}
+
 double matrixSum(std::vector<std::vector<double> >& matrix, int width, int height)
 {
 	double result = 0.0;
@@ -116,7 +121,7 @@ double norm(matrix_t m) //first norm
 	double res = columnSum(m, 0);
 	for(int i = 1; i < m.size(); i++)
 	{
-		res = std::max(res, columnSum(m, i));
+		res = myMax(res, columnSum(m, i));
 	}
 	return res;
 }
