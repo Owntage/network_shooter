@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 
+//gauss
+
 double matrixSum(std::vector<std::vector<double> >& matrix, int width, int height)
 {
 	double result = 0.0;
@@ -59,7 +61,7 @@ void generateRandom(matrix_t& m)
 	{
 		for(int j = 0; j < m[i].size(); j++)
 		{
-			m[i][j] = ((double)(rand() % 100000)) / 1000.0;
+			m[i][j] = ((double)(rand() % 100));
 		}
 	}
 	printMatrix(m);
@@ -179,4 +181,62 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 	std::cout << "reverted: " << std::endl;
 	printMatrix(reverted);
 	return std::make_pair(result_v, reverted);
+}
+
+//yakobi
+
+double vec_norm(vector_t vector)
+{
+	double res = 0;
+	for (int i = 0; i < vector.size() - 1; i++) res += vector[i];
+	return res;
+}
+
+vector_t get_next_x(matrix_t& matrix, vector_t& prev)
+{
+	vector_t res;
+	res.resize(matrix.size());
+	for(int i = 0; i < matrix.size(); i++)
+	{
+		double sum = 0.0;
+		for(int j = 0; j < matrix.size(); j++)
+		{
+			if (i == j) continue;
+			sum += matrix[i][j] * prev[j];
+		}
+		res[i] = 1.0 / matrix[i][i] * (matrix[i].back() - sum);
+	}
+	return res;
+}
+
+vector_t vec_substract(vector_t first, vector_t second)
+{
+	vector_t res;
+	res.resize(first.size());
+	for(int i = 0; i < res.size(); i++)
+	{
+		res[i] = first[i] - second[i];
+	}
+	return res;
+}
+
+vector_t yakobi(matrix_t& matrix)
+{
+	std::cout << "norm: " << norm(matrix) << std::endl;
+	float eps = 0.000001;
+	vector_t x0;
+	x0.resize(matrix.size());
+	for(int i = 0; i < matrix.size(); i++)
+	{
+		x0[i] = matrix[i].back() / matrix[i][i];
+	}
+
+	int it_count = 0;
+	while (true)
+	{
+		it_count++;
+		vector_t x1 = get_next_x(matrix, x0);
+		if (abs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		x0 = x1;
+	}
 }
