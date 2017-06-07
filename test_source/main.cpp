@@ -146,18 +146,11 @@ int main()
 	result.setText("result: ");
 	guiManager.addElement(result); 
 
-	auto getResultButton = createButton(elemX, -matrixSize.second / 2 + getOffset() , remainingWidth, CELL_SIZE, "sum");
-	getResultButton->setOnReleaseCallback([&result]()
+	auto hilbertButton = createButton(elemX, -matrixSize.second / 2 + getOffset() , remainingWidth, CELL_SIZE, "gen hilbert");
+	hilbertButton->setOnReleaseCallback([&result]()
 	{
-		copyFromGui();
-		if(copyErrorFlag)
-		{
-			result.setText("result: incorrect input");
-		}
-		else
-		{
-			result.setText("result: " + to_string(matrixSum(matrixValues, MATRIX_WIDTH, MATRIX_HEIGHT)));
-		}
+		generateHilbert(matrixValues);
+		copyToGui();
 	});
 
 	auto gaussButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");

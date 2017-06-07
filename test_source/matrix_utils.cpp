@@ -65,6 +65,17 @@ void generateRandom(matrix_t& m)
 	printMatrix(m);
 }
 
+void generateHilbert(matrix_t& m)
+{
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m.size(); j++)
+		{
+			m[i][j] = 1.0 / (i + j + 1.0);
+		}
+	}
+}
+
 matrix_t generateIdentity(int size)
 {
 	matrix_t m;
@@ -129,15 +140,20 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 		for(int j = i; j < matrix.size(); j++)
 		{
 			if (matrix[j][i] == 0.0) continue;
-			multiplyRow(matrix, j, 1.0 / matrix[j][i]);
-			multiplyRow(reverted, j, 1.0 / matrix[j][i]);
+			double temp = 1.0 / matrix[j][i];
+			multiplyRow(matrix, j, temp);
+			multiplyRow(reverted, j, temp);
 		}
+		std::cout << "reverted " << i << " : " << std::endl;
+		printMatrix(reverted);
 		for(int j = i + 1; j < matrix.size(); j++)
 		{
 			if (matrix[j][i] == 0.0) continue;
 			subtractRows(matrix, j, i);
 			subtractRows(reverted, j, i);
 		}
+		
+		
 	}
 
 	int offset = 0;
@@ -146,18 +162,21 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 		for(int j = 0; j < i; j++)
 		{
 			if (matrix[j][matrix.size() - 1 - offset] == 0.0f) continue;
-			multiplyRow(matrix, j, matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset]);
-			multiplyRow(reverted, j, matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset]);
+			double temp = matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset];
+			multiplyRow(matrix, j, temp);
+			multiplyRow(reverted, j, temp);
 			subtractRows(matrix, j, i);
 			subtractRows(reverted, j, i);
 		}
-		multiplyRow(matrix, i, 1.0 / matrix[i][matrix.size() - 1 - offset]);
-		multiplyRow(reverted, i, 1.0 / matrix[i][matrix.size() - 1 - offset]);
+		double temp = 1.0 / matrix[i][matrix.size() - 1 - offset];
+		multiplyRow(matrix, i, temp);
+		multiplyRow(reverted, i, temp);
 		offset++;
 	}
 
-	matrix_t result_m;
 	vector_t result_v;
 	printMatrix(matrix);
+	std::cout << "reverted: " << std::endl;
+	printMatrix(reverted);
 	return std::make_pair(result_v, reverted);
 }
