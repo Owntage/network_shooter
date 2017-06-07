@@ -191,6 +191,28 @@ int main()
 		}
 	});
 
+	auto zeidelButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "zeidel");
+	zeidelButton->setOnReleaseCallback([&result]()
+	{
+		copyFromGui();
+		if (!copyErrorFlag)
+		{
+			auto res = yakobi(matrixValues);
+			result.setText("zeidel applied");
+			auto identity = generateIdentity(10);
+			for (int i = 0; i < 10; i++)
+			{
+				for (int j = 0; j < 10; j++)
+				{
+					matrixValues[i][j] = identity[i][j];
+				}
+				matrixValues[i][10] = res[i];
+			}
+			copyToGui();
+
+		}
+	});
+
 	auto randomButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen random");
 	randomButton->setOnReleaseCallback([]()
 	{

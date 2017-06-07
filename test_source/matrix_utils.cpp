@@ -240,3 +240,56 @@ vector_t yakobi(matrix_t& matrix)
 		x0 = x1;
 	}
 }
+
+//zeidel
+
+double count_c(matrix_t& m, int i, int j)
+{
+	if (i == j) return 0;
+	return -m[i][j] / m[i][i];
+}
+
+double count_d(matrix_t& m, int i)
+{
+	return m[i].back() / m[i][i];
+}
+
+vector_t zeidel(matrix_t& matrix)
+{
+	float eps = 0.000001;
+	vector_t x0;
+	x0.resize(matrix.size());
+	for (int i = 0; i < matrix.size(); i++)
+	{
+		x0[i] = matrix[i].back() / matrix[i][i];
+	}
+	
+
+	int it_count = 0;
+	while(true)
+	{
+		it_count++;
+		vector_t x1;
+		x1.resize(x0.size());
+		
+		for (int i = 0; i < x0.size(); i++)
+		{
+			double sum = 0;
+			for (int j = 0; j < x0.size(); j++)
+			{
+				if (j < i)
+				{
+					sum += count_c(matrix, i, j) * x1[j];
+				}
+				else
+				{
+					sum += count_c(matrix, i, j) * x0[j] + count_d(matrix, i);
+				}
+			}
+			x1[i] = sum;
+		}
+		if (abs(vec_norm(vec_substract(x0, x1))) < eps || it_count > 100000) return x1;
+		x0 = x1;
+
+	}
+}
