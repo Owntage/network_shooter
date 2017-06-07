@@ -361,7 +361,7 @@ vector_t matToVec(matrix_t m, vector_t vec)
 	{
 		for(int j = 0; j < result.size(); j++)
 		{
-			result[i] = m[i][j] * vec[i];
+			result[i] += m[i][j] * vec[j];
 		}
 	}
 	return result;
