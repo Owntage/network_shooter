@@ -146,12 +146,7 @@ int main()
 	result.setText("result: ");
 	guiManager.addElement(result); 
 
-	auto hilbertButton = createButton(elemX, -matrixSize.second / 2 + getOffset() , remainingWidth, CELL_SIZE, "gen hilbert");
-	hilbertButton->setOnReleaseCallback([&result]()
-	{
-		generateHilbert(matrixValues);
-		copyToGui();
-	});
+	
 
 	auto gaussButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
 	gaussButton->setOnReleaseCallback([&]()
@@ -233,6 +228,15 @@ int main()
 			copyToGui();
 
 		}
+	});
+
+	getOffset();
+
+	auto hilbertButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen hilbert");
+	hilbertButton->setOnReleaseCallback([&result]()
+	{
+		generateHilbert(matrixValues);
+		copyToGui();
 	});
 
 	auto randomButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gen random");
