@@ -1,6 +1,7 @@
 #include "matrix_utils.h"
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 double matrixSum(std::vector<std::vector<double> >& matrix, int width, int height)
 {
@@ -64,8 +65,54 @@ void generateRandom(matrix_t& m)
 	printMatrix(m);
 }
 
+matrix_t generateIdentity(int size)
+{
+	matrix_t m;
+	m.resize(size);
+	for (int i = 0; i < size; i++) m[i].resize(size);
+	for(int i = 0; i < m.size(); i++)
+	{
+		for(int j = 0; j < m.size(); j++)
+		{
+			if (i == j)
+			{
+				m[i][j] = 1.0;
+			}
+			else
+			{
+				m[i][j] = 0.0;
+			}
+				
+		}
+	}
+	return m;
+}
+
+double columnSum(matrix_t& m, int column)
+{
+	double res = 0;
+	for(int i = 0; i < m.size(); i++)
+	{
+		res += abs(m[i][column]);
+	}
+	return res;
+}
+
+double norm(matrix_t m) //first norm
+{
+	double res = columnSum(m, 0);
+	for(int i = 1; i < m.size(); i++)
+	{
+		res = std::max(res, columnSum(m, i));
+	}
+	return res;
+}
+
 std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 {
+	matrix_t reverted = generateIdentity(matrix.size());
+
+
 	for(int i = 0; i < matrix.size(); i++)
 	{
 		int nonZeroIndex = i;
@@ -78,15 +125,18 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 			}
 		}
 		swapRows(matrix, i, nonZeroIndex);
+		swapRows(reverted, i, nonZeroIndex);
 		for(int j = i; j < matrix.size(); j++)
 		{
 			if (matrix[j][i] == 0.0) continue;
 			multiplyRow(matrix, j, 1.0 / matrix[j][i]);
+			multiplyRow(reverted, j, 1.0 / matrix[j][i]);
 		}
 		for(int j = i + 1; j < matrix.size(); j++)
 		{
 			if (matrix[j][i] == 0.0) continue;
 			subtractRows(matrix, j, i);
+			subtractRows(reverted, j, i);
 		}
 	}
 
@@ -97,14 +147,17 @@ std::pair<vector_t, matrix_t> gauss(matrix_t& matrix)
 		{
 			if (matrix[j][matrix.size() - 1 - offset] == 0.0f) continue;
 			multiplyRow(matrix, j, matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset]);
+			multiplyRow(reverted, j, matrix[i][matrix.size() - 1 - offset] / matrix[j][matrix.size() - 1 - offset]);
 			subtractRows(matrix, j, i);
+			subtractRows(reverted, j, i);
 		}
 		multiplyRow(matrix, i, 1.0 / matrix[i][matrix.size() - 1 - offset]);
+		multiplyRow(reverted, i, 1.0 / matrix[i][matrix.size() - 1 - offset]);
 		offset++;
 	}
 
 	matrix_t result_m;
 	vector_t result_v;
 	printMatrix(matrix);
-	return std::make_pair(result_v, result_m);
+	return std::make_pair(result_v, reverted);
 }

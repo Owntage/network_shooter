@@ -161,13 +161,17 @@ int main()
 	});
 
 	auto gaussButton = createButton(elemX, -matrixSize.second / 2 + getOffset(), remainingWidth, CELL_SIZE, "gauss");
-	gaussButton->setOnReleaseCallback([]()
+	gaussButton->setOnReleaseCallback([&]()
 	{
 		copyFromGui();
 		if(!copyErrorFlag)
 		{
-			gauss(matrixValues);
+			auto temp = matrixValues;
+			auto res = gauss(matrixValues);
+			double cond = norm(temp) * norm(res.second);
+			//double cond = norm(generateIdentity(10)) * norm(generateIdentity(10));
 			copyToGui();
+			result.setText("cond: " + to_string(cond));
 		}
 		
 	});

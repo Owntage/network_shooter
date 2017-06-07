@@ -10,6 +10,8 @@ typedef std::vector<double> vector_t;
 double matrixSum(matrix_t& matrix, int width, int height);
 std::pair<vector_t, matrix_t> gauss(matrix_t& matrix);
 void generateRandom(matrix_t& matrix);
+double norm(matrix_t matrix);
+matrix_t generateIdentity(int size);
 
 
 #endif
