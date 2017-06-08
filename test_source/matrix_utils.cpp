@@ -63,6 +63,7 @@ void printMatrix(matrix_t& m)
 		}
 		std::cout << std::endl;
 	}
+	std::cout << std::endl;
 }
 
 void generateDiag(matrix_t& m)
