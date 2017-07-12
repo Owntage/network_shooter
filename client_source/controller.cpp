@@ -69,16 +69,13 @@ void Controller::onEvent(sf::Event event)
 	}
 	if(event.type == sf::Event::MouseMoved)
 	{
-		
-		mouseX = event.mouseMove.x - screenWidth / 2;
-		mouseY = event.mouseMove.y - screenHeight / 2;
+		float actualScreenWidth = RenderWindow::getInstance()->window.getSize().x;
+		float actualScreenHeight = RenderWindow::getInstance()->window.getSize().y;
+
+		mouseX = event.mouseMove.x - actualScreenWidth / 2;
+		mouseY = event.mouseMove.y - actualScreenHeight / 2;
 		mouseX /= tileSize;
 		mouseY /= tileSize;
-		
-		//mouseX += cameraDeltaX;
-		//mouseY += cameraDeltaY;
-
-		
 	}
 	if(event.type == sf::Event::MouseButtonPressed)
 	{
