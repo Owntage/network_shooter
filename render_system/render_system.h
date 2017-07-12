@@ -65,6 +65,7 @@ struct LightManager
 	void draw(sf::RenderTarget& renderTarget);
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
 	void removeLightSource(int lightSourceIndex);
+	void onWindowResize(float screenWidth, float screenHeight);
 private:
 	struct LightSource
 	{
