@@ -262,6 +262,12 @@ void DrawableActor::draw()
 			}
 			rect.setTexture(&renderSystem.textures[nextImage]);
 			rect.setRotation(animationLayerStates[i].angle);
+
+			float windowSizeX = (float) RenderWindow::getInstance()->window.getSize().x / TILE_SIZE;
+			float windowSizeY = (float) RenderWindow::getInstance()->window.getSize().y / TILE_SIZE;
+
+			renderSystem.gameView.setSize(windowSizeX, windowSizeY);
+
 			if(isMain)
 			{
 				float view_x = renderSystem.gameView.getCenter().x;
