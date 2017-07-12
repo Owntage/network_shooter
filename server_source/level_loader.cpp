@@ -57,20 +57,31 @@ bool LevelLoader::loadLevel(std::string path, std::string levelName)
 			{
 				double x = (double)object.second.get<double>("<xmlattr>.x") / SPRITE_SIZE;
 				double y = (double) object.second.get<double>("<xmlattr>.y") / SPRITE_SIZE;
-				double width = (double)object.second.get<double>("<xmlattr>.width") / SPRITE_SIZE;
-				double height = (double)object.second.get<double>("<xmlattr>.height") / SPRITE_SIZE;
+				double width;
+				double height;
+				try 
+				{
+					width = (double)object.second.get<double>("<xmlattr>.width") / SPRITE_SIZE;
+					height = (double)object.second.get<double>("<xmlattr>.height") / SPRITE_SIZE;
+				} catch (...)
+				{
+					width = 0.3;
+					height = 0.3;
+				}
 				std::string type = object.second.get<std::string>("<xmlattr>.type");
 				//std::string name = object.second.get<std::string>("<xmlattr>.name");
 				int objectActor = gameLogic.createActor(type);
 				gameLogic.onEvent(CoordEvent("set_coords", objectActor, x + width / 2, y + height / 2));
 				gameLogic.onEvent(CoordEvent("set_scale", objectActor, width, height));
+				std::cout << "created object: " << type << std::endl;
 			}
 		}
 
 		return true;
 	}
-	catch(...)
+	catch(const boost::property_tree::ptree_error& e)
 	{
+		std::cout << "parser failed: " << e.what() << std::endl;
 		return false;
 	}
 	
