@@ -9,7 +9,7 @@
 
 struct RenderWindow: Singleton<RenderWindow>
 {
-	RenderWindow() : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "network_shooter")
+	RenderWindow() : window(sf::VideoMode::getFullscreenModes()[0], "network_shooter", sf::Style::Fullscreen)
 	{
 		window.setKeyRepeatEnabled(false);
 	}

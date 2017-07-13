@@ -262,13 +262,16 @@ void GuiManager::onEvent(sf::Event& event)
 	switch(event.type)
 	{
 		case sf::Event::MouseButtonPressed:
-			onMouseClick(event.mouseButton.x - WINDOW_WIDTH / 2, event.mouseButton.y - WINDOW_HEIGHT / 2, false);
+			onMouseClick(event.mouseButton.x - RenderWindow::getInstance()->getWidth() / 2, 
+				event.mouseButton.y - RenderWindow::getInstance()->getHeight() / 2, false);
 			break;
 		case sf::Event::MouseButtonReleased:
-			onMouseClick(event.mouseButton.x - WINDOW_WIDTH / 2, event.mouseButton.y - WINDOW_HEIGHT / 2, true);
+			onMouseClick(event.mouseButton.x - RenderWindow::getInstance()->getWidth() / 2, 
+				event.mouseButton.y - RenderWindow::getInstance()->getHeight() / 2, true);
 			break;
 		case sf::Event::MouseMoved:
-			onMouseMove(event.mouseMove.x - WINDOW_WIDTH / 2, event.mouseMove.y - WINDOW_HEIGHT / 2);
+			onMouseMove(event.mouseMove.x - RenderWindow::getInstance()->getWidth() / 2, 
+				event.mouseMove.y - RenderWindow::getInstance()->getHeight() / 2);
 			break;
 	}
 	if(event.type == sf::Event::KeyPressed && isSpecialKey(event.key.code))

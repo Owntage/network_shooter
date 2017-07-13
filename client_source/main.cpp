@@ -36,7 +36,8 @@ int main()
 	//Console console(-WINDOW_WIDTH / 2 + CONSOLE_WIDTH / 2, WINDOW_HEIGHT / 2 - CONSOLE_HEIGHT / 2, CONSOLE_WIDTH, CONSOLE_HEIGHT, guiManager);
 	//Controller controller(console, TILE_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT);
 	//RenderSystem renderSystem(console);
-	SceneManager::getInstance()->startScene(std::make_shared<MenuScene>(WINDOW_WIDTH, WINDOW_HEIGHT));
+	SceneManager::getInstance()->startScene(std::make_shared<MenuScene>(RenderWindow::getInstance()->getWidth(), 
+		RenderWindow::getInstance()->getHeight()));
 	while(RenderWindow::getInstance()->window.isOpen())
 	{
 		sf::Event event;
