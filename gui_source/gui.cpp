@@ -167,7 +167,8 @@ void GuiManager::drawGuiElement(GuiElement* guiElement)
 
 void GuiManager::draw()
 {
-	
+	guiView.setSize(RenderWindow::getInstance()->getWidth(), RenderWindow::getInstance()->getHeight());
+
 	renderCounter = 1;
 	RenderWindow::getInstance()->window.setView(guiView);
 	for(auto it = isDrawn.begin(); it != isDrawn.end(); it++)

@@ -14,6 +14,16 @@ struct RenderWindow: Singleton<RenderWindow>
 		window.setKeyRepeatEnabled(false);
 	}
 	sf::RenderWindow window;
+
+	float getWidth()
+	{
+		return window.getSize().x;
+	}
+
+	float getHeight()
+	{
+		return window.getSize().y;
+	}
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "render_system.h"
 #include <SFML/Graphics/BlendMode.hpp>
+#include "render_window.h"
 
 void GameGuiManager::setWeaponUpdate(WeaponUpdate& weaponUpdate)
 {
@@ -34,6 +35,9 @@ void GameGuiManager::setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate)
 
 void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 {
+	screenWidth = RenderWindow::getInstance()->getWidth();
+	screenHeight = RenderWindow::getInstance()->getHeight();
+	view.setSize(screenWidth, screenHeight);
 
 	//hp bar
 	shape.setTexture(nullptr);
