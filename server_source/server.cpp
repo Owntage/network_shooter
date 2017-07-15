@@ -33,7 +33,10 @@ GameServer::GameServer(GameLogic& gameLogic, unsigned short port): uniqueCounter
 	}
 	*/
 	LevelLoader levelLoader(gameLogic);
-	levelLoader.loadLevel("res", "level1.tmx");
+	std::cout << "enter level_name: ";
+	std::string levelName;
+	std::cin >> levelName;
+	levelLoader.loadLevel("res", levelName + ".tmx");
 }
 
 bool GameServer::ensureClient(IpAddress& address, int uniqueID)
