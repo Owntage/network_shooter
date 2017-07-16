@@ -71,7 +71,7 @@ if(SFML_FOUND AND Boost_FOUND)
 	endif()
 		
 	target_link_libraries(gui ${SFML_LIBRARIES})
-    	target_link_libraries(shooter_server ${SFML_LIBRARIES} gui game_logic render_system network)
+    	target_link_libraries(shooter_server gui game_logic render_system network)
 	target_link_libraries(shooter_client ${SFML_LIBRARIES} gui game_logic render_system network)
 	target_link_libraries(shooter_test ${SFML_LIBRARIES} gui game_logic render_system network)
 	if(WIN32)

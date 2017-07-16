@@ -18,7 +18,7 @@ uint32_t uniqueCounter = 0;
 
 
 
-int main()
+int main(int argc, char** argv)
 {
 	
 	UdpSocket::initializeSockets();
