@@ -5,7 +5,8 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
 	tileWidth(tileWidth),
-	counter(0)
+	counter(0),
+	shaderArraySize(0)
 {
 	shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
 	multiplyShader.loadFromFile(MULTIPLY_FRAGMENT_SHADER, sf::Shader::Fragment);
@@ -19,22 +20,15 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
-	LightSource lightSource;
-	sf::Vertex vertex;
-	vertex.color = color;
-	vertex.color.a = intensity;
-	vertex.texCoords = pos;
-	vertex.position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-	lightSource.vertices[0] = vertex;
-	vertex.position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-	lightSource.vertices[1] = vertex;
-	vertex.position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-	lightSource.vertices[2] = vertex;
-	vertex.position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-	lightSource.vertices[3] = vertex;
+	idToShaderIndex[counter] = shaderArraySize;
+	shader.setParameter("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
 
-	verticesMap[counter] = lightSource;
+	sf::Vector3f colorVec(color.r, color.g, color.b);
+	shader.setParameter("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
 
+	shader.setParameter("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
+
+	shader.setParameter("sources_size", ++shaderArraySize);
 	return counter++;
 }
 
@@ -56,13 +50,10 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	shader.setParameter("offset", center);
 
 	std::vector<sf::Vertex> vertices;
-	for (auto it = verticesMap.begin(); it != verticesMap.end(); it++)
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			vertices.push_back(it->second.vertices[i]);
-		}
-	}
+	vertices.push_back(sf::Vertex(sf::Vector2f(-screenWidth / 2, -screenHeight / 2)));
+	vertices.push_back(sf::Vertex(sf::Vector2f(screenWidth / 2, -screenHeight / 2)));
+	vertices.push_back(sf::Vertex(sf::Vector2f(screenWidth / 2, screenHeight / 2)));
+	vertices.push_back(sf::Vertex(sf::Vector2f(-screenWidth / 2, screenHeight / 2)));
 
 	sf::View lightView;
 	lightView.setCenter(sf::Vector2f(0, 0));
@@ -89,28 +80,25 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 
 void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 {
-	verticesMap[lightSourceID].vertices[0].texCoords = pos;
-	verticesMap[lightSourceID].vertices[1].texCoords = pos;
-	verticesMap[lightSourceID].vertices[2].texCoords = pos;
-	verticesMap[lightSourceID].vertices[3].texCoords = pos;
+	shader.setParameter("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
 }
 
 void LightManager::removeLightSource(int lightSourceID)
 {
-	verticesMap.erase(lightSourceID);
+	//verticesMap.erase(lightSourceID);
 }
 
 void LightManager::onWindowResize(float screenWidth, float screenHeight)
 {
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
-	for(auto it = verticesMap.begin(); it != verticesMap.end(); it++)
-	{
-		it->second.vertices[0].position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-		it->second.vertices[1].position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-		it->second.vertices[2].position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-		it->second.vertices[3].position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-	}
+	//for(auto it = verticesMap.begin(); it != verticesMap.end(); it++)
+	//{
+	//	it->second.vertices[0].position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
+	//	it->second.vertices[1].position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
+	//	it->second.vertices[2].position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
+	//	it->second.vertices[3].position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
+	//}
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
 }

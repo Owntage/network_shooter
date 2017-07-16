@@ -67,12 +67,14 @@ struct LightManager
 	void removeLightSource(int lightSourceIndex);
 	void onWindowResize(float screenWidth, float screenHeight);
 private:
-	struct LightSource
-	{
-		sf::Vertex vertices[4];
-	};
+	//struct LightSource
+	//{
+	//	sf::Vertex vertices[4];
+	//};
 
-	std::map<int, LightSource> verticesMap;
+	//std::map<int, LightSource> verticesMap;
+	std::map<int, int> idToShaderIndex;
+	int shaderArraySize;
 	int counter;
 	sf::Shader shader;
 	sf::Shader multiplyShader;
