@@ -32,7 +32,10 @@ int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intens
 	shaderIndexToId[shaderArraySize] = counter;
 
 	shader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
-	sf::Vector3f colorVec(color.r, color.g, color.b);
+	sf::Vector3f colorVec((int) color.r, (int) color.g, (int) color.b);
+	colorVec.x /= 255.0f;
+	colorVec.y /= 255.0f;
+	colorVec.z /= 255.0f;
 	shader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
 	shader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
 	shader.setUniform("sources_size", ++shaderArraySize);
@@ -77,12 +80,12 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	sf::RenderStates multiplyRenderStates;
 
 	multiplyRenderStates.blendMode = sf::BlendAdd;
-	multiplyShader.setUniform("multiplier", 5.0f * 0.2f);
+	multiplyShader.setUniform("multiplier", 1.0f);
 	multiplyRenderStates.shader = &multiplyShader;
 	renderTarget.draw(shape, multiplyRenderStates);
 
 	multiplyRenderStates.blendMode = sf::BlendMultiply;
-	multiplyShader.setUniform("multiplier", 5.0f);
+	multiplyShader.setUniform("multiplier", 3.0f);
 	multiplyRenderStates.shader = &multiplyShader;
 	renderTarget.draw(shape, multiplyRenderStates);
 }
