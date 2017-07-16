@@ -88,7 +88,7 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 
 void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 {
-	shader.setParameter("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
+	shader.setUniform("light_pos[" + std::to_string(idToShaderIndex[lightSourceID]) + "]", pos);
 }
 
 void LightManager::removeLightSource(int lightSourceID)
@@ -100,13 +100,6 @@ void LightManager::onWindowResize(float screenWidth, float screenHeight)
 {
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
-	//for(auto it = verticesMap.begin(); it != verticesMap.end(); it++)
-	//{
-	//	it->second.vertices[0].position = sf::Vector2f(-screenWidth / 2, -screenHeight / 2);
-	//	it->second.vertices[1].position = sf::Vector2f(screenWidth / 2, -screenHeight / 2);
-	//	it->second.vertices[2].position = sf::Vector2f(screenWidth / 2, screenHeight / 2);
-	//	it->second.vertices[3].position = sf::Vector2f(-screenWidth / 2, screenHeight / 2);
-	//}
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
 }
