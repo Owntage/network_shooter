@@ -29,14 +29,15 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
 	idToShaderIndex[counter] = shaderArraySize;
-	shader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
+	shaderIndexToId[shaderArraySize] = counter;
 
+	shader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
 	sf::Vector3f colorVec(color.r, color.g, color.b);
 	shader.setUniform("light_color[" + std::to_string(shaderArraySize) + "]", colorVec);
-
 	shader.setUniform("light_intensity[" + std::to_string(shaderArraySize) + "]", intensity);
-
 	shader.setUniform("sources_size", ++shaderArraySize);
+
+	idToData[counter] = LightData(pos, colorVec, intensity);
 	return counter++;
 }
 
@@ -93,7 +94,20 @@ void LightManager::setPosition(int lightSourceID, sf::Vector2f pos)
 
 void LightManager::removeLightSource(int lightSourceID)
 {
-	//verticesMap.erase(lightSourceID);
+	//should swap with the last element in shader array
+	int lastId = shaderIndexToId[shaderArraySize - 1];
+	LightData lastData = idToData[lastId];
+	int currentIndex = idToShaderIndex[lightSourceID];
+	shaderIndexToId[currentIndex] = lastId;
+	idToShaderIndex[lastId] = currentIndex;
+	shader.setUniform("light_pos[" + std::to_string(currentIndex) + "]", lastData.position);
+	shader.setUniform("light_color[" + std::to_string(currentIndex) + "]", lastData.color);
+	shader.setUniform("light_intensity[" + std::to_string(currentIndex) + "]", lastData.intensity);
+	shaderArraySize--;
+	shader.setUniform("sources_size", shaderArraySize);
+
+	//todo: remove lightSourceID data from maps
+
 }
 
 void LightManager::onWindowResize(float screenWidth, float screenHeight)

@@ -67,13 +67,21 @@ struct LightManager
 	void removeLightSource(int lightSourceIndex);
 	void onWindowResize(float screenWidth, float screenHeight);
 private:
-	//struct LightSource
-	//{
-	//	sf::Vertex vertices[4];
-	//};
-
-	//std::map<int, LightSource> verticesMap;
-	std::map<int, int> idToShaderIndex;
+	struct LightData
+	{
+		sf::Vector2f position;
+		sf::Vector3f color;
+		float intensity;
+		LightData() {}
+		LightData(sf::Vector2f position, sf::Vector3f color, float intensity) :
+				position(position),
+				color(color),
+				intensity(intensity)
+		{}
+	};
+	std::map<int, int> idToShaderIndex; //can be replaced with bimap
+	std::map<int, int> shaderIndexToId;
+	std::map<int, LightData> idToData;
 	int shaderArraySize;
 	int counter;
 	sf::Shader shader;
