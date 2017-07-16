@@ -4,12 +4,37 @@ varying vec2 pos_vec;
 varying vec2 tex_vec;
 
 uniform vec2 offset;
+uniform vec2 light_pos[256];
+uniform vec3 light_color[256];
+uniform float light_intensity[256];
+uniform int sources_size;
 
 void main(void)
 {
-	float len = length(pos_vec + offset - tex_vec) / 32;
-	float intensity = gl_Color.a * 255;
 	float len_power = 2;
-	float multiplier = min(10.0, intensity / pow(len, len_power)) * 0.025;
-	gl_FragColor = vec4(gl_Color.r * multiplier, gl_Color.g * multiplier, gl_Color.b * multiplier, 1.0);
+	vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+	
+	for (int i = 0; i < sources_size; i++)
+	{
+		float multiplier;
+		float len = length(pos_vec + offset - light_pos[i]) / 32;
+		if (len / light_intensity[i] < 1 && light_intensity[i] >= 1) len = light_intensity[i];
+		
+		if (light_intensity[i] < 1)
+		{
+			multiplier = 0.15 / pow(len * 2, len_power);
+		}
+		else
+		{
+			multiplier = 0.15 / pow(len / light_intensity[i], len_power);
+		}
+		
+		color.r += light_color[i].r * multiplier;
+		color.g += light_color[i].g * multiplier;
+		color.b += light_color[i].b * multiplier;
+		
+	}
+	
+	//gl_FragColor = vec4(gl_Color.r * multiplier, gl_Color.g * multiplier, gl_Color.b * multiplier, 1.0);
+	gl_FragColor = color;
 }

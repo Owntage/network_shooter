@@ -1,6 +1,10 @@
 #version 120
 
 uniform vec2 offset;
+uniform vec2 light_pos[256];
+uniform vec3 light_color[256];
+uniform float light_intensity[256];
+uniform int sources_size;
 
 varying vec2 pos_vec;
 varying vec2 tex_vec;
