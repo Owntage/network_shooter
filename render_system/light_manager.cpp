@@ -8,15 +8,16 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	counter(0),
 	shaderArraySize(0)
 {
-	try
-	{
-		shader.loadFromFile(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
-	}
-	catch (...)
-	{
-		std::cout << "failed to load shader" << std::endl;
-	}
-	multiplyShader.loadFromFile(MULTIPLY_FRAGMENT_SHADER, sf::Shader::Fragment);
+
+	sf::FileInputStream vertexStream;
+	vertexStream.open(LIGHT_VERTEX_SHADER);
+	sf::FileInputStream fragmentStream;
+	fragmentStream.open(LIGHT_FRAGMENT_SHADER);
+	shader.loadFromStream(vertexStream, fragmentStream);
+
+	sf::FileInputStream multiplyFragmentStream;
+	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
+	multiplyShader.loadFromStream(multiplyFragmentStream, sf::Shader::Fragment);
 	//vertices.setPrimitiveType(sf::Quads);
 	renderTexture.create(screenWidth / 4, screenHeight / 4);
 	renderTexture.setSmooth(true);
