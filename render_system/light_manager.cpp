@@ -6,7 +6,8 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	screenHeight(screenHeight),
 	tileWidth(tileWidth),
 	counter(0),
-	shaderArraySize(0)
+	shaderArraySize(0),
+	shadowsArraySize(0)
 {
 
 	sf::FileInputStream vertexStream;
@@ -19,18 +20,23 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
 	multiplyShader.loadFromStream(multiplyFragmentStream, sf::Shader::Fragment);
 	//vertices.setPrimitiveType(sf::Quads);
-	renderTexture.create(screenWidth / 4, screenHeight / 4);
+	renderTexture.create(screenWidth, screenHeight);
 	renderTexture.setSmooth(true);
 
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
+
+	//shader.setUniform("shadows_size", 1);
+	//shader.setUniform("shadow_pos[0]", sf::Vector2f(1200, 400));
+	//shader.setUniform("shadow_size[0]", sf::Vector2f(32, 32));
+	addRectangleObstacle(sf::Vector2f(1200, 400), sf::Vector2f(64, 32));
+	addRectangleObstacle(sf::Vector2f(1200, 500), sf::Vector2f(64, 32));
 }
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)
 {
 	idToShaderIndex[counter] = shaderArraySize;
 	shaderIndexToId[shaderArraySize] = counter;
-
 	shader.setUniform("light_pos[" + std::to_string(shaderArraySize) + "]", pos);
 	sf::Vector3f colorVec((int) color.r, (int) color.g, (int) color.b);
 	colorVec.x /= 255.0f;
@@ -41,6 +47,15 @@ int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intens
 	shader.setUniform("sources_size", ++shaderArraySize);
 
 	idToData[counter] = LightData(pos, colorVec, intensity);
+	return counter++;
+}
+
+int LightManager::addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size)
+{
+	shader.setUniform("shadow_pos[" + std::to_string(shadowsArraySize) + "]", pos);
+	shader.setUniform("shadow_size[" + std::to_string(shadowsArraySize) + "]", size);
+	shadowsArraySize++;
+	shader.setUniform("shadows_size", shadowsArraySize);
 	return counter++;
 }
 

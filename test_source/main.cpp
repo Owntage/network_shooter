@@ -169,7 +169,7 @@ int main()
 		lightSourceAngle += 2.0 / 60.0;
 		lightSource.x = cos(lightSourceAngle) * lightSourceRadius + WINDOW_WIDTH / 2;
 		lightSource.y = sin(lightSourceAngle) * lightSourceRadius + WINDOW_HEIGHT / 2;
-		lightSourceRadius = sin(lightSourceAngle * PI) * 66 + 100;
+		lightSourceRadius = sin(lightSourceAngle * PI) * 200;
 		RenderWindow::getInstance()->window.clear();
 
 			for(int i = 0; i < WINDOW_WIDTH; i++)

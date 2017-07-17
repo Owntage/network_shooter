@@ -62,6 +62,7 @@ struct LightManager
 {
 	LightManager(float screenWidth, float screenHeight, float tileWidth);
 	int addLightSource(sf::Vector2f pos, sf::Color color, float intensity);
+	int addRectangleObstacle(sf::Vector2f pos, sf::Vector2f size);
 	void draw(sf::RenderTarget& renderTarget);
 	void setPosition(int lightSourceIndex, sf::Vector2f pos);
 	void removeLightSource(int lightSourceIndex);
@@ -83,6 +84,7 @@ private:
 	std::map<int, int> shaderIndexToId;
 	std::map<int, LightData> idToData;
 	int shaderArraySize;
+	int shadowsArraySize;
 	int counter;
 	sf::Shader shader;
 	sf::Shader multiplyShader;
