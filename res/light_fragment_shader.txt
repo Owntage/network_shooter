@@ -4,10 +4,228 @@ varying vec2 pos_vec;
 varying vec2 tex_vec;
 
 uniform vec2 offset;
-uniform vec2 light_pos[256];
-uniform vec3 light_color[256];
-uniform float light_intensity[256];
+uniform vec2 light_pos[200];
+uniform vec3 light_color[200];
+uniform float light_intensity[200];
+
+uniform vec2 shadow_pos[100];
+uniform vec2 shadow_size[100];
+
+
 uniform int sources_size;
+uniform int shadows_size;
+
+#define PI 3.141593 //good enough for engineering
+
+float get_angle(vec2 base, vec2 target)
+{
+	vec2 delta = target - base;
+	if (abs(delta.x) < 0.0001)
+	{
+		if (delta.y < 0)
+		{
+			return PI * 3 / 2;
+		}
+		else
+		{
+			return PI / 2;
+		}
+	}
+	if (delta.x < 0)
+	{
+		return atan(delta.y / delta.x) + PI;
+	}
+	else
+	{
+		if (delta.y > 0)
+		{
+			return atan(delta.y / delta.x);
+		}
+		else
+		{
+			return atan(delta.y / delta.x) + PI * 2;
+		}
+	}
+}
+
+vec4 get_rectangle_angles(vec2 base, vec2 rect_pos, vec2 rect_size)
+{
+	return vec4(
+		get_angle(base, vec2(rect_pos.x + rect_size.x / 2, rect_pos.y + rect_size.y / 2)),
+		get_angle(base, vec2(rect_pos.x - rect_size.x / 2, rect_pos.y + rect_size.y / 2)),
+		get_angle(base, vec2(rect_pos.x - rect_size.x / 2, rect_pos.y - rect_size.y / 2)),
+		get_angle(base, vec2(rect_pos.x + rect_size.x / 2, rect_pos.y - rect_size.y / 2)));
+}
+
+float vec_min(vec4 v)
+{
+	float res = v[0];
+	for	(int i = 1; i < 4; i++)
+	{
+		res = min(res, v[i]);
+	}
+	return res;
+}
+
+float vec_max(vec4 v)
+{
+	float res = v[0];
+	for	(int i = 1; i < 4; i++)
+	{
+		res = max(res, v[i]);
+	}
+	return res;
+}
+
+float correctAngle(float angle)
+{
+	while (angle >= 2 * PI)
+	{
+		angle -= 2 * PI;
+	}
+	while (angle < 0)
+	{
+		angle += 2 * PI;
+	}
+	return angle;
+}
+
+//copy-paste, because glsl doesnt allow recursion
+float getAngularIntersection1(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+	
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
+
+
+float getAngularIntersection0(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+	if (startAngleB > endAngleB)
+	{
+		return getAngularIntersection1(startAngleA, endAngleA, startAngleB, 2 * PI) +
+			getAngularIntersection1(startAngleA, endAngleA, 0, endAngleB);
+	}
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
+
+float get_angular_intersection(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+	if (startAngleA > endAngleA)
+	{
+		return getAngularIntersection0(startAngleA, 2 * PI, startAngleB, endAngleB) +
+			getAngularIntersection0(0, endAngleA, startAngleB, endAngleB);
+	}
+	if (startAngleB > endAngleB)
+	{
+		return getAngularIntersection1(startAngleA, endAngleA, startAngleB, 2 * PI) +
+			getAngularIntersection1(startAngleA, endAngleA, 0, endAngleB);
+	}
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
+
+float get_sphere_delta_angle(vec2 base, vec2 sphere, float radius)
+{	
+	if (length(base - sphere) < 0.0001) return 0;
+	float angleRadius = radius / length(base - sphere);
+	return asin(angleRadius);
+}
+
+float dotProduct(vec2 a, vec2 b)
+{
+	return a.x * b.x + a.y * b.y;
+}
+
+float crossProduct(vec2 a, vec2 b)
+{
+	return a.x * b.y - a.y * b.x;
+}
+
+float point_segment_distance(vec2 s1, vec2 s2, vec2 p)
+{
+	vec2 s1p = p - s1;
+	vec2 s1s2 = s2 - s1;
+	float firstDotProduct = dotProduct(s1p, s1s2);
+	if(firstDotProduct < 0)
+	{
+		return length(p - s1);
+	}
+	vec2 s2p = p - s2;
+	vec2 s2s1 = -s1s2;
+	float secondDotProduct = dotProduct(s2p, s2s1);
+	if(secondDotProduct < 0)
+	{
+		return length(p - s2);
+	}
+	float parallelogramSquare = abs(crossProduct(s1p, s2p));
+	return parallelogramSquare / length(s1s2);
+}
+
+float point_rect_distance(vec2 rect_center, vec2 rect_size, vec2 point)
+{
+	vec2 rect_p0 = vec2(rect_center.x - rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p1 = vec2(rect_center.x + rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p2 = vec2(rect_center.x + rect_size.x / 2, rect_center.y + rect_size.y / 2);
+	vec2 rect_p3 = vec2(rect_center.x - rect_size.x / 2, rect_center.y + rect_size.y / 2);
+	
+	vec4 res;
+	res[0] = point_segment_distance(rect_p0, rect_p1, point);
+	res[1] = point_segment_distance(rect_p1, rect_p2, point);
+	res[2] = point_segment_distance(rect_p2, rect_p3, point);
+	res[3] = point_segment_distance(rect_p3, rect_p0, point);
+	
+	return vec_min(res);
+}
+
+bool point_in_rectangle(vec2 rect_pos, vec2 rect_size, vec2 point)
+{
+	return (point.x >= rect_pos.x - rect_size.x / 2 &&
+		point.x <= rect_pos.x + rect_size.x / 2 &&
+		point.y >= rect_pos.y - rect_size.y / 2 &&
+		point.y <= rect_pos.y + rect_size.y / 2);
+	
+}
+
+bool left_turn(vec2 a, vec2 b, vec2 c)
+{
+	return ((c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x)) > 0;
+}
+
+bool segment_intersect(vec2 a0, vec2 a1, vec2 b0, vec2 b1)
+{
+	return left_turn(a0, a1, b0) != left_turn(a0, a1, b1) &&
+			left_turn(b0, b1, a0) != left_turn(b0, b1, a1);
+}
+
+bool rect_segment_intersect(vec2 rect_center, vec2 rect_size, vec2 a0, vec2 a1)
+{
+	vec2 rect_p0 = vec2(rect_center.x - rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p1 = vec2(rect_center.x + rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p2 = vec2(rect_center.x + rect_size.x / 2, rect_center.y + rect_size.y / 2);
+	vec2 rect_p3 = vec2(rect_center.x - rect_size.x / 2, rect_center.y + rect_size.y / 2);
+	
+	return segment_intersect(rect_p0, rect_p1, a0, a1) ||
+			segment_intersect(rect_p1, rect_p2, a0, a1) ||
+			segment_intersect(rect_p2, rect_p3, a0, a1) ||
+			segment_intersect(rect_p3, rect_p0, a0, a1);
+}
 
 void main(void)
 {
@@ -29,12 +247,50 @@ void main(void)
 			multiplier = 0.15 / pow(len / light_intensity[i], len_power);
 		}
 		
+		float shadow_intensity = 1;
+		for (int j = 0; j < shadows_size; j++)
+		{
+			float current_intensity = 1;
+			if (rect_segment_intersect(shadow_pos[j], shadow_size[j], pos_vec + offset, light_pos[i]) &&
+				!point_in_rectangle(shadow_pos[j], shadow_size[j], pos_vec + offset))
+			{
+				current_intensity = 0;
+				
+				
+				if (point_rect_distance(shadow_pos[j], shadow_size[j], light_pos[i]) < 10)
+				{
+					current_intensity = 0;
+					//continue;
+				}
+				else
+				{
+				
+					float light_angle = get_angle(pos_vec + offset, light_pos[i]);
+					float sphere_delta_angle = get_sphere_delta_angle(pos_vec + offset, light_pos[i], 10);
+					float angularIntersection = get_angular_intersection(
+								vec_min(get_rectangle_angles(pos_vec + offset, shadow_pos[j], shadow_size[j])),
+								vec_max(get_rectangle_angles(pos_vec + offset, shadow_pos[j], shadow_size[j])),
+								light_angle - sphere_delta_angle,
+								light_angle + sphere_delta_angle);
+					current_intensity = sphere_delta_angle * 2 - angularIntersection;
+					if(sphere_delta_angle > 0.001)
+					{
+						current_intensity /= sphere_delta_angle;
+					}
+				}
+				
+			}
+			shadow_intensity *= current_intensity;
+		}
+		shadow_intensity = min(shadow_intensity, 1.0);
+		
+		multiplier *= shadow_intensity;
+		
 		color.r += light_color[i].r * multiplier;
 		color.g += light_color[i].g * multiplier;
 		color.b += light_color[i].b * multiplier;
 		
 	}
 	
-	//gl_FragColor = vec4(gl_Color.r * multiplier, gl_Color.g * multiplier, gl_Color.b * multiplier, 1.0);
 	gl_FragColor = color;
 }
