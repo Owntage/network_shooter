@@ -16,21 +16,13 @@ uniform int sources_size;
 uniform int shadows_size;
 
 #define PI 3.141593 //good enough for engineering
+#define LIGHT_RADIUS 32
+#define EPS = 0.001
 
 float get_angle(vec2 base, vec2 target)
 {
 	vec2 delta = target - base;
-	if (abs(delta.x) < 0.0001)
-	{
-		if (delta.y < 0)
-		{
-			return PI * 3 / 2;
-		}
-		else
-		{
-			return PI / 2;
-		}
-	}
+	
 	if (delta.x < 0)
 	{
 		return atan(delta.y / delta.x) + PI;
@@ -48,6 +40,7 @@ float get_angle(vec2 base, vec2 target)
 	}
 }
 
+
 vec4 get_rectangle_angles(vec2 base, vec2 rect_pos, vec2 rect_size)
 {
 	return vec4(
@@ -56,6 +49,9 @@ vec4 get_rectangle_angles(vec2 base, vec2 rect_pos, vec2 rect_size)
 		get_angle(base, vec2(rect_pos.x - rect_size.x / 2, rect_pos.y - rect_size.y / 2)),
 		get_angle(base, vec2(rect_pos.x + rect_size.x / 2, rect_pos.y - rect_size.y / 2)));
 }
+
+
+
 
 float vec_min(vec4 v)
 {
@@ -77,17 +73,47 @@ float vec_max(vec4 v)
 	return res;
 }
 
+float get_min_rect_angle(vec2 base, vec2 rect_pos, vec2 rect_size)
+{
+	vec2 delta = rect_pos - base;
+	vec2 a0 = vec2(delta.x - rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a1 = vec2(delta.x + rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a2 = vec2(delta.x + rect_size.x / 2, delta.y + rect_size.y / 2);
+	vec2 a3 = vec2(delta.x - rect_size.x / 2, delta.y + rect_size.y / 2);
+	
+	if(a1.x > 0 && a1.y > 0) return get_angle(vec2(0, 0), a1);
+	if(a2.x < 0 && a2.y > 0) return get_angle(vec2(0, 0), a2);
+	if(a3.x < 0 && a3.y < 0) return get_angle(vec2(0, 0), a3);
+	return get_angle(vec2(0, 0), a0);
+}
+
+float get_max_rect_angle(vec2 base, vec2 rect_pos, vec2 rect_size)
+{
+	vec2 delta = rect_pos - base;
+	vec2 a0 = vec2(delta.x - rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a1 = vec2(delta.x + rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a2 = vec2(delta.x + rect_size.x / 2, delta.y + rect_size.y / 2);
+	vec2 a3 = vec2(delta.x - rect_size.x / 2, delta.y + rect_size.y / 2);
+	
+	if(a3.x > 0 && a3.y > 0) return get_angle(vec2(0, 0), a3);
+	if(a0.x < 0 && a0.y > 0) return get_angle(vec2(0, 0), a0);
+	if(a1.x < 0 && a1.y < 0) return get_angle(vec2(0, 0), a1);
+	return get_angle(vec2(0, 0), a2);
+}
+
 float correctAngle(float angle)
 {
-	while (angle >= 2 * PI)
+	
+	if (angle > 2.0f * PI)
 	{
-		angle -= 2 * PI;
+		angle -= 2.0f * PI;
 	}
-	while (angle < 0)
+	if (angle < 0)
 	{
-		angle += 2 * PI;
+		angle += 2.0f * PI;
 	}
 	return angle;
+	
 }
 
 //copy-paste, because glsl doesnt allow recursion
@@ -143,7 +169,6 @@ float get_angular_intersection(float startAngleA, float endAngleA, float startAn
 
 float get_sphere_delta_angle(vec2 base, vec2 sphere, float radius)
 {	
-	if (length(base - sphere) < 0.0001) return 0;
 	float angleRadius = radius / length(base - sphere);
 	return asin(angleRadius);
 }
@@ -254,32 +279,21 @@ void main(void)
 			if (rect_segment_intersect(shadow_pos[j], shadow_size[j], pos_vec + offset, light_pos[i]) &&
 				!point_in_rectangle(shadow_pos[j], shadow_size[j], pos_vec + offset))
 			{
-				current_intensity = 0;
+				float min_ra = get_min_rect_angle(pos_vec + offset, shadow_pos[j], shadow_size[j]);
+				float max_ra = get_max_rect_angle(pos_vec + offset, shadow_pos[j], shadow_size[j]);
+				float dist = point_rect_distance(shadow_pos[j], shadow_size[j], light_pos[i]);
 				
-				
-				if (point_rect_distance(shadow_pos[j], shadow_size[j], light_pos[i]) < 10)
-				{
-					current_intensity = 0;
-					//continue;
-				}
-				else
-				{
-				
-					float light_angle = get_angle(pos_vec + offset, light_pos[i]);
-					float sphere_delta_angle = get_sphere_delta_angle(pos_vec + offset, light_pos[i], 10);
-					float angularIntersection = get_angular_intersection(
-								vec_min(get_rectangle_angles(pos_vec + offset, shadow_pos[j], shadow_size[j])),
-								vec_max(get_rectangle_angles(pos_vec + offset, shadow_pos[j], shadow_size[j])),
-								light_angle - sphere_delta_angle,
-								light_angle + sphere_delta_angle);
-					current_intensity = sphere_delta_angle * 2 - angularIntersection;
-					if(sphere_delta_angle > 0.001)
-					{
-						current_intensity /= sphere_delta_angle;
-					}
-				}
-				
+				float light_angle = get_angle(pos_vec + offset, light_pos[i]);
+				float sphere_delta_angle = get_sphere_delta_angle(pos_vec + offset, light_pos[i], min(dist - 0.0001, 10));
+				float angularIntersection = get_angular_intersection(
+							min_ra,
+							max_ra,
+							light_angle - sphere_delta_angle,
+							light_angle + sphere_delta_angle);
+				current_intensity = sphere_delta_angle * 2 - angularIntersection;
+				current_intensity /= sphere_delta_angle;
 			}
+			
 			shadow_intensity *= current_intensity;
 		}
 		shadow_intensity = min(shadow_intensity, 1.0);
