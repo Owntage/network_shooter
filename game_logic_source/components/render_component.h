@@ -12,12 +12,14 @@ struct RenderData
 	RenderData() :
 		spriteIsVisible(true),
 		lightIsVisible(false),
+		shouldDropShadow(false),
 		spriteScale(1.0f)
 	{}
 
 	RenderData(
 		bool spriteIsVisible,
 		bool lightIsVisible,
+		bool shouldDropShadow,
 		float lightR,
 		float lightG,
 		float lightB,
@@ -26,6 +28,7 @@ struct RenderData
 
 		spriteIsVisible(spriteIsVisible),
 		lightIsVisible(lightIsVisible),
+		shouldDropShadow(shouldDropShadow),
 		lightR(lightR),
 		lightG(lightG),
 		lightB(lightB),
@@ -36,6 +39,7 @@ struct RenderData
 	bool spriteIsVisible;
 	bool lightIsVisible;
 	bool renderLightOnTop;
+	bool shouldDropShadow;
 	float lightR;
 	float lightG;
 	float lightB;
@@ -45,16 +49,18 @@ struct RenderData
 	template<typename STREAM_T>
 	friend STREAM_T& operator<<(STREAM_T& s, RenderData& data)
 	{
-		s << (uint8_t) data.spriteIsVisible << (uint8_t) data.lightIsVisible << (uint8_t) data.renderLightOnTop
-			<< data.lightR << data.lightG << data.lightB << data.lightIntensity << data.spriteScale;
+		s << (uint8_t) data.spriteIsVisible << (uint8_t) data.lightIsVisible << (uint8_t) data.shouldDropShadow
+		  << (uint8_t) data.renderLightOnTop << data.lightR << data.lightG << data.lightB << data.lightIntensity
+		  << data.spriteScale;
 		return s;
 	}
 
 	template<typename STREAM_T>
 	friend STREAM_T& operator>>(STREAM_T& s, RenderData& data)
 	{
-		s >> (uint8_t&) data.spriteIsVisible >> (uint8_t&) data.lightIsVisible >> (uint8_t&) data.renderLightOnTop
-			>> data.lightR >> data.lightG >> data.lightB >> data.lightIntensity >> data.spriteScale;
+		s >> (uint8_t&) data.spriteIsVisible >> (uint8_t&) data.lightIsVisible >> (uint8_t&) data.shouldDropShadow
+		  >> (uint8_t&) data.renderLightOnTop >> data.lightR >> data.lightG >> data.lightB >> data.lightIntensity
+		  >> data.spriteScale;
 		return s;
 	}
 
