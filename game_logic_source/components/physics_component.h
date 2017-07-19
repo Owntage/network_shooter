@@ -49,6 +49,8 @@ private:
 
 	bool up, down, left, right;
 	float speed;
+	float width;
+	float height;
 	float density;
 	float friction;
 	float restitution;

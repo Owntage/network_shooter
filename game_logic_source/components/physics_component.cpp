@@ -175,6 +175,9 @@ void PhysicsComponent::onEvent(const Event& event)
 		b2Body* newBody;
 		if(body->GetType() != b2_dynamicBody)
 		{
+			currentDataNumber++;
+			width = coordEvent.x;
+			height = coordEvent.y;
 			newBody = World::getInstance()->createStaticBody(body->GetPosition().x, body->GetPosition().y, coordEvent.x, coordEvent.y);
 			World::getInstance()->destroyBody(body);
 			body = newBody;
@@ -207,6 +210,12 @@ std::string PhysicsComponent::getName()
 
 std::shared_ptr<ComponentUpdate> PhysicsComponent::getUpdate(int systemID)
 {
+	if (body->GetType() == b2_staticBody) {
+		std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
+																		  width, height);
+		result->number = currentDataNumber;
+		return result;
+	}
 	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
 		body->GetLinearVelocity().x, body->GetLinearVelocity().y, World::getInstance()->getTime());
 	result->number = currentDataNumber;
@@ -226,6 +235,8 @@ std::shared_ptr<IComponent> PhysicsComponent::loadFromXml(const boost::property_
 	{
 		double width = tree.get("width", 0.5);
 		double height = tree.get("height", 0.5);
+		result->width = width;
+		result->height = height;
 		result->body = World::getInstance()->createStaticBody(x, y, width, height);
 	}
 	if(type == "dynamic")
