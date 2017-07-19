@@ -25,12 +25,6 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
 	shape.setOrigin(screenWidth / tileWidth / 2, screenHeight / tileWidth / 2);
-
-	//shader.setUniform("shadows_size", 1);
-	//shader.setUniform("shadow_pos[0]", sf::Vector2f(1200, 400));
-	//shader.setUniform("shadow_size[0]", sf::Vector2f(32, 32));
-	addRectangleObstacle(sf::Vector2f(1200, 400), sf::Vector2f(64, 32));
-	addRectangleObstacle(sf::Vector2f(1200, 500), sf::Vector2f(64, 32));
 }
 
 int LightManager::addLightSource(sf::Vector2f pos, sf::Color color, float intensity)

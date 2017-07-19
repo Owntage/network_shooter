@@ -28,6 +28,8 @@ using namespace std;
 
 #define POINTS_COUNT 10
 
+typedef sf::Vector2f vec2;
+
 float dotProduct(const sf::Vector2f& a, const sf::Vector2f& b)
 {
 	return a.x * b.x + a.y * b.y;
@@ -146,7 +148,116 @@ float getAngularIntersection(float startAngleA, float endAngleA, float startAngl
 	return max(endAngle - startAngle, 0.0f);
 }
 
+bool point_in_rectangle(vec2 rect_pos, vec2 rect_size, vec2 point)
+{
+	return (point.x >= rect_pos.x - rect_size.x / 2 &&
+			point.x <= rect_pos.x + rect_size.x / 2 &&
+			point.y >= rect_pos.y - rect_size.y / 2 &&
+			point.y <= rect_pos.y + rect_size.y / 2);
 
+}
+
+bool left_turn(vec2 a, vec2 b, vec2 c)
+{
+	return ((c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x)) > 0;
+}
+
+bool segment_intersect(vec2 a0, vec2 a1, vec2 b0, vec2 b1)
+{
+	return left_turn(a0, a1, b0) != left_turn(a0, a1, b1) &&
+		   left_turn(b0, b1, a0) != left_turn(b0, b1, a1);
+}
+
+bool rect_segment_intersect(vec2 rect_center, vec2 rect_size, vec2 a0, vec2 a1)
+{
+	vec2 rect_p0 = vec2(rect_center.x - rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p1 = vec2(rect_center.x + rect_size.x / 2, rect_center.y - rect_size.y / 2);
+	vec2 rect_p2 = vec2(rect_center.x + rect_size.x / 2, rect_center.y + rect_size.y / 2);
+	vec2 rect_p3 = vec2(rect_center.x - rect_size.x / 2, rect_center.y + rect_size.y / 2);
+
+	return segment_intersect(rect_p0, rect_p1, a0, a1) ||
+		   segment_intersect(rect_p1, rect_p2, a0, a1) ||
+		   segment_intersect(rect_p2, rect_p3, a0, a1) ||
+		   segment_intersect(rect_p3, rect_p0, a0, a1);
+}
+
+float get_min_rect_angle(vec2 base, vec2 rect_pos, vec2 rect_size)
+{
+	vec2 delta = rect_pos - base;
+	vec2 a0 = vec2(delta.x - rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a1 = vec2(delta.x + rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a2 = vec2(delta.x + rect_size.x / 2, delta.y + rect_size.y / 2);
+	vec2 a3 = vec2(delta.x - rect_size.x / 2, delta.y + rect_size.y / 2);
+
+	if(a1.x > 0 && a1.y > 0) return getAngle(vec2(0, 0), a1);
+	if(a2.x < 0 && a2.y > 0) return getAngle(vec2(0, 0), a2);
+	if(a3.x < 0 && a3.y < 0) return getAngle(vec2(0, 0), a3);
+	return getAngle(vec2(0, 0), a0);
+}
+
+float get_max_rect_angle(vec2 base, vec2 rect_pos, vec2 rect_size)
+{
+	vec2 delta = rect_pos - base;
+	vec2 a0 = vec2(delta.x - rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a1 = vec2(delta.x + rect_size.x / 2, delta.y - rect_size.y / 2);
+	vec2 a2 = vec2(delta.x + rect_size.x / 2, delta.y + rect_size.y / 2);
+	vec2 a3 = vec2(delta.x - rect_size.x / 2, delta.y + rect_size.y / 2);
+
+	if(a3.x > 0 && a3.y > 0) return getAngle(vec2(0, 0), a3);
+	if(a0.x < 0 && a0.y > 0) return getAngle(vec2(0, 0), a0);
+	if(a1.x < 0 && a1.y < 0) return getAngle(vec2(0, 0), a1);
+	return getAngle(vec2(0, 0), a2);
+}
+
+float getAngularIntersection1(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
+
+
+float getAngularIntersection0(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+	if (startAngleB > endAngleB)
+	{
+		return getAngularIntersection1(startAngleA, endAngleA, startAngleB, 2 * PI) +
+			   getAngularIntersection1(startAngleA, endAngleA, 0, endAngleB);
+	}
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
+
+float get_angular_intersection(float startAngleA, float endAngleA, float startAngleB, float endAngleB)
+{
+	startAngleA = correctAngle(startAngleA);
+	endAngleA = correctAngle(endAngleA);
+	startAngleB = correctAngle(startAngleB);
+	endAngleB = correctAngle(endAngleB);
+	if (startAngleA > endAngleA)
+	{
+		return getAngularIntersection0(startAngleA, 2 * PI, startAngleB, endAngleB) +
+			   getAngularIntersection0(0, endAngleA, startAngleB, endAngleB);
+	}
+	if (startAngleB > endAngleB)
+	{
+		return getAngularIntersection1(startAngleA, endAngleA, startAngleB, 2 * PI) +
+			   getAngularIntersection1(startAngleA, endAngleA, 0, endAngleB);
+	}
+	float startAngle = max(startAngleA, startAngleB);
+	float endAngle = min(endAngleA, endAngleB);
+	return max(endAngle - startAngle, 0.0f);
+}
 
 
 int main()
@@ -158,8 +269,8 @@ int main()
 	verticle.position = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
 	sf::Vector2f lightSource(0, 100);
-	sf::Vector2f sphere(WINDOW_WIDTH / 2, WINDOW_HEIGHT  /2);
-	float sphereRadius = 20;
+	sf::Vector2f square(WINDOW_WIDTH / 2, WINDOW_HEIGHT  /2);
+	vec2 square_size(64, 64);
 	float lightRadius = 40;
 	float lightSourceAngle = 0;
 	float lightSourceRadius = 100;
@@ -169,7 +280,7 @@ int main()
 		lightSourceAngle += 2.0 / 60.0;
 		lightSource.x = cos(lightSourceAngle) * lightSourceRadius + WINDOW_WIDTH / 2;
 		lightSource.y = sin(lightSourceAngle) * lightSourceRadius + WINDOW_HEIGHT / 2;
-		lightSourceRadius = sin(lightSourceAngle * PI) * 200;
+		lightSourceRadius = sin(lightSourceAngle * PI) * 66 + 200;
 		RenderWindow::getInstance()->window.clear();
 
 			for(int i = 0; i < WINDOW_WIDTH; i++)
@@ -190,21 +301,19 @@ int main()
 				}
 				
 				bool inside = false;
-				if(vectorDistance(sphere, verticle.position) < sphereRadius)
+				if(point_in_rectangle(square, square_size, verticle.position))
 				{
 					inside = true;
 					intensity = 1;
 				}
 
-				if(sphereSegmentIntersection(verticle.position, lightSource, sphere, sphereRadius) && !inside) {
+				if(rect_segment_intersect(square, square_size, verticle.position, lightSource) && !inside) {
 					intensity = 1;
-					float sphereDeltaAngle = getSphereDeltaAngle(verticle.position, sphere, sphereRadius);
 					float lightDeltaAngle = getSphereDeltaAngle(verticle.position, lightSource, lightRadius);
-					float sphereAngle = getAngle(verticle.position, sphere);
 					float lightAngle = getAngle(verticle.position, lightSource);
-					float angularIntersection = getAngularIntersection(
-						sphereAngle - sphereDeltaAngle, 
-						sphereAngle + sphereDeltaAngle,
+					float angularIntersection = get_angular_intersection(
+						get_min_rect_angle(verticle.position, square, square_size),
+						get_max_rect_angle(verticle.position, square, square_size),
 						lightAngle - lightDeltaAngle,
 						lightAngle + lightDeltaAngle);
 					intensity = lightDeltaAngle * 2 - angularIntersection;
