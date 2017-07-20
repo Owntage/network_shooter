@@ -118,6 +118,8 @@ private:
 	float positionY;
 	float speedX;
 	float speedY;
+	float sizeX;
+	float sizeY;
 
 	std::vector<LayerState> animationLayerStates;
 	std::vector<float> layerTime;
@@ -133,6 +135,7 @@ private:
 
 	std::shared_ptr<LightManager> lightManager;
 	bool hasLightSource;
+	bool hasShadow;
 	int lightSourceID;
 
 	RenderData renderData;

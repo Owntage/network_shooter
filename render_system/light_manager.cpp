@@ -20,7 +20,7 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
 	multiplyShader.loadFromStream(multiplyFragmentStream, sf::Shader::Fragment);
 	//vertices.setPrimitiveType(sf::Quads);
-	renderTexture.create(screenWidth, screenHeight);
+	renderTexture.create(screenWidth / 4, screenHeight / 4);
 	renderTexture.setSmooth(true);
 
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));

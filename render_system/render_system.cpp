@@ -32,8 +32,11 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, std::
 	positionY(0.0f),
 	speedX(0.0f),
 	speedY(0.0f),
+	sizeX(0.0f),
+	sizeY(0.0f),
 	lightManager(lightManager),
-	hasLightSource(false)
+	hasLightSource(false),
+	hasShadow(false)
 {
 	rect.setOrigin(0.5f, 0.5f);
 	isDrawing = false;
@@ -67,6 +70,8 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			positionY = moveUpdate.y;
 			speedX = moveUpdate.speedX;
 			speedY = moveUpdate.speedY;
+			sizeX = moveUpdate.sizeX;
+			sizeY = moveUpdate.sizeY;
 			serverTime = moveUpdate.time;
 			deltaTime = 0;
 		}
@@ -263,10 +268,7 @@ void DrawableActor::draw()
 			rect.setTexture(&renderSystem.textures[nextImage]);
 			rect.setRotation(animationLayerStates[i].angle);
 
-			float windowSizeX = (float) RenderWindow::getInstance()->window.getSize().x / TILE_SIZE;
-			float windowSizeY = (float) RenderWindow::getInstance()->window.getSize().y / TILE_SIZE;
 
-			renderSystem.gameView.setSize(windowSizeX, windowSizeY);
 
 			if(isMain)
 			{
@@ -301,6 +303,13 @@ void DrawableActor::draw()
 			hasLightSource = true;
 		}
 		lightManager->setPosition(lightSourceID, sf::Vector2f((positionX + speedX * deltaTime) * TILE_SIZE, (positionY + speedY * deltaTime) * TILE_SIZE));
+	}
+
+	if (renderData.shouldDropShadow && ! hasShadow && sizeX > 0.0f && sizeY > 0.0f)
+	{
+		lightManager->addRectangleObstacle(sf::Vector2f(positionX * TILE_SIZE, positionY * TILE_SIZE),
+										   sf::Vector2f(sizeX * TILE_SIZE, sizeY * TILE_SIZE));
+		hasShadow = true;
 	}
 	
 }
@@ -379,7 +388,10 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 
 void RenderSystem::draw()
 {
-	
+	float windowSizeX = (float) RenderWindow::getInstance()->window.getSize().x / TILE_SIZE;
+	float windowSizeY = (float) RenderWindow::getInstance()->window.getSize().y / TILE_SIZE;
+
+	gameView.setSize(windowSizeX, windowSizeY);
 
 	RenderWindow::getInstance()->window.setView(gameView);
 
