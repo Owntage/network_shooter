@@ -279,12 +279,13 @@ void main(void)
 			if (rect_segment_intersect(shadow_pos[j], shadow_size[j], pos_vec + offset, light_pos[i]) &&
 				!point_in_rectangle(shadow_pos[j], shadow_size[j], pos_vec + offset))
 			{
+				
 				float min_ra = get_min_rect_angle(pos_vec + offset, shadow_pos[j], shadow_size[j]);
 				float max_ra = get_max_rect_angle(pos_vec + offset, shadow_pos[j], shadow_size[j]);
 				float dist = point_rect_distance(shadow_pos[j], shadow_size[j], light_pos[i]);
 				
 				float light_angle = get_angle(pos_vec + offset, light_pos[i]);
-				float sphere_delta_angle = get_sphere_delta_angle(pos_vec + offset, light_pos[i], min(dist - 0.0001, 10));
+				float sphere_delta_angle = get_sphere_delta_angle(pos_vec + offset, light_pos[i], min(dist - 0.0001, 32));
 				float angularIntersection = get_angular_intersection(
 							min_ra,
 							max_ra,
@@ -292,6 +293,12 @@ void main(void)
 							light_angle + sphere_delta_angle);
 				current_intensity = sphere_delta_angle * 2 - angularIntersection;
 				current_intensity /= sphere_delta_angle;
+				
+				if(current_intensity < 0.01)
+				{
+					shadow_intensity = 0;
+					break;
+				}
 			}
 			
 			shadow_intensity *= current_intensity;
