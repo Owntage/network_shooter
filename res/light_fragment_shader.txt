@@ -272,6 +272,11 @@ void main(void)
 			multiplier = 0.15 / pow(len / light_intensity[i], len_power);
 		}
 		
+		if(multiplier <= 0.001)
+		{
+			continue;
+		}
+		
 		float shadow_intensity = 1;
 		for (int j = 0; j < shadows_size; j++)
 		{
