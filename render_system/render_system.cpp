@@ -274,7 +274,8 @@ void DrawableActor::draw()
 			{
 				float view_x = renderSystem.gameView.getCenter().x;
 				float view_y = renderSystem.gameView.getCenter().y;
-				renderSystem.gameView.setCenter(rect.getPosition().x * 0.05 + view_x * 0.95, rect.getPosition().y * 0.05 + view_y * 0.95);
+				renderSystem.newGameViewPos = sf::Vector2f(rect.getPosition().x * 0.05 + view_x * 0.95,
+														   rect.getPosition().y * 0.05 + view_y * 0.95);
 				renderSystem.cameraX = renderSystem.gameView.getCenter().x;
 				renderSystem.cameraY = renderSystem.gameView.getCenter().y;
 				renderSystem.playerX = rect.getPosition().x;
@@ -402,7 +403,9 @@ void RenderSystem::draw()
 	{
 		it->second->draw();
 	}
+
 	lightManager->draw(RenderWindow::getInstance()->window);
+	gameView.setCenter(newGameViewPos);
 
 	gameGuiManager.onTimer();
 	gameGuiManager.draw(RenderWindow::getInstance()->window);

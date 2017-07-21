@@ -173,6 +173,7 @@ private:
 	float playerY;
 	float cameraX;
 	float cameraY;
+	sf::Vector2f newGameViewPos;
 	sf::View gameView;
 	sf::VertexArray tileVertices;
 	sf::Texture tileset;
