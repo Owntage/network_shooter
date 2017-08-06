@@ -1,7 +1,7 @@
 #include "physics_component.h"
 #include "move_event.h"
-#include "move_update.h"
 #include "coord_event.h"
+#include "variant_update.h"
 #include <math.h>
 
 
@@ -210,14 +210,14 @@ std::string PhysicsComponent::getName()
 
 std::shared_ptr<ComponentUpdate> PhysicsComponent::getUpdate(int systemID)
 {
-	if (body->GetType() == b2_staticBody) {
-		std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
-																		  width, height);
-		result->number = currentDataNumber;
-		return result;
-	}
-	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(body->GetPosition().x, body->GetPosition().y,
-		body->GetLinearVelocity().x, body->GetLinearVelocity().y, World::getInstance()->getTime());
+	auto result = std::make_shared<VariantUpdate>("move");
+	result->set("x", body->GetPosition().x);
+	result->set("y", body->GetPosition().y);
+	result->set("sizeX", width);
+	result->set("sizeY", height);
+	result->set("time", World::getInstance()->getTime());
+	result->set("speedX", body->GetLinearVelocity().x);
+	result->set("speedY", body->GetLinearVelocity().y);
 	result->number = currentDataNumber;
 	return result;
 }

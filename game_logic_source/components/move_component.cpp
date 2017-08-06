@@ -2,6 +2,7 @@
 #include "move_event.h"
 #include "world.h"
 #include "coord_event.h"
+#include "variant_update.h"
 #include <iostream>
 
 void MoveComponent::onRequest(const Request& request)
@@ -57,7 +58,14 @@ bool MoveComponent::hasUpdate(int systemID)
 
 std::shared_ptr<ComponentUpdate> MoveComponent::getUpdate(int systemID)
 {
-	std::shared_ptr<MoveUpdate> result = std::make_shared<MoveUpdate>(x, y, 0, 0, World::getInstance()->getTime());
+	auto result = std::make_shared<VariantUpdate>("move");
+	result->set("x", x);
+	result->set("y", y);
+	result->set("sizeX", 0);
+	result->set("sizeY", 0);
+	result->set("time", World::getInstance()->getTime());
+	result->set("speedX", 0);
+	result->set("speedY", 0);
 	result->number = currentDataNumber;
 	return result;
 }

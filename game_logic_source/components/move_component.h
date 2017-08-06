@@ -2,7 +2,6 @@
 #define MOVE_COMPONENT_H
 
 #include "icomponent.h"
-#include "move_update.h"
 #include <map>
 
 struct MoveComponent : IComponent

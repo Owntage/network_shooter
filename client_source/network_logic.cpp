@@ -1,16 +1,9 @@
 #include "network_logic.h"
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <components/move_update.h>
 #include <components/chat_component.h>
 #include <components/animation_update.h>
 #include <components/tile_update.h>
-#include <components/render_component.h>
-#include <components/weapon_component.h>
-#include <components/hp_component.h>
-#include <components/deathmatch_component.h>
 #include <delete_update.h>
+#include <components/variant_update.h>
 #include "game_scenes.h"
 
 
@@ -210,9 +203,9 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
 					bool shouldBeWritten = true;
-
-					if(componentUpdate.name == "move")
-						addUpdate<MoveUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					
+					if(componentUpdate.name == "variant")
+						addUpdate<VariantUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "chat")
 						addUpdate<ChatUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "delete")

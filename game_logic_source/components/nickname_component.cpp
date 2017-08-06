@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <boost/foreach.hpp>
 
-
+#include "variant_update.h"
 
 void NicknameComponent::onRequest(const Request& request)
 {
@@ -34,9 +34,12 @@ std::string NicknameComponent::getName()
 	return "nickname";
 }
 
-std::shared_ptr<ComponentUpdate> NicknameComponent::getUpdate(int syatemID)
+std::shared_ptr<ComponentUpdate> NicknameComponent::getUpdate(int systemID)
 {
-	return std::make_shared<NicknameUpdate>(nickname);
+	lastSystemApproved[systemID] = 1;
+	auto result = std::make_shared<VariantUpdate>("nickname");
+	result->set("nickname", nickname);
+	return result;
 }
 
 std::shared_ptr<IComponent> NicknameComponent::loadFromXml(const boost::property_tree::ptree& tree)

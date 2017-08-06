@@ -1,6 +1,5 @@
 #include "render_system.h"
 #include <render_window.h>
-#include <components/move_update.h>
 #include <components/chat_update.h>
 #include <components/animation_update.h>
 #include <components/deathmatch_component.h>
@@ -10,9 +9,7 @@
 #include <delete_update.h>
 #include <math.h>
 #include <vector>
-
-
-
+#include <components/variant_update.h>
 
 
 bool isFileExists(std::string filename)
@@ -63,18 +60,6 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 	//std::cout << "onUpdate started" << std::endl;
 	for(auto it = update.updates.begin(); it != update.updates.end(); it++)
 	{
-		if((*it)->name == "move")
-		{
-			MoveUpdate& moveUpdate = static_cast<MoveUpdate&> (*(*it));
-			positionX = moveUpdate.x;
-			positionY = moveUpdate.y;
-			speedX = moveUpdate.speedX;
-			speedY = moveUpdate.speedY;
-			sizeX = moveUpdate.sizeX;
-			sizeY = moveUpdate.sizeY;
-			serverTime = moveUpdate.time;
-			deltaTime = 0;
-		}
 		if((*it)->name == "render")
 		{
 			RenderUpdate& renderUpdate = static_cast<RenderUpdate&> (*(*it));
@@ -104,6 +89,30 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				renderSystem.gameGuiManager.setHpUpdate(hpUpdate);
 			}
 		}
+
+		if((*it)->name == "variant")
+		{
+			VariantUpdate &variantUpdate = static_cast<VariantUpdate &> (*(*it));
+			std::string name = variantUpdate.get<std::string>("name");
+			if (name == "nickname")
+			{
+				std::cout << "variant update received: " << std::endl;
+				std::cout << "name: " << variantUpdate.get<std::string>("name") << std::endl;
+				std::cout << "nickname: " << variantUpdate.get<std::string>("nickname") << std::endl;
+			}
+			if (name == "move")
+			{
+				positionX = variantUpdate.get<float>("x");
+				positionY = variantUpdate.get<float>("y");
+				speedX = variantUpdate.get<float>("speedX");
+				speedY = variantUpdate.get<float>("speedY");
+				sizeX = variantUpdate.get<float>("sizeX");
+				sizeY = variantUpdate.get<float>("sizeY");
+				serverTime = variantUpdate.get<float>("time");
+				deltaTime = 0;
+			}
+		}
+
 		if((*it)->name == "chat" && isMain)
 		{
 			//std::cout << "received chat message." << std::endl;

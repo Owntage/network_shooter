@@ -8,6 +8,7 @@
 #include <components/tile_update.h>
 #include <components/coord_event.h>
 #include <components/string_event.h>
+#include <components/variant_update.h>
 #include <components/render_component.h>
 #include <components/weapon_component.h>
 #include <components/hp_component.h>
@@ -246,7 +247,7 @@ void GameServer::sendUpdates()
 
 				packet << *(*component_it);
 
-				if((*component_it)->name == "move") packet << (MoveUpdate&) *(*component_it);
+				if((*component_it)->name == "variant") packet << (VariantUpdate&) *(*component_it);
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
@@ -376,16 +377,19 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 		for(auto component_it = (*it)->updates.begin(); component_it != (*it)->updates.end(); component_it++)
 		{
 			gameLogic.approve((*component_it)->actorID, (*component_it)->name, systemID, (*component_it)->number);	
-			if((*component_it)->name == "move")
+			if((*component_it)->name == "variant")
 			{
-				MoveUpdate& moveUpdate = (MoveUpdate&) *(*component_it);
-				actors[(*it)->actorID]->hasCoords = true;
-				actors[(*it)->actorID]->x = moveUpdate.x;
-				actors[(*it)->actorID]->y = moveUpdate.y;
-				(*it)->actor->x = moveUpdate.x;
-				(*it)->actor->y = moveUpdate.y;
-				(*it)->actor->hasCoords = true;
-				
+				VariantUpdate& variantUpdate = (VariantUpdate&) *(*component_it);
+				std::string name = variantUpdate.get<std::string>("name");
+				if(name == "move")
+				{
+					actors[(*it)->actorID]->hasCoords = true;
+					actors[(*it)->actorID]->x = variantUpdate.get<float>("x");
+					actors[(*it)->actorID]->y = variantUpdate.get<float>("y");
+					(*it)->actor->x = variantUpdate.get<float>("x");
+					(*it)->actor->y = variantUpdate.get<float>("y");
+					(*it)->actor->hasCoords = true;
+				}
 			}
 			if((*component_it)->name == "tile")
 			{

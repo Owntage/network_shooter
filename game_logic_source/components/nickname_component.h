@@ -7,35 +7,8 @@
 #include <set>
 #include <utility>
 
-struct NicknameUpdate : ComponentUpdate
-{
-	NicknameUpdate(std::string nickname) :
-		ComponentUpdate("nickname"),
-		nickname(nickname)
-	{}
-	NicknameUpdate() {}
-	std::string nickname;
-
-	template<typename STREAM_T>
-	friend STREAM_T& operator<<(STREAM_T& s, NicknameUpdate& u)
-	{
-		s << u.nickname;
-		return s;
-	}
-
-	template<typename STREAM_T>
-	friend STREAM_T& operator>>(STREAM_T& s, NicknameUpdate& u)
-	{
-		s >> u.nickname;
-		return s;
-	}
-};
-
-
-
 struct NicknameComponent : IComponent
 {
-	
 	void onRequest(const Request& request);
 	void onEvent(const Event& event);
 	bool hasUpdate(int systemID);
