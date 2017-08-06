@@ -44,7 +44,6 @@ struct GameGuiManager
 	void onKey(int key, bool isReleased);
 
 private:
-
 	float screenWidth;
 	float screenHeight;
 	float shootBlink;
@@ -86,6 +85,7 @@ private:
 	int shaderArraySize;
 	int shadowsArraySize;
 	int counter;
+	int textureDivider;
 	sf::Shader shader;
 	sf::Shader multiplyShader;
 	sf::RectangleShape shape;

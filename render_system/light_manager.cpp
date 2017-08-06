@@ -7,7 +7,8 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	tileWidth(tileWidth),
 	counter(0),
 	shaderArraySize(0),
-	shadowsArraySize(0)
+	shadowsArraySize(0),
+	textureDivider(8)
 {
 
 	sf::FileInputStream vertexStream;
@@ -20,7 +21,7 @@ LightManager::LightManager(float screenWidth, float screenHeight, float tileWidt
 	multiplyFragmentStream.open(MULTIPLY_FRAGMENT_SHADER);
 	multiplyShader.loadFromStream(multiplyFragmentStream, sf::Shader::Fragment);
 	//vertices.setPrimitiveType(sf::Quads);
-	renderTexture.create(screenWidth / 4, screenHeight / 4);
+	renderTexture.create(screenWidth / textureDivider, screenHeight / textureDivider);
 	renderTexture.setSmooth(true);
 
 	shape.setSize(sf::Vector2f(screenWidth / tileWidth, screenHeight / tileWidth));
@@ -66,8 +67,24 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderStates.shader = &shader;
 	renderStates.blendMode = sf::BlendAdd;
 	sf::Vector2f center = renderTarget.getView().getCenter();
+
+
+	double multiplier = tileWidth / textureDivider;
+	double offsetX = center.x * multiplier;
+	double offsetY = center.y * multiplier;
+	offsetX = offsetX - floor(offsetX);
+	offsetY = offsetY - floor(offsetY);
+	offsetX /= multiplier;
+	offsetY /= multiplier;
+
+	center.x -= offsetX;
+	center.y -= offsetY;
+
+	sf::Vector2f centerInBlocks = center;
+
 	center.x *= tileWidth;
 	center.y *= tileWidth;
+
 	shader.setUniform("offset", center);
 
 	std::vector<sf::Vertex> vertices;
@@ -84,14 +101,14 @@ void LightManager::draw(sf::RenderTarget& renderTarget)
 	renderTexture.draw(&vertices[0], vertices.size(), sf::Quads, renderStates);
 	renderTexture.display();
 	shape.setTexture(&renderTexture.getTexture());
-	shape.setPosition(renderTarget.getView().getCenter());
+	shape.setPosition(centerInBlocks);
 
 	sf::RenderStates multiplyRenderStates;
 
-	multiplyRenderStates.blendMode = sf::BlendAdd;
-	multiplyShader.setUniform("multiplier", 1.0f);
-	multiplyRenderStates.shader = &multiplyShader;
-	renderTarget.draw(shape, multiplyRenderStates);
+	//multiplyRenderStates.blendMode = sf::BlendAdd;
+	//multiplyShader.setUniform("multiplier", 1.0f);
+	//multiplyRenderStates.shader = &multiplyShader;
+	//renderTarget.draw(shape, multiplyRenderStates);
 
 	multiplyRenderStates.blendMode = sf::BlendMultiply;
 	multiplyShader.setUniform("multiplier", 3.0f);
