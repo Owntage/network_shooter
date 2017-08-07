@@ -2,6 +2,7 @@
 #include "coord_event.h"
 #include "string_event.h"
 #include "tile_update.h"
+#include "variant_update.h"
 
 void TileComponent::onEvent(const Event& event)
 {
@@ -30,7 +31,11 @@ std::string TileComponent::getName()
 
 std::shared_ptr<ComponentUpdate> TileComponent::getUpdate(int syatemID)
 {
-	auto result = std::make_shared<TileUpdate>(image, x, y);
+	//auto result = std::make_shared<TileUpdate>(image, x, y);
+	auto result = std::make_shared<VariantUpdate>("tile");
+	result->set("image", image);
+	result->set("x", x);
+	result->set("y", y);
 	result->number = 1;
 	return result;
 }

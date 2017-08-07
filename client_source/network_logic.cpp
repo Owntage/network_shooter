@@ -212,8 +212,6 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<DeleteUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "animation")
 						addUpdate<AnimationUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
-					if(componentUpdate.name == "tile")
-						addUpdate<TileUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "render")
 						addUpdate<RenderUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "weapon")

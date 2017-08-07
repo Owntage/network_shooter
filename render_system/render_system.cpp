@@ -55,6 +55,8 @@ void DrawableActor::setMain(bool isMain)
 	this->isMain = isMain;
 }
 
+int counter = 0;
+
 void DrawableActor::onUpdate(ActorUpdate& update)
 {
 	//std::cout << "onUpdate started" << std::endl;
@@ -111,6 +113,61 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				serverTime = variantUpdate.get<float>("time");
 				deltaTime = 0;
 			}
+			if (name == "tile")
+			{
+				counter++;
+				std::cout << "received tile update " << counter << std::endl;
+				std::string imageName = variantUpdate.get<std::string>("image");
+				if(renderSystem.imagesInTileset.find(imageName) == renderSystem.imagesInTileset.end())
+				{
+					sf::Image image;
+					if(!isFileExists(imageName))
+					{
+						//std::cout << "loading image in tile update" << std::endl;
+						image.loadFromFile(DEFAULT_TEXTURE);
+						if(renderSystem.imageLoadRequests.find(imageName) == renderSystem.imageLoadRequests.end())
+						{
+							renderSystem.imageLoadRequests.insert(imageName);
+							renderSystem.imagesToLoad.push_back(imageName);
+						}
+					}
+					else
+					{
+						//std::cout << "loading default image in tile update" << std::endl;
+						image.loadFromFile(imageName);
+					}
+
+					int pos = renderSystem.imagesInTileset.size();
+					renderSystem.imagesInTileset[imageName] = pos;
+					int tileset_x = pos % TILESET_WIDTH;
+					int tileset_y = pos / TILESET_WIDTH;
+					renderSystem.tileset.update(image, tileset_x * TILE_SIZE, tileset_y * TILE_SIZE);
+				}
+
+				float tileset_x = renderSystem.imagesInTileset[imageName] % TILESET_WIDTH;
+				float tileset_y = renderSystem.imagesInTileset[imageName] / TILESET_WIDTH;
+
+				tileset_x *= TILE_SIZE;
+				tileset_y *= TILE_SIZE;
+
+				float x = variantUpdate.get<float>("x");
+				float y = variantUpdate.get<float>("y");
+
+				vertices[0].position = sf::Vector2f(x - 0.5f, y - 0.5f);
+				vertices[1].position = sf::Vector2f(x + 0.5f, y - 0.5f);
+				vertices[2].position = sf::Vector2f(x + 0.5f, y + 0.5f);
+				vertices[3].position = sf::Vector2f(x - 0.5f, y + 0.5f);
+
+				vertices[0].texCoords = sf::Vector2f(tileset_x, tileset_y);
+				vertices[1].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y);
+				vertices[2].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y + TILE_SIZE);
+				vertices[3].texCoords = sf::Vector2f(tileset_x, tileset_y + TILE_SIZE);
+
+				for(int i = 0; i < 4; i++)
+				{
+					renderSystem.tileVertices.append(vertices[i]);
+				}
+			}
 		}
 
 		if((*it)->name == "chat" && isMain)
@@ -161,59 +218,6 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			layerTime.resize(animationLayerStates.size(), 99999.0f);
 			layerImageIndex.resize(animationLayerStates.size(), 0);
 			isDrawing = true;
-		}
-		if((*it)->name == "tile")
-		{
-			TileUpdate& tileUpdate = static_cast<TileUpdate&>(*(*it));
-			if(renderSystem.imagesInTileset.find(tileUpdate.image) == renderSystem.imagesInTileset.end())
-			{
-				sf::Image image;
-				if(!isFileExists(tileUpdate.image))
-				{
-					//std::cout << "loading image in tile update" << std::endl;
-					image.loadFromFile(DEFAULT_TEXTURE);
-					if(renderSystem.imageLoadRequests.find(tileUpdate.image) == renderSystem.imageLoadRequests.end())
-					{
-						renderSystem.imageLoadRequests.insert(tileUpdate.image);
-						renderSystem.imagesToLoad.push_back(tileUpdate.image);
-					}
-				}
-				else
-				{
-					//std::cout << "loading default image in tile update" << std::endl;
-					image.loadFromFile(tileUpdate.image);
-				}
-				
-				int pos = renderSystem.imagesInTileset.size();
-				renderSystem.imagesInTileset[tileUpdate.image] = pos;
-				int tileset_x = pos % TILESET_WIDTH;
-				int tileset_y = pos / TILESET_WIDTH;
-				renderSystem.tileset.update(image, tileset_x * TILE_SIZE, tileset_y * TILE_SIZE);
-			}
-			
-			float tileset_x = renderSystem.imagesInTileset[tileUpdate.image] % TILESET_WIDTH;
-			float tileset_y = renderSystem.imagesInTileset[tileUpdate.image] / TILESET_WIDTH;
-
-			tileset_x *= TILE_SIZE;
-			tileset_y *= TILE_SIZE;
-
-			//float f_width = TILESET_WIDTH;
-			//float f_height = TILESET_HEIGHT;
-
-			vertices[0].position = sf::Vector2f(tileUpdate.x - 0.5f, tileUpdate.y - 0.5f);
-			vertices[1].position = sf::Vector2f(tileUpdate.x + 0.5f, tileUpdate.y - 0.5f);
-			vertices[2].position = sf::Vector2f(tileUpdate.x + 0.5f, tileUpdate.y + 0.5f);
-			vertices[3].position = sf::Vector2f(tileUpdate.x - 0.5f, tileUpdate.y + 0.5f);
-
-			vertices[0].texCoords = sf::Vector2f(tileset_x, tileset_y);
-			vertices[1].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y);
-			vertices[2].texCoords = sf::Vector2f(tileset_x + TILE_SIZE, tileset_y + TILE_SIZE);
-			vertices[3].texCoords = sf::Vector2f(tileset_x, tileset_y + TILE_SIZE);
-
-			for(int i = 0; i < 4; i++)
-			{
-				renderSystem.tileVertices.append(vertices[i]);
-			}
 		}
 	}
 	//std::cout << "onUpdate finished" << std::endl;

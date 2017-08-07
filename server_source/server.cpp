@@ -251,7 +251,6 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
-				if((*component_it)->name == "tile") packet << (TileUpdate&) *(*component_it);
 				if((*component_it)->name == "render") packet << (RenderUpdate&) *(*component_it);
 				if((*component_it)->name == "weapon") packet << (WeaponUpdate&) *(*component_it);
 				if((*component_it)->name == "hp") packet << (HpUpdate&) *(*component_it);
@@ -268,13 +267,13 @@ void GameServer::sendUpdates()
 
 		//if there are not enough updates in this range, update radius is increased
 		//if there is too much updates to put in one packet, radius is dropped back to default
-		if(!packed)
-		{
-			if(client_it->second.radiusMultiplier < 100)
-			{
-				client_it->second.radiusMultiplier += 1.0f;
-			}
-		}
+		//if(!packed)
+		//{
+		//	if(client_it->second.radiusMultiplier < 100)
+		//	{
+		//		client_it->second.radiusMultiplier += 1.0f;
+		//	}
+		//}
 		
 		
 		socket.send(client_it->second.address, packet);
@@ -381,7 +380,7 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 			{
 				VariantUpdate& variantUpdate = (VariantUpdate&) *(*component_it);
 				std::string name = variantUpdate.get<std::string>("name");
-				if(name == "move")
+				if(name == "move" || name == "tile")
 				{
 					actors[(*it)->actorID]->hasCoords = true;
 					actors[(*it)->actorID]->x = variantUpdate.get<float>("x");
@@ -390,16 +389,6 @@ void GameServer::ServerView::onUpdate(std::vector<std::shared_ptr<ActorUpdate> >
 					(*it)->actor->y = variantUpdate.get<float>("y");
 					(*it)->actor->hasCoords = true;
 				}
-			}
-			if((*component_it)->name == "tile")
-			{
-				TileUpdate& tileUpdate = (TileUpdate&) *(*component_it);
-				actors[(*it)->actorID]->hasCoords = true;
-				actors[(*it)->actorID]->x = tileUpdate.x;
-				actors[(*it)->actorID]->y = tileUpdate.y;
-				(*it)->actor->x = tileUpdate.x;
-				(*it)->actor->y = tileUpdate.y;
-				(*it)->actor->hasCoords = true;
 			}
 		}
 	}
