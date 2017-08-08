@@ -261,13 +261,13 @@ void GameServer::sendUpdates()
 
 		//if there are not enough updates in this range, update radius is increased
 		//if there is too much updates to put in one packet, radius is dropped back to default
-		//if(!packed)
-		//{
-		//	if(client_it->second.radiusMultiplier < 100)
-		//	{
-		//		client_it->second.radiusMultiplier += 1.0f;
-		//	}
-		//}
+		if(!packed)
+		{
+			if(client_it->second.radiusMultiplier < 100)
+			{
+				client_it->second.radiusMultiplier += 1.0f;
+			}
+		}
 		
 		
 		socket.send(client_it->second.address, packet);
