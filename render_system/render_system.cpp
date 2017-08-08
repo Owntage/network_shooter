@@ -2,15 +2,8 @@
 #include <render_window.h>
 #include <components/chat_update.h>
 #include <components/animation_update.h>
-#include <components/deathmatch_component.h>
-#include <components/tile_update.h>
-#include <iostream>
-#include <fstream>
 #include <delete_update.h>
-#include <math.h>
-#include <vector>
 #include <components/variant_update.h>
-
 
 bool isFileExists(std::string filename)
 {

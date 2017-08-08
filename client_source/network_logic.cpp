@@ -1,7 +1,6 @@
 #include "network_logic.h"
 #include <components/chat_component.h>
 #include <components/animation_update.h>
-#include <components/tile_update.h>
 #include <delete_update.h>
 #include <components/variant_update.h>
 #include "game_scenes.h"

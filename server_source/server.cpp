@@ -1,13 +1,7 @@
 #include "server.h"
-#include <components/move_component.h>
-#include <string>
-#include <iostream>
 #include <components/move_event.h>
 #include <components/chat_component.h>
 #include <components/animation_update.h>
-#include <components/tile_update.h>
-#include <components/coord_event.h>
-#include <components/string_event.h>
 #include <components/variant_update.h>
 #include <components/render_component.h>
 #include <components/weapon_component.h>

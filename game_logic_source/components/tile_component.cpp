@@ -1,7 +1,6 @@
 #include "tile_component.h"
 #include "coord_event.h"
 #include "string_event.h"
-#include "tile_update.h"
 #include "variant_update.h"
 
 void TileComponent::onEvent(const Event& event)
