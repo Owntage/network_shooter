@@ -62,6 +62,11 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 	//std::cout << "onUpdate started" << std::endl;
 	for(auto it = update.updates.begin(); it != update.updates.end(); it++)
 	{
+		if((*it)->name != "animation")
+		{
+			std::cout << "received update: " << (*it)->name << std::endl;
+		}
+
 		if((*it)->name == "render")
 		{
 			RenderUpdate& renderUpdate = static_cast<RenderUpdate&> (*(*it));

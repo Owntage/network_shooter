@@ -108,7 +108,7 @@ void NetworkLogic::sendEvents()
 }
 
 template<typename UPDATE_T>
-void addUpdate(std::shared_ptr<ActorUpdate> actorUpdate, ComponentUpdate& componentUpdate, Packet& packet, bool shouldBeWritten)
+std::shared_ptr<UPDATE_T> addUpdate(std::shared_ptr<ActorUpdate> actorUpdate, ComponentUpdate& componentUpdate, Packet& packet, bool shouldBeWritten)
 {
 
 	std::shared_ptr<UPDATE_T> newUpdate = std::make_shared<UPDATE_T>();
@@ -118,7 +118,7 @@ void addUpdate(std::shared_ptr<ActorUpdate> actorUpdate, ComponentUpdate& compon
 	{
 		actorUpdate->updates.push_back(newUpdate);
 	}
-	
+	return newUpdate;
 }
 
 std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
@@ -203,9 +203,14 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 					mappedUpdates[componentUpdate.actorID]->actorID = componentUpdate.actorID;
 
 					bool shouldBeWritten = true;
-					
+					std::string approveName = componentUpdate.name;
+
 					if(componentUpdate.name == "variant")
-						addUpdate<VariantUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
+					{
+						auto res = addUpdate<VariantUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate,
+															packet, shouldBeWritten);
+						approveName = res->get<std::string>("name");
+					}
 					if(componentUpdate.name == "chat")
 						addUpdate<ChatUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "delete")
@@ -226,7 +231,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 
 					Packet approvePacket;
 				
-					approvePacket << localPort << "approve" << uniqueID << componentUpdate.actorID << componentUpdate.name << componentUpdate.number;
+					approvePacket << localPort << "approve" << uniqueID << componentUpdate.actorID << approveName << componentUpdate.number;
 					socket.send(address, approvePacket);
 				}
 			}
