@@ -11,8 +11,11 @@ void AnimationComponent::onEvent(const Event& event)
 		AnimationEvent& animationEvent = (AnimationEvent&) event;
 		if(states.find(animationEvent.layerState.state) != states.end() && animationEvent.layerNumber < currentLayerStates.size())
 		{
-			currentLayerStates[animationEvent.layerNumber] = animationEvent.layerState;
-			currentDataNumber++;
+			if (currentLayerStates[animationEvent.layerNumber] != animationEvent.layerState)
+			{
+				currentLayerStates[animationEvent.layerNumber] = animationEvent.layerState;
+				currentDataNumber++;
+			}
 		}
 		
 	}

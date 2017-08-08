@@ -55,11 +55,6 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 	//std::cout << "onUpdate started" << std::endl;
 	for(auto it = update.updates.begin(); it != update.updates.end(); it++)
 	{
-		if((*it)->name != "animation")
-		{
-			std::cout << "received update: " << (*it)->name << std::endl;
-		}
-
 		if((*it)->name == "render")
 		{
 			RenderUpdate& renderUpdate = static_cast<RenderUpdate&> (*(*it));
@@ -184,7 +179,6 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 		}
 		if((*it)->name == "animation")
 		{
-			//std::cout << "animation update got" << std::endl;
 			AnimationUpdate& animationUpdate = static_cast<AnimationUpdate&>(*(*it));
 			//std::cout << "state: " << animationUpdate.animationState << std::endl;
 			for(int i = 0; i < animationUpdate.states.size(); i++)
