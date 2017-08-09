@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <set>
 
+#include "vector_wrapper.h"
+
 namespace
 {
     template<typename Left, typename Right, bool assignable>
@@ -36,7 +38,7 @@ namespace
 
 
     template<typename... Types>
-    struct _VariantMap : VariantMapPart<Types>...
+    struct _VariantMap : VariantMapPart<Types>..., VariantMapPart<VectorWrapper<Types> >...
     {
         template<typename T>
         void set(const std::string& key, T value)
