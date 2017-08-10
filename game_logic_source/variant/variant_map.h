@@ -38,7 +38,7 @@ namespace
 
 
     template<typename... Types>
-    struct _VariantMap : VariantMapPart<Types>..., VariantMapPart<VectorWrapper<Types> >...
+    struct _VariantMap : VariantMapPart<Types>...
     {
         template<typename T>
         void set(const std::string& key, T value)
@@ -232,10 +232,11 @@ namespace
             return -1;
         }
     };
-
-
 }
 
-struct VariantMap : _VariantMap<std::string, int, float> {};
+template<typename... Types>
+struct __VariantMap : _VariantMap<Types..., VectorWrapper<Types>...> {};
+
+struct VariantMap : __VariantMap<std::string, int, float> {};
 
 #endif

@@ -6,6 +6,11 @@ struct VectorWrapper
 {
 	std::vector<Type> vec;
 
+	VectorWrapper(std::vector<Type> vec) : vec(vec)
+	{}
+
+	VectorWrapper() {}
+
 	template<typename StreamType>
 	friend StreamType& operator<<(StreamType& s, VectorWrapper<Type>& v)
 	{
@@ -22,6 +27,7 @@ struct VectorWrapper
 	{
 		int size;
 		s >> size;
+		v.vec.resize(size);
 		for (int i = 0; i < size; i++)
 		{
 			s >> v.vec[i];

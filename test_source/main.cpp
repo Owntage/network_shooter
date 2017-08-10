@@ -17,6 +17,14 @@ int main()
     VariantMap m;
     m.set("string_key", "kekeke1");
     m.set("int_key", 10);
+    std::vector<int> vector1;
+
+    vector1.push_back(1);
+    vector1.push_back(2);
+    vector1.push_back(3);
+
+    m.set("vector_key", VectorWrapper<int>(vector1));
+
     Packet packet;
     packet << m;
     VariantMap extracted_m;
@@ -24,6 +32,7 @@ int main()
     std::cout << "extracted string: " << extracted_m.get<std::string>("string_key") << std::endl;
     std::cout << "extracted int: " << extracted_m.get<int>("int_key") << std::endl;
     std::cout << extracted_m << std::endl;
+    std::cout << "extracted vector element: " << m.get<VectorWrapper<int> >("vector_key").vec[1] << std::endl;
 
     //variant event test:
     VariantEvent variantEvent("type1");
