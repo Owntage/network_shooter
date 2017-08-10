@@ -52,9 +52,21 @@ namespace
         }
 
         template<typename T>
+        void setVector(const std::string& key, const std::vector<T> v)
+        {
+            set(key, VectorWrapper<T>(v));
+        }
+
+        template<typename T>
         T get(const std::string& key)
         {
             return VariantMapPart<T>::m[key];
+        }
+
+        template<typename T>
+        std::vector<T> getVector(const std::string& key)
+        {
+            return get<VectorWrapper<T> >(key).vec;
         }
 
         template<typename StreamType>
