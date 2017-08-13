@@ -95,6 +95,19 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				std::cout << "name: " << variantUpdate.get<std::string>("name") << std::endl;
 				std::cout << "nickname: " << variantUpdate.get<std::string>("nickname") << std::endl;
 			}
+
+			if (name == "chat")
+			{
+				for (int i = 0; i < variantUpdate.getVector<std::string>("messages").size(); i++)
+				{
+					if (i + variantUpdate.get<int>("rangeBegin") > lastMessagePrinted)
+					{
+						console.println(variantUpdate.getVector<std::string>("messages")[i]);
+					}
+				}
+				lastMessagePrinted = variantUpdate.get<int>("rangeEnd");
+			}
+
 			if (name == "move")
 			{
 				positionX = variantUpdate.get<float>("x");
@@ -163,6 +176,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			}
 		}
 
+		/*
 		if((*it)->name == "chat" && isMain)
 		{
 			//std::cout << "received chat message." << std::endl;
@@ -177,6 +191,8 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			}
 			lastMessagePrinted = chatUpdate.rangeEnd;
 		}
+		 */
+
 		if((*it)->name == "animation")
 		{
 			AnimationUpdate& animationUpdate = static_cast<AnimationUpdate&>(*(*it));

@@ -1,6 +1,7 @@
 #include "chat_component.h"
 #include <iostream>
 #include "string_event.h"
+#include "variant_update.h"
 
 std::vector<std::string> ChatComponent::chatHistory;
 
@@ -40,21 +41,24 @@ std::string ChatComponent::getName()
 
 std::shared_ptr<ComponentUpdate> ChatComponent::getUpdate(int systemID)
 {
-	std::shared_ptr<ChatUpdate> result = std::make_shared<ChatUpdate>();
+	std::shared_ptr<VariantUpdate> result = std::make_shared<VariantUpdate>(getName());
 	result->number = chatHistory.size();
-	//currentSystemNumber[systemID] = chatHistory.size();
 	if(lastSystemApproved.find(systemID) == lastSystemApproved.end())
 	{
 		lastSystemApproved[systemID] = 0;
 	}
-	result->rangeBegin = lastSystemApproved[systemID];
-	result->rangeEnd = chatHistory.size() - 1;
-	for(int i = result->rangeBegin; i <= result->rangeEnd; i++)
+
+	int rangeBegin = lastSystemApproved[systemID];
+	int rangeEnd = chatHistory.size() - 1;
+
+	result->set("rangeBegin", rangeBegin);
+	result->set("rangeEnd", rangeEnd);
+	std::vector<std::string> messages;
+	for(int i = rangeBegin; i <= rangeEnd; i++)
 	{
-		result->messages.push_back(chatHistory[i]);
+		messages.push_back(chatHistory[i]);
 	}
-	//std::cout << "history size: " << chatHistory.size() << std::endl;
-	result->number = chatHistory.size();
+	result->setVector("messages", messages);
 	return result;
 }
 
