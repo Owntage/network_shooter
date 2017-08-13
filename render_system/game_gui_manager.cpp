@@ -11,10 +11,10 @@ void GameGuiManager::setWeaponUpdate(WeaponUpdate& weaponUpdate)
 	}
 }
 
-void GameGuiManager::setHpUpdate(HpUpdate& hpUpdate)
+void GameGuiManager::setHpUpdate(VariantUpdate& hpUpdate)
 {
 	this->hpUpdate = hpUpdate;
-	if(hpUpdate.currentHp < hpUpdate.maxHp)
+	if(hpUpdate.get<float>("currentHp") < hpUpdate.get<float>("maxHp"))
 	{
 		damageBlink = 1.0f;
 	}
@@ -43,7 +43,7 @@ void GameGuiManager::draw(sf::RenderTarget& renderTarget)
 	shape.setTexture(nullptr);
 	sf::View targetView = renderTarget.getView();
 	renderTarget.setView(view);
-	shape.setSize(sf::Vector2f(160 * hpUpdate.currentHp / hpUpdate.maxHp, 32));
+	shape.setSize(sf::Vector2f(160 * hpUpdate.get<float>("currentHp") / hpUpdate.get<float>("maxHp"), 32));
 	shape.setPosition(screenWidth / 2 - 164, -screenHeight / 2 + 4);
 	shape.setFillColor(sf::Color(128, 0, 128, 255));
 	renderTarget.draw(shape);

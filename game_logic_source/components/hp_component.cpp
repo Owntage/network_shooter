@@ -1,4 +1,5 @@
 #include "hp_component.h"
+#include "variant_update.h"
 
 
 void HpComponent::onEvent(const Event& event)
@@ -34,8 +35,10 @@ std::string HpComponent::getName()
 
 std::shared_ptr<ComponentUpdate> HpComponent::getUpdate(int syatemID)
 {
-	auto result = std::make_shared<HpUpdate>(currentHp, maxHp, currentDataNumber);
+	auto result = std::make_shared<VariantUpdate>(getName());
 	result->number = currentDataNumber;
+	result->set("currentHp", currentHp);
+	result->set("maxHp", maxHp);
 	return result;
 }
 

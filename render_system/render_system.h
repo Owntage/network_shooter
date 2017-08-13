@@ -13,6 +13,7 @@
 #include <components/weapon_component.h>
 #include <components/hp_component.h>
 #include <components/deathmatch_component.h>
+#include <components/variant_update.h>
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
@@ -32,12 +33,13 @@ struct GameGuiManager
 		damageBlink(0.0f),
 		outputConsole(0, -100, 200, 300, guiManager)
 	{
-		hpUpdate.currentHp = 1;
-		hpUpdate.maxHp = 1;
+		hpUpdate.set("maxHp", 1.0f);
+		hpUpdate.set("currentHp", 1.0f);
+
 		outputConsole.setVisible(false);
 	}
 	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
-	void setHpUpdate(HpUpdate& hpUpdate);
+	void setHpUpdate(VariantUpdate& hpUpdate);
 	void setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate);
 	void draw(sf::RenderTarget& renderTarget);
 	void onTimer();
@@ -52,7 +54,7 @@ private:
 	sf::RectangleShape shape;
 	std::map<std::string, sf::Texture> textures;
 	WeaponUpdate weaponUpdate;
-	HpUpdate hpUpdate;
+	VariantUpdate hpUpdate;
 	sf::Texture& getTexture(std::string name);
 	OutputConsole outputConsole;
 };
