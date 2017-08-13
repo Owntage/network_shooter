@@ -13,33 +13,6 @@ struct HpEvent : Event
 	float delta;
 };
 
-struct HpUpdate : ComponentUpdate
-{
-	HpUpdate(float currentHp, float maxHp, int number) : 
-		ComponentUpdate("hp"),
-		currentHp(currentHp),
-		maxHp(maxHp)
-	{
-		number = number;
-	}
-	HpUpdate() {}
-	float currentHp;
-	float maxHp;
-
-	template<typename STREAM_T>
-	friend STREAM_T& operator<<(STREAM_T& s, HpUpdate& u)
-	{
-		s << u.currentHp << u.maxHp;
-		return s;
-	}
-	template<typename STREAM_T>
-	friend STREAM_T& operator>>(STREAM_T& s, HpUpdate& u)
-	{
-		s >> u.currentHp >> u.maxHp;
-		return s;
-	}
-};
-
 struct HpComponent : IComponent
 {
 	void onEvent(const Event& event);
