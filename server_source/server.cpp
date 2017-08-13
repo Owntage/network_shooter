@@ -242,7 +242,6 @@ void GameServer::sendUpdates()
 				packet << *(*component_it);
 
 				if((*component_it)->name == "variant") packet << (VariantUpdate&) *(*component_it);
-				if((*component_it)->name == "chat") packet << (ChatUpdate&) *(*component_it);
 				if((*component_it)->name == "delete") packet << (DeleteUpdate&) *(*component_it);
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
 				if((*component_it)->name == "render") packet << (RenderUpdate&) *(*component_it);

@@ -210,8 +210,6 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 															packet, shouldBeWritten);
 						approveName = res->get<std::string>("name");
 					}
-					if(componentUpdate.name == "chat")
-						addUpdate<ChatUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "delete")
 						addUpdate<DeleteUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "animation")

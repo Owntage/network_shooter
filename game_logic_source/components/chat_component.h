@@ -3,7 +3,6 @@
 
 #include "icomponent.h"
 #include "chat_event.h"
-#include "chat_update.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -19,7 +18,6 @@ struct ChatComponent : IComponent
 
 private:
 	static std::vector<std::string> chatHistory;
-	//std::map<int, ChatUpdate> systemUpdates;
 };
 
 

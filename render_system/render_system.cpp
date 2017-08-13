@@ -1,6 +1,5 @@
 #include "render_system.h"
 #include <render_window.h>
-#include <components/chat_update.h>
 #include <components/animation_update.h>
 #include <delete_update.h>
 #include <components/variant_update.h>
