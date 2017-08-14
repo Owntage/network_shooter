@@ -40,6 +40,8 @@ namespace
     template<typename... Types>
     struct _VariantMap : VariantMapPart<Types>...
     {
+        typedef _VariantMap<Types...> self_t;
+
         template<typename T>
         void set(const std::string& key, T value)
         {
@@ -57,6 +59,11 @@ namespace
             set(key, VectorWrapper<T>(v));
         }
 
+        void setObject(const std::string& key, self_t value)
+        {
+            selfTypeMap[key] = value;
+        }
+
         template<typename T>
         T get(const std::string& key)
         {
@@ -69,9 +76,19 @@ namespace
             return get<VectorWrapper<T> >(key).vec;
         }
 
+        self_t getObject(const std::string& key)
+        {
+            return selfTypeMap[key];
+        }
+
         template<typename StreamType>
         friend StreamType& operator<<(StreamType& s, _VariantMap& m)
         {
+            s << (int32_t) m.selfTypeMap.size();
+            for (auto it = m.selfTypeMap.begin(); it != m.selfTypeMap.end(); it++)
+            {
+                s << it->first << it->second;
+            }
 
             int numberOfTypes = sizeof... (Types);
             for(int i = 0; i < numberOfTypes; i++)
@@ -89,6 +106,17 @@ namespace
         template<typename StreamType>
         friend StreamType& operator>>(StreamType& s, _VariantMap& m)
         {
+            int32_t selfKeys;
+            s >> selfKeys;
+            for(int i = 0; i < selfKeys; i++)
+            {
+                std::string key;
+                s >> key;
+                self_t value;
+                s >> value;
+                m.selfTypeMap[key] = value;
+            }
+
             int numberOfTypes = sizeof... (Types);
             for(int i = 0; i < numberOfTypes; i++)
             {
@@ -106,6 +134,7 @@ namespace
         }
 
     private:
+        std::map<std::string, self_t>  selfTypeMap;
         std::map<std::string, int> keyToType;
         std::map<int, std::set<std::string> > typeToKeys;
 

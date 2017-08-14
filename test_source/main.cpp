@@ -18,6 +18,9 @@ int main()
     m.set("string_key", "kekeke1");
     m.set("int_key", 10);
     m.setVector("vector_key", std::vector<int>({1, 2, 3}));
+	VariantMap innerM;
+	innerM.set("first", 1337);
+	m.setObject("map_key", innerM);
 
     Packet packet;
     packet << m;
@@ -25,7 +28,8 @@ int main()
     packet >> extracted_m;
     std::cout << "extracted string: " << extracted_m.get<std::string>("string_key") << std::endl;
     std::cout << "extracted int: " << extracted_m.get<int>("int_key") << std::endl;
-    std::cout << "extracted vector element: " << m.getVector<int>("vector_key")[1] << std::endl;
+    std::cout << "extracted vector element: " << extracted_m.getVector<int>("vector_key")[1] << std::endl;
+	std::cout << "extracted inner object: " << extracted_m.getObject("map_key").get<int>("first") << std::endl;
     std::cout << extracted_m << std::endl;
 
     //variant event test:
