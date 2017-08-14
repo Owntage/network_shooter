@@ -22,6 +22,11 @@ int main()
 	innerM.set("first", 1337);
 	m.setObject("map_key", innerM);
 
+	std::vector<VariantMap> objVec;
+	innerM.set("first", 7331);
+	objVec.push_back(innerM);
+	m.setObjectVector("obj_vec_key", objVec);
+
     Packet packet;
     packet << m;
     VariantMap extracted_m;
@@ -30,6 +35,7 @@ int main()
     std::cout << "extracted int: " << extracted_m.get<int>("int_key") << std::endl;
     std::cout << "extracted vector element: " << extracted_m.getVector<int>("vector_key")[1] << std::endl;
 	std::cout << "extracted inner object: " << extracted_m.getObject("map_key").get<int>("first") << std::endl;
+	std::cout << "extracted inner object vec: " << extracted_m.getObjectVector("obj_vec_key")[0].get<int>("first") << std::endl;
     std::cout << extracted_m << std::endl;
 
     //variant event test:
