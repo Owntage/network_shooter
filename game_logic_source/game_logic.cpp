@@ -227,7 +227,6 @@ std::vector<std::shared_ptr<ActorUpdate> > GameLogic::getUpdates(int systemID, f
 		auto deleteUpdate = std::make_shared<DeleteUpdate>(deletedActors.size() - 1);
 		for(int i = deletedActorApproves[systemID] + 1; i < deletedActors.size(); i++)
 		{
-			//std::cout << "deleted actor: " << deletedActors[i] << std::endl;
 			deleteUpdate->deletedActors.push_back(deletedActors[i]);
 		}
 		deleteUpdate->actorID = -1;
