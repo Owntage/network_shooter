@@ -79,10 +79,8 @@ std::string DeathmatchComponent::getName()
 
 std::shared_ptr<ComponentUpdate> DeathmatchComponent::getUpdate(int syatemID)
 {
-	//std::cout << "alive actors size: " << aliveActors.size() << std::endl;
-	//return std::make_shared<DeathmatchUpdate>(aliveActors, DeathmatchUpdate::GameState::RUNNING, currentDataNumber);
 	auto result = std::make_shared<VariantUpdate>(getName());
-	result->set("state", (int) DeathmatchUpdate::GameState::RUNNING);
+	result->set("state", (int) 1); //todo: state is not used, because round never ends
 	result->number = currentDataNumber;
 	std::vector<VariantMap> actors;
 	for (int i = 0; i < aliveActors.size(); i++)

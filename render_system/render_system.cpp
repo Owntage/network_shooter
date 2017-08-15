@@ -69,15 +69,6 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 			}
 		}
 
-		/*
-		if((*it)->name == "deathmatch")
-		{
-			
-			DeathmatchUpdate dmUpdate = static_cast<DeathmatchUpdate&>(*(*it));
-			renderSystem.gameGuiManager.setDeathmatchUpdate(dmUpdate);
-		}
-		 */
-
 		if((*it)->name == "variant")
 		{
 			VariantUpdate &variantUpdate = static_cast<VariantUpdate &> (*(*it));
@@ -181,24 +172,7 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				}
 			}
 		}
-
-		/*
-		if((*it)->name == "chat" && isMain)
-		{
-			//std::cout << "received chat message." << std::endl;
-			ChatUpdate& chatUpdate = static_cast<ChatUpdate&> (*(*it));
-			
-			for(int i = 0; i < chatUpdate.messages.size(); i++)
-			{
-				if(i + chatUpdate.rangeBegin > lastMessagePrinted)
-				{
-					console.println(chatUpdate.messages[i]);
-				}
-			}
-			lastMessagePrinted = chatUpdate.rangeEnd;
-		}
-		 */
-
+		
 		if((*it)->name == "animation")
 		{
 			AnimationUpdate& animationUpdate = static_cast<AnimationUpdate&>(*(*it));

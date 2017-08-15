@@ -246,7 +246,6 @@ void GameServer::sendUpdates()
 				if((*component_it)->name == "animation") packet << (AnimationUpdate&) *(*component_it);
 				if((*component_it)->name == "render") packet << (RenderUpdate&) *(*component_it);
 				if((*component_it)->name == "weapon") packet << (WeaponUpdate&) *(*component_it);
-				if((*component_it)->name == "deathmatch") packet << (DeathmatchUpdate&) *(*component_it);
 
 				if(packet.isPacked())
 				{

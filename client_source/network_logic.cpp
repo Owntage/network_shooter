@@ -218,11 +218,7 @@ std::vector<std::shared_ptr<ActorUpdate> > NetworkLogic::receiveUpdates()
 						addUpdate<RenderUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
 					if(componentUpdate.name == "weapon")
 						addUpdate<WeaponUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
-					if(componentUpdate.name == "deathmatch")
-						addUpdate<DeathmatchUpdate>(mappedUpdates[componentUpdate.actorID], componentUpdate, packet, shouldBeWritten);
-					
 
-					
 
 					Packet approvePacket;
 				
