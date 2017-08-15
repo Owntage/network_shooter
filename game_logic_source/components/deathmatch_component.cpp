@@ -1,6 +1,7 @@
 #include "deathmatch_component.h"
 #include "string_event.h"
 #include "coord_event.h"
+#include "variant_update.h"
 
 void DeathmatchComponent::onRequest(const Request& request)
 {
@@ -78,8 +79,21 @@ std::string DeathmatchComponent::getName()
 
 std::shared_ptr<ComponentUpdate> DeathmatchComponent::getUpdate(int syatemID)
 {
-	std::cout << "alive actors size: " << aliveActors.size() << std::endl;
-	return std::make_shared<DeathmatchUpdate>(aliveActors, DeathmatchUpdate::GameState::RUNNING, currentDataNumber);
+	//std::cout << "alive actors size: " << aliveActors.size() << std::endl;
+	//return std::make_shared<DeathmatchUpdate>(aliveActors, DeathmatchUpdate::GameState::RUNNING, currentDataNumber);
+	auto result = std::make_shared<VariantUpdate>(getName());
+	result->set("state", (int) DeathmatchUpdate::GameState::RUNNING);
+	result->number = currentDataNumber;
+	std::vector<VariantMap> actors;
+	for (int i = 0; i < aliveActors.size(); i++)
+	{
+		VariantMap actorData;
+		actorData.set("name", aliveActors[i].first);
+		actorData.set("score", aliveActors[i].second);
+		actors.push_back(actorData);
+	}
+	result->setObjectVector("actors", actors);
+	return result;
 }
 
 std::shared_ptr<IComponent> DeathmatchComponent::loadFromXml(const boost::property_tree::ptree& tree)

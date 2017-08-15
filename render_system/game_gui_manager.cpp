@@ -20,15 +20,15 @@ void GameGuiManager::setHpUpdate(VariantUpdate& hpUpdate)
 	}
 }
 
-void GameGuiManager::setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate)
+void GameGuiManager::setDeathmatchUpdate(VariantUpdate& deathmatchUpdate)
 {
 	outputConsole.clear();
-	for(int i = 0; i < deathmatchUpdate.actors.size(); i++)
+	auto actors = deathmatchUpdate.getObjectVector("actors");
+	for(int i = 0; i < actors.size(); i++)
 	{
 		std::string line;
-		line += deathmatchUpdate.actors[i].first;
-		line += " " + std::to_string(deathmatchUpdate.actors[i].second);
-		std::cout << "line: " << line << std::endl;
+		line += actors[i].get<std::string>("name");
+		line += " " + std::to_string(actors[i].get<int>("score"));
 		outputConsole.println(line);
 	}
 }

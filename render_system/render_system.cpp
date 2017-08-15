@@ -68,13 +68,15 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				renderSystem.gameGuiManager.setWeaponUpdate(weaponUpdate);
 			}
 		}
+
+		/*
 		if((*it)->name == "deathmatch")
 		{
 			
 			DeathmatchUpdate dmUpdate = static_cast<DeathmatchUpdate&>(*(*it));
 			renderSystem.gameGuiManager.setDeathmatchUpdate(dmUpdate);
-			
 		}
+		 */
 
 		if((*it)->name == "variant")
 		{
@@ -85,6 +87,11 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				std::cout << "variant update received: " << std::endl;
 				std::cout << "name: " << variantUpdate.get<std::string>("name") << std::endl;
 				std::cout << "nickname: " << variantUpdate.get<std::string>("nickname") << std::endl;
+			}
+
+			if (name == "deathmatch")
+			{
+				renderSystem.gameGuiManager.setDeathmatchUpdate(variantUpdate);
 			}
 
 			if (name == "hp")

@@ -40,7 +40,7 @@ struct GameGuiManager
 	}
 	void setWeaponUpdate(WeaponUpdate& weaponUpdate);
 	void setHpUpdate(VariantUpdate& hpUpdate);
-	void setDeathmatchUpdate(DeathmatchUpdate& deathmatchUpdate);
+	void setDeathmatchUpdate(VariantUpdate& deathmatchUpdate);
 	void draw(sf::RenderTarget& renderTarget);
 	void onTimer();
 	void onKey(int key, bool isReleased);
