@@ -6,6 +6,7 @@
 #define NETWORK_SHOOTER_PROJECT_SOUND_MANAGER_H
 
 #include <SFML/Audio.hpp>
+#include <c++/map>
 
 struct SoundManager {
     bool playSound (float x, float y, std::string filename);
@@ -24,11 +25,12 @@ private:
     };
 
     float distanceToListener(float x, float y);
-    float listener_x, listener_y;
+    float listenerX, listenerY;
 
     const float sound_const = 100;
 
     std::vector<ObstacleData> obstacles;
+    std::map<std::string, sf::SoundBuffer> buffers;
 
     sf::SoundBuffer soundBuffer;
     sf::Sound sound;

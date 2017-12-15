@@ -1,13 +1,20 @@
 //
 // Created by Матвей on 15.12.2017.
 //
-#include <c++/iostream>
+using namespace std;
+
 #include <cmath>
 #include "sound_manager.h"
 
 bool SoundManager::playSound (float x, float y, std::string filename) {
-    if(!soundBuffer.loadFromFile(filename)) {
-        return false;
+    if(buffers.count(filename) == 0) {
+        if (!soundBuffer.loadFromFile(filename)) {
+            return false;
+        }
+
+        buffers.insert(std::pair<std::string, sf::SoundBuffer>(filename, soundBuffer));
+    } else {
+        soundBuffer = buffers.find(filename) -> second;
     }
 
     sound.setBuffer(soundBuffer);
@@ -22,13 +29,16 @@ bool SoundManager::playSound (float x, float y, std::string filename) {
             break;
     }
 
-    if(obstacle_count != 2) {
-        sound.setVolume(sound_const * __max(0, 1 - distanceToListener(x, y) / sound_const));
-    } else {
-        sound.setVolume(0);
+    switch (obstacle_count) {
+        case 2 :
+            sound.setVolume(0);
+            break;
+        case 1:
+            sound.setVolume(0.5f * sound_const * std::max(1 - distanceToListener(x, y) / sound_const, 0.0f));
+            break;
+        default:
+            sound.setVolume(sound_const * std::max(1 - distanceToListener(x, y) / sound_const, 0.0f));
     }
-
-    std::cout << sound.getVolume();
 
     sound.play();
 
@@ -36,8 +46,8 @@ bool SoundManager::playSound (float x, float y, std::string filename) {
 }
 
 void SoundManager::setListenerPosition(float x, float y) {
-    listener_x = x;
-    listener_y = y;
+    listenerX = x;
+    listenerY = y;
 }
 
 void SoundManager::setObstaclePosition(float centerX, float centerY, float sizeX, float sizeY) {
@@ -45,16 +55,16 @@ void SoundManager::setObstaclePosition(float centerX, float centerY, float sizeX
 }
 
 float SoundManager::distanceToListener(float x, float y) {
-    return sqrt(pow(listener_x - x, 2) + pow(listener_y - y, 2));
+    return sqrt(pow(listenerX - x, 2) + pow(listenerY - y, 2));
 }
 
 bool SoundManager::checkLine(ObstacleData obstacle, float x, float y) {
     float half_x = obstacle.sizeX/2, half_y = obstacle.sizeY/2;
 
-    return lineIntersect(obstacle.centerX - half_x, obstacle.centerY - half_y, obstacle.centerX + half_x, obstacle.centerY - half_y, x, y, listener_x, listener_y) ||
-           lineIntersect(obstacle.centerX - half_x, obstacle.centerY - half_y, obstacle.centerX - half_x, obstacle.centerY + half_y, x, y, listener_x, listener_y) ||
-           lineIntersect(obstacle.centerX + half_x, obstacle.centerY - half_y, obstacle.centerX + half_x, obstacle.centerY + half_y, x, y, listener_x, listener_y) ||
-           lineIntersect(obstacle.centerX - half_x, obstacle.centerY + half_y, obstacle.centerX + half_x, obstacle.centerY + half_y, x, y, listener_x, listener_y);
+    return lineIntersect(obstacle.centerX - half_x, obstacle.centerY - half_y, obstacle.centerX + half_x, obstacle.centerY - half_y, x, y, listenerX, listenerY) ||
+           lineIntersect(obstacle.centerX - half_x, obstacle.centerY - half_y, obstacle.centerX - half_x, obstacle.centerY + half_y, x, y, listenerX, listenerY) ||
+           lineIntersect(obstacle.centerX + half_x, obstacle.centerY - half_y, obstacle.centerX + half_x, obstacle.centerY + half_y, x, y, listenerX, listenerY) ||
+           lineIntersect(obstacle.centerX - half_x, obstacle.centerY + half_y, obstacle.centerX + half_x, obstacle.centerY + half_y, x, y, listenerX, listenerY);
 }
 
 bool SoundManager::lineIntersect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
@@ -75,5 +85,5 @@ bool SoundManager::intersect(float a, float b, float c, float d) {
     if (c > d)
         std::swap (c, d);
 
-    return __max(a,c) <= __min(b,d);
+    return std::max(a,c) <= std::min(b,d);
 }
