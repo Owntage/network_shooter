@@ -29,7 +29,7 @@ source_group("game_logic" FILES ${GAME_LOGIC_FILES})
 source_group("game_logic\\components" FILES ${GAME_LOGIC_COMPONENTS_FILES})
 
 #test project sources
-file(GLOB_RECURSE TEST_SOURCE_FILES ${PROJECT_SOURCE_DIR}/test_source/*.cpp ${PROJECT_SOURCE_DIR}/test_source/*.h)
+file(GLOB TEST_SOURCE_FILES ${PROJECT_SOURCE_DIR}/test_source/*.cpp ${PROJECT_SOURCE_DIR}/test_source/*.h)
 
 add_library(gui ${GUI_SOURCE_FILES})
 add_library(game_logic ${GAME_LOGIC_FILES} ${GAME_LOGIC_COMPONENTS_FILES})
