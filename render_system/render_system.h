@@ -14,6 +14,7 @@
 #include <components/hp_component.h>
 #include <components/deathmatch_component.h>
 #include <components/variant_update.h>
+#include "sound_manager.h"
 
 #define LIGHT_VERTEX_SHADER "res/light_vertex_shader.txt"
 #define LIGHT_FRAGMENT_SHADER "res/light_fragment_shader.txt"
@@ -104,7 +105,7 @@ struct RenderSystem;
 
 struct DrawableActor
 {
-	DrawableActor(Console& console, RenderSystem& renderSystem, std::shared_ptr<LightManager> lightManager);
+	DrawableActor(Console& console, RenderSystem& renderSystem, SoundManager& soundManager, std::shared_ptr<LightManager> lightManager);
 	~DrawableActor();
 	void onUpdate(ActorUpdate& actorUpdate);
 	void draw();
@@ -134,7 +135,8 @@ private:
 	Console& console;
 	int lastMessagePrinted;
 	RenderSystem& renderSystem;
-
+	SoundManager& soundManager;
+	
 	std::shared_ptr<LightManager> lightManager;
 	bool hasLightSource;
 	bool hasShadow;
@@ -164,7 +166,6 @@ struct RenderSystem
 	void onKey(int key, bool isReleased);
 	std::vector<std::string> imagesToLoad;
 private:
-	
 	std::map<int, std::shared_ptr<DrawableActor> > actors;
 	std::map<std::string, sf::Texture> textures;
 	std::map<std::string, int> imagesInTileset;
@@ -180,6 +181,7 @@ private:
 	sf::VertexArray tileVertices;
 	sf::Texture tileset;
 	Console& console;
+	SoundManager soundManager;
 	std::shared_ptr<LightManager> lightManager;
 	GameGuiManager gameGuiManager;
 	friend class DrawableActor;

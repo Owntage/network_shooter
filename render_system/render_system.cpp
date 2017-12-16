@@ -10,7 +10,7 @@ bool isFileExists(std::string filename)
 	return file.good();
 }
 
-DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, std::shared_ptr<LightManager> lightManager) : 
+DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, SoundManager& soundManager, std::shared_ptr<LightManager> lightManager) :
 	isMain(false),
 	rect(sf::Vector2f(1.0f, 1.0f)), 
 	console(console), 
@@ -25,7 +25,8 @@ DrawableActor::DrawableActor(Console& console, RenderSystem& renderSystem, std::
 	sizeY(0.0f),
 	lightManager(lightManager),
 	hasLightSource(false),
-	hasShadow(false)
+	hasShadow(false),
+	soundManager(soundManager)
 {
 	rect.setOrigin(0.5f, 0.5f);
 	isDrawing = false;
@@ -93,6 +94,14 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				}
 			}
 
+			if (name == "sound")
+			{
+				if (variantUpdate.get<std::string>("type") == "sound")
+				{
+					soundManager.playSound(positionX, positionY, variantUpdate.get<std::string>("sound"));
+				}
+			}
+
 			if (name == "chat")
 			{
 				for (int i = 0; i < variantUpdate.getVector<std::string>("messages").size(); i++)
@@ -115,6 +124,11 @@ void DrawableActor::onUpdate(ActorUpdate& update)
 				sizeY = variantUpdate.get<float>("sizeY");
 				serverTime = variantUpdate.get<float>("time");
 				deltaTime = 0;
+
+				if (isMain)
+				{
+					soundManager.setListenerPosition(positionX, positionY);
+				}
 			}
 			if (name == "tile")
 			{
@@ -376,7 +390,7 @@ void RenderSystem::onUpdate(std::vector<std::shared_ptr<ActorUpdate> > updates)
 				continue;
 			}
 			//std::cout << "render system created actor with id: " << (*it)->actorID << std::endl;
-			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this, lightManager);
+			actors[(*it)->actorID] = std::make_shared<DrawableActor>(console, *this, soundManager, lightManager);
 			if((*it)->actorID == mainActor)
 			{
 				actors[(*it)->actorID]->setMain(true);

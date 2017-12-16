@@ -22,6 +22,7 @@ struct WeaponPropertiesVisitor : XmlVisitor
 struct WeaponDef //NB: not everything is serialized
 {
 	float period;
+	float soundPeriod;
 	float bulletSpeed;
 	float reloadTime;
 	float dispersion; //in radians
@@ -31,6 +32,7 @@ struct WeaponDef //NB: not everything is serialized
 	int bulletsPerHolder;
 	std::string bulletType;
 	std::string weaponTexture;
+	std::string soundName;
 	std::string layerName;
 	
 	template<typename STREAM_T>
@@ -139,12 +141,13 @@ struct WeaponComponent : IComponent
 	std::shared_ptr<IComponent> loadFromXml(const boost::property_tree::ptree& tree);
 private:
 	void shoot();
+	void pushBulletCreateEvent(const Event& event, float angle);
+	void pushSoundEvent();
 	friend class WeaponPropertiesVisitor;
 	static std::map<std::string, WeaponDef> weaponDefinitions;
 	std::vector<WeaponDef> weapons;
 	int thisActorID;
-
-	
+	float timeSinceSoundPlayed;
 	int currentWeapon;
 	bool isShooting;
 	WeaponUpdate::WeaponState state;

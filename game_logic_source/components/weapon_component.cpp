@@ -1,9 +1,13 @@
+#include <variant/variant_event.h>
 #include "weapon_component.h"
 #include "physics_component.h"
 #include "coord_event.h"
 #include "create_event.h"
 #include "damage_dealer_component.h"
 #include "animation_event.h"
+#include <iostream>
+
+using namespace std;
 
 #define PI 3.141593
 
@@ -28,7 +32,10 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 	weaponDef.damage = tree.get("damage", 10.0f);
 	weaponDef.bullets = tree.get("bullets", 1);
 	weaponDef.layerName = tree.get("layer_name", "");
-	
+	weaponDef.soundName = tree.get("sound", "");
+	weaponDef.soundPeriod = tree.get("sound_period", 0.3);
+	cout << "cound period: " << weaponDef.soundPeriod << endl;
+
 
 	WeaponComponent::weaponDefinitions[nodeName] = weaponDef;
 }
@@ -36,7 +43,8 @@ void WeaponPropertiesVisitor::onVisit(const boost::property_tree::ptree& tree, s
 WeaponComponent::WeaponComponent() :
 	currentWeapon(0),
 	isShooting(false),
-	state(WeaponUpdate::WeaponState::CHANGE)
+	state(WeaponUpdate::WeaponState::CHANGE),
+	timeSinceSoundPlayed(0.0f)
 {
 	if(weaponDefinitions.size() == 0)
 	{
@@ -44,6 +52,43 @@ WeaponComponent::WeaponComponent() :
 		walkXml(visitor.getPropertiesFilename(), visitor);
 	}
 	currentDataNumber = 0;
+}
+
+void WeaponComponent::pushBulletCreateEvent(const Event& event, float angle)
+{
+	const CoordEvent& coordEvent = (const CoordEvent&) event;
+	auto createEvent = std::make_shared<CreateEvent>();
+	createEvent->type = weapons[currentWeapon].bulletType;
+	createEvent->actorID = thisActorID;
+
+	float rand_num = std::rand() % 100;
+	rand_num /= 100.0f;
+	rand_num -= 0.5f;
+
+	auto newCoordEvent = std::make_shared<CoordEvent>("set_coords", 0, coordEvent.x + 0.8 * cos(angle), coordEvent.y + 0.8 * sin(angle));
+	float speed = weapons[currentWeapon].bulletSpeed;
+	speed += speed * 0.3 * rand_num;
+	auto speedCoordEvent = std::make_shared<CoordEvent>("set_speed", 0, speed * cos(angle), speed * sin(angle));
+	auto damageEvent = std::make_shared<DamageEvent>(
+			weapons[currentWeapon].damage,
+			weapons[currentWeapon].bulletType,
+			thisActorID, 0);
+	createEvent->events.push_back(newCoordEvent);
+	createEvent->events.push_back(speedCoordEvent);
+	createEvent->events.push_back(damageEvent);
+	localEvents.push_back(createEvent);
+}
+
+void WeaponComponent::pushSoundEvent()
+{
+	if (timeSinceSoundPlayed > weapons[currentWeapon].soundPeriod &&
+			weapons[currentWeapon].soundName != "")
+	{
+		timeSinceSoundPlayed = 0.0f;
+		auto soundEvent = make_shared<VariantEvent>("sound", false, thisActorID);
+		soundEvent->set("sound", weapons[currentWeapon].soundName);
+		localEvents.push_back(soundEvent);
+	}
 }
 
 void WeaponComponent::shoot()
@@ -62,30 +107,9 @@ void WeaponComponent::shoot()
 				angle += rand_num * weapons[currentWeapon].dispersion;
 				auto coordRequest = std::make_shared<Request>("coords", false, thisActorID, [this, angle](const Event& event)
 				{
-					const CoordEvent& coordEvent = (const CoordEvent&) event;
-					auto createEvent = std::make_shared<CreateEvent>();
-					createEvent->type = weapons[currentWeapon].bulletType;
-					createEvent->actorID = thisActorID;
-
-					float rand_num = std::rand() % 100;
-					rand_num /= 100.0f;
-					rand_num -= 0.5f;
-
-					auto newCoordEvent = std::make_shared<CoordEvent>("set_coords", 0, coordEvent.x + 0.8 * cos(angle), coordEvent.y + 0.8 * sin(angle));
-					float speed = weapons[currentWeapon].bulletSpeed;
-					speed += speed * 0.3 * rand_num;
-					auto speedCoordEvent = std::make_shared<CoordEvent>("set_speed", 0, speed * cos(angle), speed * sin(angle));
-					auto damageEvent = std::make_shared<DamageEvent>(
-						weapons[currentWeapon].damage, 
-						weapons[currentWeapon].bulletType,
-						thisActorID, 0);
-					createEvent->events.push_back(newCoordEvent);
-					createEvent->events.push_back(speedCoordEvent);
-					createEvent->events.push_back(damageEvent);
-					localEvents.push_back(createEvent);
-
-
-
+					pushBulletCreateEvent(event, angle);
+					pushSoundEvent();
+					cout << "shoot performed" << endl;
 				});
 				requests.push_back(coordRequest);
 			});
@@ -144,6 +168,7 @@ void WeaponComponent::onEvent(const Event& event)
 	}
 	if(event.name == "timer")
 	{
+		timeSinceSoundPlayed += 1.0 / 60.0;
 		if(weapons.size() > 0)
 		{
 
@@ -189,7 +214,7 @@ void WeaponComponent::onEvent(const Event& event)
 
 bool WeaponComponent::hasUpdate(int systemID)
 {
-	
+
 	if(weapons.size() == 0)
 	{
 		return false;
@@ -199,8 +224,8 @@ bool WeaponComponent::hasUpdate(int systemID)
 	{
 		return true;
 	}
-	
-	
+
+
 	return lastSystemApproved[systemID] < currentDataNumber;
 }
 
@@ -235,7 +260,7 @@ std::shared_ptr<IComponent> WeaponComponent::loadFromXml(const boost::property_t
 				result->weaponData.push_back(w);
 				result->weapons.push_back(weaponDefinitions[v.second.get_value<std::string>()]);
 			}
-			
+
 		}
 	}
 	std::cout << "finished loading weapon" << std::endl;

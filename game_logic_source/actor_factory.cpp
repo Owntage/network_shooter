@@ -21,6 +21,7 @@
 #include "components/spawn_component.h"
 #include "components/spawn_teleporter_component.h"
 #include "components/actor_replace_component.h"
+#include "components/sound_component.h"
 
 ActorFactory::ActorFactory(std::string propertiesPath)
 {
@@ -64,6 +65,7 @@ std::shared_ptr<Actor> ActorFactory::createActor(std::string id)
 		if(v.first == "spawn") component = std::make_shared<SpawnComponent>();
 		if(v.first == "spawn_teleporter") component = std::make_shared<SpawnTeleporterComponent>();
 		if(v.first == "actor_replace") component = std::make_shared<ActorReplaceComponent>();
+		if(v.first == "sound") component = std::make_shared<SoundComponent>();
 		result->components.push_back(component->loadFromXml(v.second));
 	}
 	return result;
