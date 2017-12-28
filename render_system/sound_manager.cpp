@@ -23,28 +23,18 @@ bool SoundManager::playSound(float x, float y, std::string filename)
 
 	sound.setBuffer(soundBuffer);
 
-	int obstacle_count = 0;
+	float obstacle_count = 0;
 
 	for (int i = 0; i < obstacles.size(); i++)
 	{
 		if (checkLine(obstacles[i], x, y))
 			obstacle_count++;
-
-		if (obstacle_count == 2)
-			break;
 	}
 
-	switch (obstacle_count)
-	{
-		case 2 :
-			sound.setVolume(0);
-			break;
-		case 1:
-			sound.setVolume(0.5f * sound_const * std::max(1 - distanceToListener(x, y) / sound_const, 0.0f));
-			break;
-		default:
-			sound.setVolume(sound_const * std::max(1 - distanceToListener(x, y) / sound_const, 0.0f));
-	}
+	float volume = (float) (sound_const * (1.0f / pow(distanceToListener(x, y), 2)));
+    float obst_dim = 1.0f / (float) pow(obstacle_count + 1.0f, 4);
+
+    sound.setVolume(obst_dim * 0.5f * (volume < 2.5 ? 0 : volume));
 
 	sound.play();
 
