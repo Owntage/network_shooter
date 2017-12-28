@@ -33,7 +33,7 @@ private:
 
 	float listenerX, listenerY;
 
-	const float sound_const = 100;
+	const float sound_const = 1000;
 
 	std::vector<ObstacleData> obstacles;
 	std::map<std::string, sf::SoundBuffer> buffers;
