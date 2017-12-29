@@ -31,7 +31,7 @@ private:
 
 	float listenerX, listenerY;
 
-	const float volume_const = 1000, lowpass_distance = 15;
+	const float volume_const = 3000, lowpass_distance = 15;
 
 	std::vector<ObstacleData> obstacles;
 	std::map<std::string, sf::SoundBuffer> buffers;
