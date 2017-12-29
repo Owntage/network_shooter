@@ -325,6 +325,7 @@ void DrawableActor::draw()
 	{
 		lightManager->addRectangleObstacle(sf::Vector2f(positionX * TILE_SIZE, positionY * TILE_SIZE),
 										   sf::Vector2f(sizeX * TILE_SIZE, sizeY * TILE_SIZE));
+		soundManager.setObstaclePosition(positionX, positionY, sizeX, sizeY);
 		hasShadow = true;
 	}
 	
