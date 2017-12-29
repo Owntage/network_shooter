@@ -6,35 +6,47 @@ using namespace std;
 #include <cmath>
 #include "sound_manager.h"
 
+bool SoundManager::loadSound(std::string filename, bool low)
+{
+    std::string lowname = filename.substr(0, filename.find(".") - 1) + "_low" + filename.substr(filename.find("."));
+
+    if (buffers.count(filename) == 0)
+    {
+        sf::SoundBuffer buffer;
+
+        if (!buffer.loadFromFile(filename))
+            return false;
+
+        buffers.insert(std::pair<std::string, sf::SoundBuffer>(filename, buffer));
+
+        if (!buffer.loadFromFile(lowname))
+            return false;
+
+        buffers.insert(std::pair<std::string, sf::SoundBuffer>(lowname, buffer));
+    }
+
+    sound.setBuffer(buffers.find(low ? lowname : filename) -> second);
+
+    return true;
+}
+
 bool SoundManager::playSound(float x, float y, std::string filename)
 {
-	if (buffers.count(filename) == 0)
-	{
-		if (!soundBuffer.loadFromFile(filename))
-		{
-			return false;
-		}
+    int obstacle_count = 0;
 
-		buffers.insert(std::pair<std::string, sf::SoundBuffer>(filename, soundBuffer));
-	} else
-	{
-		soundBuffer = buffers.find(filename)->second;
-	}
+    for (int i = 0; i < obstacles.size(); i++)
+    {
+        if (checkLine(obstacles[i], x, y))
+            obstacle_count++;
+    }
 
-	sound.setBuffer(soundBuffer);
+    if(!loadSound(filename, obstacle_count > 0 || distanceToListener(x, y) > lowpass_distance))
+        return false;
 
-	float obstacle_count = 0;
+	float volume = volume_const * (float) (1.0f / pow(distanceToListener(x, y), 2));
+    float obstacle_multiplier = 1.0f / (float) pow(obstacle_count + 1, 4);
 
-	for (int i = 0; i < obstacles.size(); i++)
-	{
-		if (checkLine(obstacles[i], x, y))
-			obstacle_count++;
-	}
-
-	float volume = (float) (sound_const * (1.0f / pow(distanceToListener(x, y), 2)));
-    float obst_dim = 1.0f / (float) pow(obstacle_count + 1.0f, 4);
-
-    sound.setVolume(obst_dim * 0.5f * (volume < 2.5 ? 0 : volume));
+    sound.setVolume(obstacle_multiplier * 0.5f * (volume < 2.5 ? 0 : volume));
 
 	sound.play();
 
