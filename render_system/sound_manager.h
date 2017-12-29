@@ -10,7 +10,7 @@
 
 struct SoundManager
 {
-	bool playSound(float x, float y, std::string filename);
+    bool playSound(float x, float y, std::string filename);
 
 	void setListenerPosition(float x, float y);
 
@@ -29,20 +29,20 @@ private:
 		float centerX, centerY, sizeX, sizeY;
 	};
 
-	float distanceToListener(float x, float y);
-
 	float listenerX, listenerY;
 
-	const float sound_const = 1000;
+	const float volume_const = 1000, lowpass_distance = 15;
 
 	std::vector<ObstacleData> obstacles;
 	std::map<std::string, sf::SoundBuffer> buffers;
 
-	sf::SoundBuffer soundBuffer;
 	sf::Sound sound;
 
-	bool checkLine(ObstacleData obstacle, float x, float y);
+    bool loadSound(std::string filename, bool low);
 
+    float distanceToListener(float x, float y);
+
+	bool checkLine(ObstacleData obstacle, float x, float y);
 	bool lineIntersect(float x1, float y1, float x2, float y2, float x3, float y3, float x4,
 					   float y4); // AB - A(x1, y1), B(x2, y2), same for CD
 	bool areaSign(float x1, float y1, float x2, float y2, float x3, float y3); // true if area positive, else false
