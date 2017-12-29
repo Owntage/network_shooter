@@ -8,7 +8,7 @@ using namespace std;
 
 bool SoundManager::loadSound(std::string filename, bool low)
 {
-    std::string lowname = filename.substr(0, filename.find(".") - 1) + "_low" + filename.substr(filename.find("."));
+    std::string lowname = filename.substr(0, filename.find(".")) + "_low" + filename.substr(filename.find("."));
 
     if (buffers.count(filename) == 0)
     {
